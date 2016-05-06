@@ -1,6 +1,7 @@
 
 const path = require('path');
 const express = require('express');
+require('./server/slackbot');
 
 // process.env.PORT is heroku's assigned port
 const PORT = process.env.PORT || 8000;
@@ -8,15 +9,15 @@ const PORT = process.env.PORT || 8000;
 const app = express();
 
 /**
- *  MIDDLEWARE
- */
+*  MIDDLEWARE
+*/
 app.use(express.static(path.join(__dirname, 'build')));
 
 /**
- *  ROUTES
- */
+*  ROUTES
+*/
 app.get('/', function(req, res) {
-  res.sendFile(path.join(__dirname + '/index.html'));
+  res.sendFile(path.join(__dirname + 'build/index.html'));
 });
 
 /**

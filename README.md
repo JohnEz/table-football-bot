@@ -7,11 +7,13 @@ Project with:
 - Babel (es6)
 - Single HTML file
 - React
--
+- Botkit
+- botbuilder
 
 ### Development
+To build the bundle run `npm run dev`
 
-`npm run dev`
+To start the server run `npm start`
 
 ### Production
 

@@ -1,14 +1,22 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const merge = require('webpack-merge');
+const validate = require('webpack-validator');
 
-module.exports = {
-	cache: true,
-  devtool: 'inline-source-map',
-  progress: true,
+const PATHS = {
+	app: path.join(__dirname, 'src'),
+	build: path.join(__dirname, 'build')
+};
 
-	entry: './src/main.js',
+const common = {
+	// cache: true,
+  // devtool: 'inline-source-map',
+  // progress: true,
+
+	entry: path.join(PATHS.app, 'main.js'),
 
 	output: {
-		path: path.join(__dirname, 'build'),
+		path: PATHS.build,
     filename: 'bundle.js',
 	},
 
@@ -21,5 +29,22 @@ module.exports = {
 				query: {presets: ['es2015', 'react'] }
 			}
 		]
-	}
+	},
+	plugins: [
+    new HtmlWebpackPlugin({
+      title: 'Scott Logic Table Football Euros',
+			template: 'my-index.ejs'
+    })
+  ]
 };
+
+var config;
+switch(process.env.npm_lifecycle_event) {
+	case 'build':
+		config = merge(common, {});
+		break;
+	default:
+		config = merge(common, {});
+}
+
+module.exports = validate(config);
