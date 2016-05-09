@@ -12,5 +12,8 @@ module.exports = {
   listResult: '%(result)s\n',
   listNoResult: 'You have no tasks.',
   notEnoughData: 'Sorry, I didn\'t get that, please post results in the form \"Team A beat Team B 10-x\"',
-  thanks: 'Cheers %{user}'
+  thanks: 'Cheers %{user}',
+  getFirstTeam:'Sorry What was the first team?',
+  getSecondTeam: 'Who was the second team?'
+
 }
