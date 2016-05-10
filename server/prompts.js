@@ -10,7 +10,7 @@ module.exports = {
   scoreMissing: 'What was the score?',
   listResultsList: 'Results\n%s',
   listResult: '%(result)s\n',
-  listNoResult: 'You have no tasks.',
+  listNoResult: 'There are no results for that search',
   player1NotFound: 'Player 1 was not found',
   player2NotFound: 'Player 2 was not found',
   incorrectScore: 'Scores should be between 0-',
