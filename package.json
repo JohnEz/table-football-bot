@@ -4,7 +4,7 @@
   "description": "Bot to officiate the Scott Logic table football tournament",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"No test specified\"",
+    "test": "mocha test",
     "dev": "webpack --watch --colors --progress",
     "build": "webpack -p",
     "start": "node server"
@@ -27,10 +27,10 @@
     "react": "^15.0.2",
     "react-dom": "^15.0.2",
     "sass-loader": "^3.1.2",
-    "slack-client": "^2.0.4",
     "style-loader": "^0.13.0",
     "webpack": "^1.12.12",
     "webpack-merge": "^0.12.0",
     "webpack-validator": "^1.5.0"
-  }
+  },
+  "dependencies": {}
 }
