@@ -11,4 +11,10 @@ module.exports = {
   listResultsList: 'Results\n%s',
   listResult: '%(result)s\n',
   listNoResult: 'You have no tasks.',
+  player1NotFound: 'Player 1 was not found',
+  player2NotFound: 'Player 2 was not found',
+  incorrectScore: 'Scores should be between 0-',
+  noMaxScore: 'One of the scores should be ',
+  twoMaxScores: 'Only one score should be ',
+  databaseError: 'There was a database error, please contact @amjones',
 }
