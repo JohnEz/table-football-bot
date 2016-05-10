@@ -18,3 +18,8 @@ To start the server run `npm start`
 ### Production
 
 `npm run prod`
+
+### Testing
+There are currently no unit tests
+to use the textbot to manually test the bot in the console.
+run `node server/textbot.js`
