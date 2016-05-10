@@ -96,15 +96,33 @@ dialog.on('AddResult', [
 ]);
 
 /** Shows the user a list of tasks. */
-dialog.on('ListResults', function (session) {
-	if (session.userData.results && session.userData.results.length > 0) {
-		let list = '';
-		session.userData.results.forEach(function (value, index) {
-			list += session.gettext(prompts.listResult, {result: value });
-		});
-		session.send(prompts.listResultsList, list);
+dialog.on('ListResults', [
+	function (session, args) {
+		// See if got the tasks title from our LUIS model.
+		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+		let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
+
+		let request = {
+			p1: p1 ? p1.entity : null,
+			p2: p2 ? p2.entity : null,
+			limit: limit ? limit.entity : null
+		};
+		//TODO send request to controller and get back results
+		let result = ['placeholder', 'data', 'yay'];
+
+		if (result.length > 0) {
+			let list = '';
+			result.forEach(function(value, index) {
+				list = list + '\u2219 ' + value + '\n';
+			});
+
+			session.send(prompts.listResultsList, list);
+		}
+		else {
+			session.send(prompts.listNoResult);
+		}
+
+		session.endDialog();
 	}
-	else {
-		session.send(prompts.listNoResult);
-	}
-});
+]);
