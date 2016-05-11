@@ -4,11 +4,14 @@ var builder = require('botbuilder');
 var prompts = require('../prompts');
 var config = require('../config');
 const capWrd = require('../util').capitaliseWords;
+const Controller = require('../controller/controller');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
 var model = process.env.model || config.luisToken;
 var dialog = new builder.LuisDialog(model);
 module.exports = dialog;
+
+let controller = new Controller();
 
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
@@ -87,7 +90,11 @@ dialog.on('AddResult', [
 
 		if (result.p1 && result.p2 && result.s1 && result.s2){
 			let res = result.p1 + " " + result.s1 +" - " + result.s2 + " " + result.p2;
-			session.send(prompts.resultCreated, {result: res});
+
+			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message) {
+				session.send(message, {result: res, player1: result.p1, player2: result.p2});
+			});
+
 		} else {
             session.send(prompts.error);
         }
@@ -108,20 +115,26 @@ dialog.on('ListResults', [
 			p2: p2 ? p2.entity : null,
 			limit: limit ? limit.entity : null
 		};
-		//TODO send request to controller and get back results
-		let result = ['placeholder', 'data', 'yay'];
 
-		if (result.length > 0) {
-			let list = '';
-			result.forEach(function(value, index) {
-				list = list + '\u2219 ' + value + '\n';
-			});
+		controller.getResults(request.limit, request.p1, request.p2, function(resultsArray, err) {
+			//if there was no error
+			if (!err) {
 
-			session.send(prompts.listResultsList, list);
-		}
-		else {
-			session.send(prompts.listNoResult);
-		}
+				if (resultsArray.length > 0) {
+					let resultsString = '';
+					resultsArray.forEach(function(result) {
+						resultsString = resultsString + `${capWrd(result.team1)} beat ${capWrd(result.team2)} ${result.team1Score}-${result.team2Score}\n`;
+					});
+
+					session.send(prompts.listResultsList, resultsString);
+				} else {
+					session.send(prompts.listNoResult);
+				}
+
+			} else {
+				session.send(prompts.databaseError);
+			}
+		});
 
 		session.endDialog();
 	}

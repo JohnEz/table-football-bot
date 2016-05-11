@@ -1,7 +1,8 @@
 'use strict';
 const DAO = require('./dao.js');
 const prompts = require('../prompts.js')
-const MAXSCORE = 10;
+const MAXSCORE = require('../config').maxScore;
+const MAXRESULTS = require('../config').maxResults;
 
 class Controller {
     constructor() {
@@ -12,11 +13,14 @@ class Controller {
         let pass = true;
         let errorMessage = '';
 
-        if (player1Doc === null) {
+        if (!player1Doc) {
             errorMessage = prompts.player1NotFound;
             pass = false;
-        } else if (player2Doc === null) {
+        } else if (!player2Doc) {
             errorMessage = prompts.player2NotFound;
+            pass = false;
+        } else if (player1Doc._id.equals(player2Doc._id)) {
+            errorMessage = prompts.sameTeamEntered;
             pass = false;
         }
 
@@ -99,6 +103,10 @@ class Controller {
     }
 
     getResults(count, player1, player2, callback) {
+
+        if (!count || count > MAXRESULTS || count < 1) {
+            count = MAXRESULTS;
+        }
 
         //get the documents for the players
         DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
