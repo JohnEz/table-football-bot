@@ -1,7 +1,8 @@
 'use strict';
 const DAO = require('./dao.js');
 const prompts = require('../prompts.js')
-const MAXSCORE = 10;
+const MAXSCORE = require('../config').maxScore;
+const MAXRESULTS = require('../config').maxResults;
 
 class Controller {
     constructor() {
@@ -102,6 +103,10 @@ class Controller {
     }
 
     getResults(count, player1, player2, callback) {
+
+        if (!count || count > MAXRESULTS || count < 1) {
+            count = MAXRESULTS;
+        }
 
         //get the documents for the players
         DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
