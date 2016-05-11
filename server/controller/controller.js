@@ -8,30 +8,14 @@ class Controller {
 
     }
 
-    getPlayers(player1, player2, callback) {
-        let player1ID = null;
-        let player2ID = null;
-
-        DAO.getInstance().getPlayerID(player1, function(id1) {
-            player1ID = id1;
-
-            DAO.getInstance().getPlayerID(player2, function(id2) {
-                player2ID = id2;
-
-                callback(player1ID, player2ID);
-
-            });
-        });
-    }
-
-    validatePlayers(player1ID, player2ID) {
+    validatePlayers(player1Doc, player2Doc) {
         let pass = true;
         let errorMessage = '';
 
-        if (player1ID === null) {
+        if (player1Doc === null) {
             errorMessage = prompts.player1NotFound;
             pass = false;
-        } else if (player2ID === null) {
+        } else if (player2Doc === null) {
             errorMessage = prompts.player2NotFound;
             pass = false;
         }
@@ -64,10 +48,10 @@ class Controller {
 
     validateInputs(player1, player2, score1, score2, callback) {
 
-        this.getPlayers(player1, player2, function(player1ID, player2ID) {
+        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
 
             //get the validation results
-            let validatePlayersResults = this.validatePlayers(player1ID, player2ID);
+            let validatePlayersResults = this.validatePlayers(player1Doc, player2Doc);
             let validateScoreResults = this.validateScores(score1, score2);
 
             //if the players dont pass validation
@@ -80,7 +64,7 @@ class Controller {
                 callback(false, validateScoreResults.message);
             } else {
                 //else return true
-                callback(true, 'woo', player1ID, player2ID);
+                callback(true, 'woo', player1Doc, player2Doc);
             }
 
         }.bind(this));
@@ -91,11 +75,11 @@ class Controller {
         let intScore1 = parseInt(score1);
         let intScore2 = parseInt(score2);
 
-        this.validateInputs(player1, player2, intScore1, intScore2, function(passed, message, player1ID, player2ID) {
+        this.validateInputs(player1, player2, intScore1, intScore2, function(passed, message, player1Doc, player2Doc) {
             //if it passed validation
             if (passed) {
                 //atempt to add the results
-                DAO.getInstance().addResult(player1ID, player2ID, intScore1, intScore2, function(added) {
+                DAO.getInstance().addResult(player1Doc._id, player2Doc._id, intScore1, intScore2, function(added) {
                     //if the results were added successfully
                     if (added) {
                         //return the added message
@@ -112,6 +96,39 @@ class Controller {
             }
 
         });
+    }
+
+    getResults(count, player1, player2, callback) {
+
+        //get the documents for the players
+        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
+            //get the results between the players
+            DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
+
+                if (!err) {
+
+                    results.forEach(function(result) {
+                        result.team1 = this.convertPlayerToString(result.team1);
+                        result.team2 = this.convertPlayerToString(result.team2);
+                    }.bind(this));
+
+                    callback(results, null);
+                } else {
+                    callback(null, err);
+                }
+
+            }.bind(this));
+
+        }.bind(this));
+
+    }
+
+    convertPlayerToString(player) {
+        let playerName = 'No player found';
+        if (player) {
+            playerName = player.country + ' (' + player.slackID + ')';
+        }
+        return playerName;
     }
 
 
