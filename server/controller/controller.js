@@ -76,14 +76,28 @@ class Controller {
     }
 
     submitResult(player1, player2, score1, score2, callback) {
-        let intScore1 = parseInt(score1);
-        let intScore2 = parseInt(score2);
+        let intScoreWinner = parseInt(score1);
+        let intScoreLoser = parseInt(score2);
 
-        this.validateInputs(player1, player2, intScore1, intScore2, function(passed, message, player1Doc, player2Doc) {
+        //check if player 2 is the winner
+        if (intScoreLoser > intScoreWinner) {
+            //if player 2 is the winner, swap the inputs
+            let storeScore = intScoreLoser;
+            let storePlayer = player2;
+
+            intScoreLoser = intScoreWinner;
+            intScoreWinner = storeScore;
+
+            player2 = player1;
+            player1 = storePlayer;
+
+        }
+
+        this.validateInputs(player1, player2, intScoreWinner, intScoreLoser, function(passed, message, player1Doc, player2Doc) {
             //if it passed validation
             if (passed) {
                 //atempt to add the results
-                DAO.getInstance().addResult(player1Doc._id, player2Doc._id, intScore1, intScore2, function(added) {
+                DAO.getInstance().addResult(player1Doc._id, player2Doc._id, intScoreWinner, intScoreLoser, function(added) {
                     //if the results were added successfully
                     if (added) {
                         //return the added message
@@ -116,8 +130,8 @@ class Controller {
                 if (!err) {
 
                     results.forEach(function(result) {
-                        result.team1 = this.convertPlayerToString(result.team1);
-                        result.team2 = this.convertPlayerToString(result.team2);
+                        result.winner = this.convertPlayerToString(result.winner);
+                        result.loser = this.convertPlayerToString(result.loser);
                     }.bind(this));
 
                     callback(results, null);
