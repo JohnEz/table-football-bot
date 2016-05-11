@@ -123,7 +123,7 @@ dialog.on('ListResults', [
 				if (resultsArray.length > 0) {
 					let resultsString = '';
 					resultsArray.forEach(function(result) {
-						resultsString = resultsString + `${capWrd(result.team1)} beat ${capWrd(result.team2)} ${result.team1Score}-${result.team2Score}\n`;
+						resultsString = resultsString + `${capWrd(result.winner)} beat ${capWrd(result.loser)} ${result.winnerScore}-${result.loserScore}\n`;
 					});
 
 					session.send(prompts.listResultsList, resultsString);
