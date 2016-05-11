@@ -26,10 +26,10 @@ slackBot.add('/say', function(session, message) {
 
 ////// Exportable functions /////////
 
-	/* To send a single messasge
-		channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
-		message is a string.
-		*/
+/* To send a single messasge
+channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
+message is a string.
+*/
 module.exports.sendMessage = function(channel, message) {
 	slackBot.beginDialog({ channel: channel}, '/say', message);
 }
