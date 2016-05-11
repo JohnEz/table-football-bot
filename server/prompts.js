@@ -13,6 +13,7 @@ module.exports = {
   listNoResult: 'There are no results for that search',
   player1NotFound: 'Player 1 was not found',
   player2NotFound: 'Player 2 was not found',
+  sameTeamEntered: 'A team can\'t play against itself',
   incorrectScore: 'Scores should be between 0-',
   noMaxScore: 'One of the scores should be ',
   twoMaxScores: 'Only one score should be ',

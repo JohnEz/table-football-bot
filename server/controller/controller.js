@@ -12,11 +12,14 @@ class Controller {
         let pass = true;
         let errorMessage = '';
 
-        if (player1Doc === null) {
+        if (!player1Doc) {
             errorMessage = prompts.player1NotFound;
             pass = false;
-        } else if (player2Doc === null) {
+        } else if (!player2Doc) {
             errorMessage = prompts.player2NotFound;
+            pass = false;
+        } else if (player1Doc._id.equals(player2Doc._id)) {
+            errorMessage = prompts.sameTeamEntered;
             pass = false;
         }
 
