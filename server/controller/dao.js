@@ -131,15 +131,28 @@ class DAO {
 			} else {
 				callback(null, err);
 			}
-
-
-
-
 		});
-
 	}
 
+	addUsers(users) {
+		users.forEach(function(user) {
+			this.addUser(user);
+		}.bind(this));
+	}
 
+	addUser(user) {
+		let collection = this.db.collection(playersCollection);
+		collection.findAndModify(
+			{$and: [ {slackID: user.name}, {slackCode: {$exists: false}}]}, //query
+			[['slackID', 1]], //sort
+			{$set: {slackCode: user.id, fname: user.fname}}, //modify
+			function(err, doc) { //callback
+				if(err){
+					console.error('FindandModifyUserError:',err);
+				}
+			}
+		);
+	}
 }
 
 let _dao = new DAO();

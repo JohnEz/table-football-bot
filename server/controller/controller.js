@@ -153,6 +153,10 @@ class Controller {
         return playerName;
     }
 
+    addUsers(users) {
+        DAO.getInstance().addUsers(users);
+    }
+
 
 }
 
