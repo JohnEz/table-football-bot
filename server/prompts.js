@@ -22,5 +22,6 @@ module.exports = {
   thanks: 'Cheers %{user}',
   getFirstTeam:'Sorry who was the first team?',
   getSecondTeam: 'Who was the second team?',
+  channelHello: 'Welcome to the thunderdome',
   defaultReply: 'You what?. I\'m not going to pass the Turing test at this rate am I!'
 }
