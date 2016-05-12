@@ -5,6 +5,7 @@ var builder = require('botbuilder');
 var index = require('./dialogs/index');
 const prompts = require('./prompts');
 const config = require('./config');
+const getRand = require('./util').getRandomMessage;
 
 var Controller = require('./controller/controller');
 var appController = new Controller();
@@ -37,7 +38,7 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 				name:msg.user_profile.name,
 				fname:msg.user_profile.first_name
 			}];
-			botkit.reply(msg,`${prompts.channelHello} ${msg.user_profile.first_name}!`);
+			botkit.reply(msg,`${getRand('hello')} ${msg.user_profile.first_name}!`);
 			appController.addUsers(user);
 		}
 	});
