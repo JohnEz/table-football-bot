@@ -3,6 +3,8 @@
 var Botkit = require('botkit');
 var builder = require('botbuilder');
 var index = require('./dialogs/index');
+const prompts = require('./prompts');
+const config = require('./config');
 
 var Controller = require('./controller/controller');
 var appController = new Controller();
@@ -22,8 +24,26 @@ slackBot.add('/say', function(session, message) {
 	session.endDialog(message);
 });
 
-slackBot.listenForMentions();
+slackBot.on('user_channel_join', function(botkit, msg) {
+	// check if the channel being joined is the specific foosball one
+	bot.api.channels.info({channel: msg.channel}, function(err, data) {
+		if (err) {
+			bot.botkit.log('Failed to find user info ',err);
+		}
+		if (data && data.channel.name === config.channelName) {
+			//check and persist user database
+			let user = [{
+				id:msg.user,
+				name:msg.user_profile.name,
+				fname:msg.user_profile.first_name
+			}];
+			botkit.reply(msg,`${prompts.channelHello} ${msg.user_profile.first_name}!`);
+			appController.addUsers(user);
+		}
+	});
+});
 
+slackBot.listenForMentions();
 ////// Exportable functions /////////
 
 /* Wrap this in a function and run it once the database is setup
