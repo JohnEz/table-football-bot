@@ -4,6 +4,7 @@ const prompts = require('../prompts.js')
 const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
 const createResultString = require('../util').createResultString;
+const capitaliseWords = require('../util').capitaliseWords;
 
 class Controller {
     constructor() {
@@ -150,8 +151,14 @@ class Controller {
 
     convertPlayerToString(player) {
         let playerName = 'No player found';
+        let slackName = `@${player.slackID}`;
+
+        if (player.slackCode) {
+            slackName = `<@${player.slackCode}>`;
+        }
+
         if (player) {
-            playerName = player.country + ' (' + player.slackID + ')';
+            playerName = `${capitaliseWords(player.country)} (${slackName})`;
         }
         return playerName;
     }
