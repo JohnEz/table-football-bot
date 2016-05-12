@@ -3,6 +3,7 @@ const DAO = require('./dao.js');
 const prompts = require('../prompts.js')
 const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
+const createResultString = require('../util').createResultString;
 
 class Controller {
     constructor() {
@@ -100,20 +101,22 @@ class Controller {
                 DAO.getInstance().addResult(player1Doc._id, player2Doc._id, intScoreWinner, intScoreLoser, function(added) {
                     //if the results were added successfully
                     if (added) {
+                        let winnerString = this.convertPlayerToString(player1Doc);
+                        let loserString = this.convertPlayerToString(player2Doc);
                         //return the added message
-                        callback(prompts.resultCreated);
+                        callback(prompts.resultCreated, createResultString(winnerString, loserString, intScoreWinner, intScoreLoser));
                     } else {
                         //else there must have been an error with the database
                         //return the defualt database error message
                         callback(prompts.databaseError);
                     }
-                });
+                }.bind(this));
 
             } else {
                 callback(message);
             }
 
-        });
+        }.bind(this));
     }
 
     getResults(count, player1, player2, callback) {
