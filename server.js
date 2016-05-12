@@ -2,7 +2,7 @@
 const path = require('path');
 const express = require('express');
 const DAO = require('./server/controller/dao.js');
-require('./server/slackbot');
+const slackbot = require('./server/slackbot');
 
 // process.env.PORT is heroku's assigned port
 const PORT = process.env.PORT || 8000;
@@ -38,4 +38,5 @@ app.listen(PORT, function(error) {
 DAO.getInstance().init(function() {
     //run this code if the database was successfully setup
     console.log('Database setup complete');
+    slackbot.startBot();
 });
