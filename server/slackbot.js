@@ -31,7 +31,7 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 		if (err) {
 			bot.botkit.log('Failed to find user info ',err);
 		}
-		if (data && data.channel.name === config.channelName) {
+		if (data && data.channel.name === config.mainChannel.name) {
 			//check and persist user database
 			let user = [{
 				id:msg.user,
