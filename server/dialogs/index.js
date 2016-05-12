@@ -4,6 +4,7 @@ var builder = require('botbuilder');
 var prompts = require('../prompts');
 var config = require('../config');
 const capWrd = require('../util').capitaliseWords;
+const createResultString = require('../util').createResultString;
 const Controller = require('../controller/controller');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
@@ -93,10 +94,9 @@ dialog.on('AddResult', [
 		}
 
 		if (result.p1 && result.p2 && result.s1 && result.s2){
-			let res = result.p1 + " " + result.s1 +" - " + result.s2 + " " + result.p2;
 
-			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message) {
-				session.send(message, {result: res, player1: result.p1, player2: result.p2});
+			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, resultString) {
+				session.send(message, {result: resultString, player1: result.p1, player2: result.p2});
 			});
 
 		} else {
@@ -127,7 +127,7 @@ dialog.on('ListResults', [
 				if (resultsArray.length > 0) {
 					let resultsString = '';
 					resultsArray.forEach(function(result) {
-						resultsString = resultsString + `${capWrd(result.winner)} beat ${capWrd(result.loser)} ${result.winnerScore}-${result.loserScore}\n`;
+						resultsString = resultsString + createResultString(result.winner, result.loser, result.winnerScore, result.loserScore) + '\n';
 					});
 
 					session.send(prompts.listResultsList, resultsString);
