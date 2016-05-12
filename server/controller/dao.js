@@ -34,17 +34,23 @@ class DAO {
 	getPlayer(searchTerm, callback) {
 		let collection = this.db.collection(playersCollection);
 
-		collection.findOne( { $or: [ { country : searchTerm }, { slackID : searchTerm } ] }, function(err, doc) {
-			//if a document was found
-			if (doc) {
-				callback(doc);
-			} else if (!err) {
-				callback(null, 'There was no team by that name');
-			} else {
-				callback(null, err);
-				console.log('error:',err);
-			}
-		});
+		//if a search term was entered
+		if (searchTerm) {
+
+			collection.findOne( { $or: [ { country : searchTerm }, { slackID : searchTerm }, { slackCode : searchTerm.toUpperCase() } ] }, function(err, doc) {
+				//if a document was found
+				if (doc) {
+					callback(doc);
+				} else if (!err) {
+					callback(null, 'There was no team by that name');
+				} else {
+					callback(null, err);
+					console.log('error:',err);
+				}
+			});
+		} else {
+			callback(null, 'NULL was entered');
+		}
 	}
 
 	getPlayers(player1, player2, callback) {

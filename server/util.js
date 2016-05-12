@@ -10,6 +10,6 @@ module.exports = {
     },
 
     createResultString: function(winner, loser, winnerScore, loserScore) {
-        return `${capWords(winner)} beat ${capWords(loser)} ${winnerScore}-${loserScore}`;
+        return `${winner} beat ${loser} ${winnerScore}-${loserScore}`;
     }
 };
