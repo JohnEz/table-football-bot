@@ -6,6 +6,7 @@ var config = require('../config');
 const capWrd = require('../util').capitaliseWords;
 const createResultString = require('../util').createResultString;
 const Controller = require('../controller/controller');
+const slackBot = require('../slackbot');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
 var model = process.env.model || config.luisToken;
@@ -95,13 +96,35 @@ dialog.on('AddResult', [
 
 		if (result.p1 && result.p2 && result.s1 && result.s2){
 
-			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, resultString) {
-				session.send(message, {result: resultString, player1: result.p1, player2: result.p2});
+			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, endResult) {
+
+				//check it created a result
+				if (endResult) {
+
+					let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
+
+					//tell the winner he won
+					if (endResult.winner.slackCode) {
+						slackBot.sendMessage(endResult.winner.slackCode, `Congratulations on your win against ${endResult.loser.country}`);
+					}
+
+					//tell the user he lost
+					if (endResult.loser.slackCode) {
+						slackBot.sendMessage(endResult.loser.slackCode, `Sorry for your loss against ${endResult.winner.country}`);
+					}
+
+					//tell the main channel
+					slackBot.sendMessage(config.mainChannel.code, `Result just in:\n${endResult.toString}`);
+
+				} else {
+					session.send(message, {player1: result.p1, player2: result.p2});
+				}
+
 			});
 
 		} else {
-            session.send(prompts.error);
-        }
+			session.send(prompts.error);
+		}
 		session.endDialog();
 	}
 ]);
