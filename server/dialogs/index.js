@@ -21,7 +21,7 @@ dialog.onDefault(builder.DialogAction.send(prompts.defaultReply));
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
 
-/** Prompts a user for the title of the task and saves it.  */
+/** Prompts a user for the two teams and their scores and saves it.  */
 dialog.on('AddResult', [
 	function (session, args, next) {
 		// See if got the tasks title from our LUIS model.
@@ -66,7 +66,7 @@ dialog.on('AddResult', [
 		}
 
 		//ask for the score of team 1
-		if(result.p1 && result.p2 && !result.s1) {
+		if(result.p1 && result.p2 && (!result.s1 || result.s1 > config.maxScore)) {
 			builder.Prompts.number(session,'What did ' + capWrd(result.p1) + ' score?');
 		}
 		else {
@@ -80,7 +80,7 @@ dialog.on('AddResult', [
 		}
 
 		//ask for p2 if not provided
-		if(result.p1 && result.p2 && result.s1 && !result.s2) {
+		if(result.p1 && result.p2 && result.s1 && (!result.s2 || result.s2 > config.maxScore)) {
 			builder.Prompts.number(session,'What did ' + capWrd(result.p2) + ' score?');
 		}
 		else {
@@ -106,7 +106,7 @@ dialog.on('AddResult', [
 	}
 ]);
 
-/** Shows the user a list of tasks. */
+/** Shows the user a list of Results. */
 dialog.on('ListResults', [
 	function (session, args) {
 		// See if got the tasks title from our LUIS model.
