@@ -23,5 +23,12 @@ module.exports = {
   getFirstTeam:'Sorry who was the first team?',
   getSecondTeam: 'Who was the second team?',
   channelHello: 'Welcome to the thunderdome',
-  defaultReply: 'You what?. I\'m not going to pass the Turing test at this rate am I!'
+  defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
+  hello: [
+      'Welcome to the Thunderdome',
+      'Howdy',
+      'Greetings',
+      'Wotcha',
+      'Hello'
+  ],
 }
