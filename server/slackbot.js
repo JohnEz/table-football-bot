@@ -12,6 +12,10 @@ var bot = controller.spawn({
 var slackBot = new builder.SlackBot(controller, bot);
 slackBot.add('/', index);
 
+slackBot.add('/say', function(session, message) {
+	session.endDialog(message);
+});
+
 slackBot.listenForMentions();
 
 bot.startRTM(function(err,bot,payload) {
@@ -25,6 +29,14 @@ slackBot.add('/say', function(session, message) {
 })
 
 ////// Exportable functions /////////
+
+/* To send a single messasge
+channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
+message is a string.
+*/
+module.exports.sendMessage = function(channel, message) {
+	slackBot.beginDialog({ channel: channel}, '/say', message);
+}
 
 /* To send a single messasge
 channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
