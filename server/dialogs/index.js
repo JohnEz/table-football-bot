@@ -13,6 +13,10 @@ module.exports = dialog;
 
 let controller = new Controller();
 
+
+/** Return a default message if nothing else is recognised */
+dialog.onDefault(builder.DialogAction.send(prompts.defaultReply));
+
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
 
