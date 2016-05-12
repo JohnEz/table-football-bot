@@ -104,8 +104,17 @@ class Controller {
                     if (added) {
                         let winnerString = this.convertPlayerToString(player1Doc);
                         let loserString = this.convertPlayerToString(player2Doc);
+
+                        let result = {
+                            winner: player1Doc,
+                            loser: player2Doc,
+                            winnerScore: intScoreWinner,
+                            loserScore: intScoreLoser,
+                            toString: createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
+                        }
+
                         //return the added message
-                        callback(prompts.resultCreated, createResultString(winnerString, loserString, intScoreWinner, intScoreLoser));
+                        callback(prompts.resultCreated, result);
                     } else {
                         //else there must have been an error with the database
                         //return the defualt database error message
@@ -165,6 +174,12 @@ class Controller {
 
     addUsers(users) {
         DAO.getInstance().addUsers(users);
+    }
+
+    checkScoreDifference(winnerScore, loserScore) {
+        let difference = Math.abs(winnerScore - loserScore) / MAXSCORE;
+
+        return difference;
     }
 
 
