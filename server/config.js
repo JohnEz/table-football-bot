@@ -4,5 +4,8 @@ module.exports = {
 	database_url: 'mongodb://admin:2604aj1010rb@ds011462.mlab.com:11462/sl-table-football',
 	maxResults: 10,
 	maxScore: 10,
-	channelName: 'foosball-stuff'
+	mainChannel: {
+		code: 'C189M5JSU',
+		name: 'foosball-stuff'
+	}
 }
