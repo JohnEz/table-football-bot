@@ -167,6 +167,10 @@ class Controller {
         DAO.getInstance().addUsers(users);
     }
 
+    getPlayer(player, callback) {
+        DAO.getInstance().getPlayer(player, callback);
+    }
+
 
 }
 
