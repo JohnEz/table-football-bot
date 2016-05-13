@@ -176,10 +176,16 @@ class Controller {
         DAO.getInstance().addUsers(users);
     }
 
+
+    getPlayer(player, callback) {
+        DAO.getInstance().getPlayer(player, callback);
+    }
+
     checkScoreDifference(winnerScore, loserScore) {
         let difference = Math.abs(winnerScore - loserScore) / MAXSCORE;
 
         return difference;
+
     }
 
 
