@@ -143,7 +143,7 @@ dialog.on('ListResults', [
 			limit: limit ? limit.entity : null
 		};
 
-		controller.getResults(request.limit, request.p1, request.p2, function(resultsArray, err) {
+		controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
 			//if there was no error
 			if (!err) {
 
