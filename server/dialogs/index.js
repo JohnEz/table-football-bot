@@ -4,7 +4,7 @@ var builder = require('botbuilder');
 var prompts = require('../prompts');
 var config = require('../config');
 const capWrd = require('../util').capitaliseWords;
-const createResultString = require('../util').createResultString;
+const util = require('../util');
 const Controller = require('../controller/controller');
 const slackBot = require('../slackbot');
 
@@ -38,6 +38,9 @@ dialog.on('AddResult', [
 			s2: s2 ? s2.entity : null,
 		};
 
+		checkForMe('p1', result, session);
+		checkForMe('p2', result, session);
+
 		//ask for p1 if not provided
 		if (!p1) {
 			builder.Prompts.text(session, prompts.getFirstTeam);
@@ -50,6 +53,7 @@ dialog.on('AddResult', [
 		let result = session.dialogData.result;
 		if (results.response) {
 			result.p1 = results.response;
+			checkForMe('p1', result, session);
 		}
 
 		//ask for p2 if not provided
@@ -64,6 +68,7 @@ dialog.on('AddResult', [
 		let result = session.dialogData.result;
 		if (results.response) {
 			result.p2 = results.response;
+			checkForMe('p2', result, session);
 		}
 
 		//ask for the score of team 1
@@ -143,6 +148,9 @@ dialog.on('ListResults', [
 			limit: limit ? limit.entity : null
 		};
 
+		checkForMe('p1', request, session);
+		checkForMe('p2', request, session);
+
 		controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
 			//if there was no error
 			if (!err) {
@@ -150,7 +158,7 @@ dialog.on('ListResults', [
 				if (resultsArray.length > 0) {
 					let resultsString = '';
 					resultsArray.forEach(function(result) {
-						resultsString = resultsString + createResultString(result.winner, result.loser, result.winnerScore, result.loserScore) + '\n';
+						resultsString = resultsString + util.createResultString(result.winner, result.loser, result.winnerScore, result.loserScore) + '\n';
 					});
 
 					session.send(prompts.listResultsList, resultsString);
@@ -166,3 +174,10 @@ dialog.on('ListResults', [
 		session.endDialog();
 	}
 ]);
+
+function checkForMe(p, result, session) {
+	let player = result[p];
+	if (util.isMe(player)) {
+		result[p] = session.userData.id;
+	}
+}
