@@ -115,7 +115,7 @@ class DAO {
 					query = { $or: [ { winner : player1Doc._id }, { loser : player1Doc._id } ] };
 				}
 
-				collection.aggregate( [ { $match: query }, { $limit : count } ] ).sort( { date: -1 } ).each(function(err, doc) {
+				collection.aggregate( [ { $match: query }, {$sort : { date : -1 }}, { $limit : count } ] ).each(function(err, doc) {
 					//if there was an error with the database
 					if (err) {
 						callback(null, err)
