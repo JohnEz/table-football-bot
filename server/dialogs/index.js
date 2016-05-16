@@ -175,6 +175,26 @@ dialog.on('ListResults', [
 	}
 ]);
 
+/**Shows the user who is a country or user. */
+dialog.on('WhoIs', function(session, args) {
+	let user = builder.EntityRecognizer.findEntity(args.entities, 'player');
+	if (user) {
+		controller.getPlayer(user.entity, function(player) {
+			if (player) {
+				let slack = player.slackCode ? player.slackCode : player.slackID
+				session.send(`<@${slack}> plays as ${player.country}`);
+			}
+			else {
+				session.send('No player found');
+			}
+		});
+	}
+	else {
+		session.send(prompts.error);
+	}
+	session.endDialog()
+});
+
 function checkForMe(p, result, session) {
 	let player = result[p];
 	if (util.isMe(player)) {
