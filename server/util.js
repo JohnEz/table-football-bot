@@ -26,5 +26,19 @@ module.exports = {
         if (!name) return false;
         let me = ['i', 'me', 'my', 'myself'];
         return me.indexOf(name.toLowerCase()) !== -1;
+    },
+
+    getPlayerFromArray: function(searchTerm, array) {
+        let playerDoc = null;
+
+        if (searchTerm) {
+            array.forEach(function(document) {
+                if (document.country === searchTerm || document.slackID === searchTerm || document.slackCode === searchTerm) {
+                    playerDoc = document;
+                }
+            });
+        }
+
+        return playerDoc;
     }
 };

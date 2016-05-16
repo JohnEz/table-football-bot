@@ -3,7 +3,6 @@
 var builder = require('botbuilder');
 var prompts = require('../prompts');
 var config = require('../config');
-const capWrd = require('../util').capitaliseWords;
 const util = require('../util');
 const Controller = require('../controller/controller');
 const slackBot = require('../slackbot');
@@ -41,23 +40,43 @@ dialog.on('AddResult', [
 		checkForMe('p1', result, session);
 		checkForMe('p2', result, session);
 
-		//ask for p1 if not provided
-		if (!p1) {
-			builder.Prompts.text(session, prompts.getFirstTeam);
-		}
-		else {
-			next()
-		}
+		let validation = session.dialogData.validation = {
+			passed: true,
+			message: 'Error'
+		};
+
+		//get all players from the database
+		controller.getAllPlayers(function(playersArray) {
+			session.dialogData.playerDocs = playersArray;
+			//get player from array
+			let playerDoc = util.getPlayerFromArray(result.p1, playersArray);
+
+			session.dialogData.result.p1 = playerDoc;
+
+			//ask for p1 if not provided or we couldn't find it
+			if (!playerDoc && validation.passed) {
+				builder.Prompts.text(session, prompts.getFirstTeam);
+			}
+			else {
+				next()
+			}
+		});
 	},
 	function(session, results, next) {
+		let playerDocs = session.dialogData.playerDocs;
 		let result = session.dialogData.result;
+		let validation = session.dialogData.validation;
+
 		if (results.response) {
 			result.p1 = results.response;
 			checkForMe('p1', result, session);
+			result.p1 = util.getPlayerFromArray(results.p1, playerDocs);
 		}
 
+		result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
+
 		//ask for p2 if not provided
-		if(result.p1 && !result.p2) {
+		if(result.p1 && !result.p2 && validation.passed) {
 			builder.Prompts.text(session,prompts.getSecondTeam);
 		}
 		else {
@@ -65,15 +84,27 @@ dialog.on('AddResult', [
 		}
 	},
 	function(session, results, next) {
+		let playerDocs = session.dialogData.playerDocs;
 		let result = session.dialogData.result;
+		let validation = session.dialogData.validation;
+
 		if (results.response) {
 			result.p2 = results.response;
 			checkForMe('p2', result, session);
+			result.p2 = util.getPlayerFromArray(results.p2, playerDocs);
 		}
 
+		//now we have the final player docs, do validation
+		if (validation.passed) {
+			session.dialogData.validation = validation = controller.validatePlayers(result.p1, result.p2);
+		}
+
+		//check the score is a valid score
+		let scoreValidation = controller.validateScore(result.s1);
+
 		//ask for the score of team 1
-		if(result.p1 && result.p2 && (!result.s1 || result.s1 > config.maxScore)) {
-			builder.Prompts.number(session,'What did ' + capWrd(result.p1) + ' score?');
+		if(result.p1 && result.p2 && (!result.s1 || !scoreValidation.passed) && validation.passed) {
+			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p1.country)} (${result.p1.slackID}) score? ${scoreValidation.message}`);
 		}
 		else {
 			next()
@@ -81,13 +112,24 @@ dialog.on('AddResult', [
 	},
 	function(session, results, next) {
 		let result = session.dialogData.result;
+		let validation = session.dialogData.validation;
+
 		if (results.response) {
 			result.s1 = results.response;
+			session.dialogData.validation = validation = controller.validateScore(result.s1);
+			console.log(validation);
 		}
 
-		//ask for p2 if not provided
-		if(result.p1 && result.p2 && result.s1 && (!result.s2 || result.s2 > config.maxScore)) {
-			builder.Prompts.number(session,'What did ' + capWrd(result.p2) + ' score?');
+		//check the score2 is a valid score
+		if (validation.passed && result.s2) {
+			session.dialogData.validation = validation = controller.validateScore(result.s2);
+		}
+
+		console.log(validation);
+
+		//ask for s2 if not provided
+		if(result.p1 && result.p2 && result.s1 && !result.s2 && validation.passed) {
+			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p2.country)} (${result.p2.slackID}) score? ${validation.message}`);
 		}
 		else {
 			next()
@@ -95,11 +137,20 @@ dialog.on('AddResult', [
 	},
 	function(session, results) {
 		let result = session.dialogData.result;
+		let validation = session.dialogData.validation;
+
 		if (results.response) {
 			result.s2 = results.response;
+			validation = controller.validateScore(result.s2);
 		}
 
-		if (result.p1 && result.p2 && result.s1 && result.s2){
+		//check the re added score is a valid score
+		if (validation.passed) {
+			validation = controller.validateScores(result.s1, result.s2);
+		}
+
+		if (result.p1 && result.p2 && result.s1 && result.s2 && validation.passed) {
+
 			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, endResult) {
 				//check it created a result
 				if (endResult) {
@@ -126,6 +177,8 @@ dialog.on('AddResult', [
 
 			});
 
+		} else if (!validation.passed) {
+			session.send(validation.message);
 		} else {
 			session.send(prompts.error);
 		}

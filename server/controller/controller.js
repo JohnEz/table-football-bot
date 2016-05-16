@@ -29,55 +29,49 @@ class Controller {
         return {passed: pass, message: errorMessage};
     }
 
-    validateScores(score1, score2) {
+    validateScore(score) {
         let pass = true;
         let errorMessage = '';
 
-        //check the values arent above the max value
-        if (!(score1 >= 0 && score1 <= MAXSCORE && score2 >= 0 && score2 <= MAXSCORE)) {
-            errorMessage = prompts.incorrectScore + MAXSCORE;
-            pass = false;
-        }
-        //check that one value is 10 and only that value is 10
-        else if (score1 !== MAXSCORE && score2 !== MAXSCORE) {
-            errorMessage = prompts.noMaxScore + MAXSCORE;
-            pass = false;
-        }
-        //check that both values are not the maxscore
-        else if (score1 === MAXSCORE && score2 === MAXSCORE) {
-            cerrorMessage = prompts.twoMaxScores + MAXSCORE;
+        if (score !== null) {
+            score = parseInt(score);
+
+            if (score > MAXSCORE || score < 0) {
+                errorMessage = prompts.incorrectScore + MAXSCORE;
+                pass = false;
+            }
+        } else {
             pass = false;
         }
 
         return {passed: pass, message: errorMessage};
     }
 
-    validateInputs(player1, player2, score1, score2, callback) {
+    validateScores(score1, score2) {
+        let pass = true;
+        let errorMessage = '';
 
-        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
+        score1 = parseInt(score1);
+        score2 = parseInt(score2);
 
-            //get the validation results
-            let validatePlayersResults = this.validatePlayers(player1Doc, player2Doc);
-            let validateScoreResults = this.validateScores(score1, score2);
+        //check that one value is 10 and only that value is 10
+        if (score1 !== MAXSCORE && score2 !== MAXSCORE) {
+            errorMessage = prompts.noMaxScore + MAXSCORE;
+            pass = false;
 
-            //if the players dont pass validation
-            if (!validatePlayersResults.passed) {
-                //return false and the error message
-                callback(false, validatePlayersResults.message);
-            } else if (!validateScoreResults.passed) {
-                //else if the scores dont pass validation
-                //return false and the error message
-                callback(false, validateScoreResults.message);
-            } else {
-                //else return true
-                callback(true, 'woo', player1Doc, player2Doc);
-            }
 
-        }.bind(this));
+        }
+        //check that both values are not the maxscore
+        else if (score1 === MAXSCORE && score2 === MAXSCORE) {
+            errorMessage = prompts.twoMaxScores + MAXSCORE;
+            pass = false;
+        }
 
+        return {passed: pass, message: errorMessage};
     }
 
     submitResult(player1, player2, score1, score2, callback) {
+
         let intScoreWinner = parseInt(score1);
         let intScoreLoser = parseInt(score2);
 
@@ -95,38 +89,30 @@ class Controller {
 
         }
 
-        this.validateInputs(player1, player2, intScoreWinner, intScoreLoser, function(passed, message, player1Doc, player2Doc) {
-            //if it passed validation
-            if (passed) {
-                //atempt to add the results
-                DAO.getInstance().addResult(player1Doc._id, player2Doc._id, intScoreWinner, intScoreLoser, function(added) {
-                    //if the results were added successfully
-                    if (added) {
-                        let winnerString = this.convertPlayerToString(player1Doc);
-                        let loserString = this.convertPlayerToString(player2Doc);
+        //atempt to add the results
+        DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, function(added) {
+            //if the results were added successfully
+            if (added) {
+                let winnerString = this.convertPlayerToString(player1);
+                let loserString = this.convertPlayerToString(player2);
 
-                        let result = {
-                            winner: player1Doc,
-                            loser: player2Doc,
-                            winnerScore: intScoreWinner,
-                            loserScore: intScoreLoser,
-                            toString: createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
-                        }
+                let result = {
+                    winner: player1,
+                    loser: player2,
+                    winnerScore: intScoreWinner,
+                    loserScore: intScoreLoser,
+                    toString: createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
+                }
 
-                        //return the added message
-                        callback(prompts.resultCreated, result);
-                    } else {
-                        //else there must have been an error with the database
-                        //return the defualt database error message
-                        callback(prompts.databaseError);
-                    }
-                }.bind(this));
-
+                //return the added message
+                callback(prompts.resultCreated, result);
             } else {
-                callback(message);
+                //else there must have been an error with the database
+                //return the defualt database error message
+                callback(prompts.databaseError);
             }
-
         }.bind(this));
+
     }
 
     getResults(count, player1, player2, callback) {
@@ -158,6 +144,12 @@ class Controller {
 
     }
 
+    getAllPlayers(callback) {
+        DAO.getInstance().getAllPlayers(function(playersMap) {
+            callback([...playersMap.values()]);
+        });
+    }
+
     convertPlayerToString(player) {
         let playerName = 'No player found';
         let slackName = `@${player.slackID}`;
@@ -176,16 +168,10 @@ class Controller {
         DAO.getInstance().addUsers(users);
     }
 
-
-    getPlayer(player, callback) {
-        DAO.getInstance().getPlayer(player, callback);
-    }
-
     checkScoreDifference(winnerScore, loserScore) {
         let difference = Math.abs(winnerScore - loserScore);
 
         return difference;
-
     }
 
 
