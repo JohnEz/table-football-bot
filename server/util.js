@@ -1,5 +1,5 @@
 'use strict';
-const prompt = require('./prompts')
+const prompts = require('./prompts')
 
 let capWords = function(s) {
     return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
@@ -7,7 +7,7 @@ let capWords = function(s) {
 
 module.exports = {
     getRandomMessage(comment) {
-        let msg = prompt[comment];
+        let msg = prompts[comment];
         if (typeof msg === 'string'){
             return msg
         }

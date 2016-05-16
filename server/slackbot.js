@@ -3,7 +3,6 @@
 var Botkit = require('botkit');
 var builder = require('botbuilder');
 var index = require('./dialogs/index');
-const prompts = require('./prompts');
 const config = require('./config');
 const getRand = require('./util').getRandomMessage;
 
