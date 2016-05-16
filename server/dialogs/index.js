@@ -96,7 +96,7 @@ dialog.on('AddResult', [
 
 		//now we have the final player docs, do validation
 		if (validation.passed) {
-			session.dialogData.validation = validation = controller.validatePlayers(result.p1, result.p2);
+			session.dialogData.validation = validation = controller.validatePlayers(result.p1, result.p2, session.userData.id);
 		}
 
 		//check the score is a valid score
@@ -117,15 +117,12 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.s1 = results.response;
 			session.dialogData.validation = validation = controller.validateScore(result.s1);
-			console.log(validation);
 		}
 
 		//check the score2 is a valid score
 		if (validation.passed && result.s2) {
 			session.dialogData.validation = validation = controller.validateScore(result.s2);
 		}
-
-		console.log(validation);
 
 		//ask for s2 if not provided
 		if(result.p1 && result.p2 && result.s1 && !result.s2 && validation.passed) {
