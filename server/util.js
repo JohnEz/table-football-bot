@@ -33,8 +33,7 @@ module.exports = {
 
         if (searchTerm) {
             array.forEach(function(document) {
-                //TODO remove double equals wtf andy this isnt amatuer hour
-                if (document.country == searchTerm || document.slackID == searchTerm || document.slackCode == searchTerm) {
+                if (document.country === searchTerm || document.slackID === searchTerm || document.slackCode === searchTerm) {
                     playerDoc = document;
                 }
             });

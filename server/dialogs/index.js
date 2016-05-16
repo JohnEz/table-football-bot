@@ -117,14 +117,17 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.s1 = results.response;
 			session.dialogData.validation = validation = controller.validateScore(result.s1);
+			console.log(validation);
 		}
 
 		//check the score2 is a valid score
-		if (validation.passed) {
+		if (validation.passed && result.s2) {
 			session.dialogData.validation = validation = controller.validateScore(result.s2);
 		}
 
-		//ask for p2 if not provided
+		console.log(validation);
+
+		//ask for s2 if not provided
 		if(result.p1 && result.p2 && result.s1 && !result.s2 && validation.passed) {
 			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p2.country)} (${result.p2.slackID}) score? ${validation.message}`);
 		}
