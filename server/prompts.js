@@ -14,6 +14,7 @@ module.exports = {
   player1NotFound: '%(player1)s was not found',
   player2NotFound: '%(player2)s was not found',
   sameTeamEntered: 'A team can\'t play against itself',
+  notOwner: 'Only people that played in the game can add results',
   incorrectScore: 'Scores should be between 0-',
   noMaxScore: 'One of the scores should be ',
   twoMaxScores: 'Only one score should be ',

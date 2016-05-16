@@ -3,6 +3,7 @@ const DAO = require('./dao.js');
 const prompts = require('../prompts.js')
 const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
+const admins = require('../config').admins;
 const createResultString = require('../util').createResultString;
 const capitaliseWords = require('../util').capitaliseWords;
 
@@ -11,7 +12,7 @@ class Controller {
 
     }
 
-    validatePlayers(player1Doc, player2Doc) {
+    validatePlayers(player1Doc, player2Doc, myID) {
         let pass = true;
         let errorMessage = '';
 
@@ -23,6 +24,9 @@ class Controller {
             pass = false;
         } else if (player1Doc._id.equals(player2Doc._id)) {
             errorMessage = prompts.sameTeamEntered;
+            pass = false;
+        } else if (player1Doc.slackCode !== myID && player2Doc.slackCode !== myID && admins.indexOf(myID) === -1) {
+            errorMessage = prompts.notOwner;
             pass = false;
         }
 
