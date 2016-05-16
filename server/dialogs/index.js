@@ -100,26 +100,25 @@ dialog.on('AddResult', [
 		}
 
 		if (result.p1 && result.p2 && result.s1 && result.s2){
-
 			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, endResult) {
-
 				//check it created a result
 				if (endResult) {
 
 					let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
-
+					// difference is 1-10 for to get correct messages from array we need (0-9) / 3
+					difference = Math.floor((difference - 1) / 3);
 					//tell the winner he won
 					if (endResult.winner.slackCode) {
-						slackBot.sendMessage(endResult.winner.slackCode, `Congratulations on your win against ${endResult.loser.country}`);
+						slackBot.sendMessage(endResult.winner.slackCode, prompts.winMessage[difference] , {country: endResult.loser.country});
 					}
 
 					//tell the user he lost
 					if (endResult.loser.slackCode) {
-						slackBot.sendMessage(endResult.loser.slackCode, `Sorry for your loss against ${endResult.winner.country}`);
+						slackBot.sendMessage(endResult.loser.slackCode, prompts.loseMessage[difference], {country: endResult.winner.country});
 					}
 
 					//tell the main channel
-					slackBot.sendMessage(config.mainChannel.code, `Result just in:\n${endResult.toString}`);
+					slackBot.sendMessage(config.mainChannel.code, prompts.result, {result: endResult.toString});
 
 				} else {
 					session.send(message, {player1: result.p1, player2: result.p2});
