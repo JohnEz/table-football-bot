@@ -31,4 +31,17 @@ module.exports = {
       'Wotcha',
       'Hello'
   ],
+  winMessage: [
+      'Well done beating %(country)s, that was a close game.',
+      'Congratulations, you beat %(country)s.',
+      'Nicely done, you beat %(country)s easily.',
+      'Congrats on beating %(country)s 10 - 0.'
+  ],
+  loseMessage: [
+      'Commiserations. %(country)s beat you, but only just.',
+      'Sorry to hear %(country)s beat you.',
+      'You lost to %(country)s, and quite badly too.  Maybe you need more practice.',
+      '10-0. Were you even trying?'
+  ],
+  result: 'Result just in: \n %(result)s'
 }

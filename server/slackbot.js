@@ -22,7 +22,8 @@ var slackBot = new builder.SlackBot(botController, bot);
 slackBot.add('/', index);
 
 slackBot.add('/say', function(session, message) {
-	session.endDialog(message);
+	session.send(message.text, message.args);
+	session.endDialog();
 });
 
 slackBot.on('user_channel_join', function(botkit, msg) {
@@ -86,6 +87,6 @@ module.exports.getUser = function (id, callback) {
 channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
 message is a string.
 */
-module.exports.sendMessage = function(channel, message) {
-	slackBot.beginDialog({ channel: channel}, '/say', message);
+module.exports.sendMessage = function(channel, message, args) {
+	slackBot.beginDialog({ channel: channel }, '/say', {text: message, args: args});
 }

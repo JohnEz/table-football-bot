@@ -182,7 +182,7 @@ class Controller {
     }
 
     checkScoreDifference(winnerScore, loserScore) {
-        let difference = Math.abs(winnerScore - loserScore) / MAXSCORE;
+        let difference = Math.abs(winnerScore - loserScore);
 
         return difference;
 
