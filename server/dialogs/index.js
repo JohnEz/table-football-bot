@@ -35,8 +35,8 @@ dialog.on('AddResult', [
 		let result = session.dialogData.result = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
-			s1: s1 ? s1.entity : null,
-			s2: s2 ? s2.entity : null,
+			s1: s1 ? util.convertWordToNumber(s1.entity) : null,
+			s2: s2 ? util.convertWordToNumber(s2.entity) : null,
 			win: win !== null,
 			loss: loss !== null
 		};
@@ -125,7 +125,7 @@ dialog.on('AddResult', [
 		let scoreValidation = controller.validateScore(result.s1);
 
 		//ask for the score of team 1
-		if(result.p1 && result.p2 && (!result.s1 || !scoreValidation.passed) && validation.passed) {
+		if(result.p1 && result.p2 && (result.s1 === null || !scoreValidation.passed) && validation.passed) {
 			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p1.country)} (${result.p1.slackID}) score? ${scoreValidation.message}`);
 		}
 		else {
@@ -137,7 +137,7 @@ dialog.on('AddResult', [
 		let validation = session.dialogData.validation;
 
 		if (results.response) {
-			result.s1 = results.response;
+			result.s1 = util.convertWordToNumber(results.response);
 			session.dialogData.validation = validation = controller.validateScore(result.s1);
 		}
 
@@ -147,7 +147,7 @@ dialog.on('AddResult', [
 		}
 
 		//ask for s2 if not provided
-		if(result.p1 && result.p2 && result.s1 && !result.s2 && validation.passed) {
+		if(result.p1 && result.p2 && result.s1 !== null && result.s2 === null && validation.passed) {
 			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p2.country)} (${result.p2.slackID}) score? ${validation.message}`);
 		}
 		else {
@@ -159,7 +159,7 @@ dialog.on('AddResult', [
 		let validation = session.dialogData.validation;
 
 		if (results.response) {
-			result.s2 = results.response;
+			result.s2 = util.convertWordToNumber(results.response);
 			validation = controller.validateScore(result.s2);
 		}
 
@@ -168,7 +168,7 @@ dialog.on('AddResult', [
 			validation = controller.validateScores(result.s1, result.s2);
 		}
 
-		if (result.p1 && result.p2 && result.s1 && result.s2 && validation.passed) {
+		if (result.p1 && result.p2 && result.s1 !== null && result.s2 !== null && validation.passed) {
 
 			controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
 				//check it created a result
@@ -218,7 +218,7 @@ dialog.on('ListResults', [
 		let request = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
-			limit: limit ? limit.entity : null
+			limit: util.convertWordToNumber(limit.entity)
 		};
 
 		checkForMe('p1', request, session);
