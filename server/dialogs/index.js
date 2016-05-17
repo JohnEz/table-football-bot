@@ -29,12 +29,16 @@ dialog.on('AddResult', [
 		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
 		let s1 = builder.EntityRecognizer.findEntity(args.entities, 'score::s1');
 		let s2 = builder.EntityRecognizer.findEntity(args.entities, 'score::s2');
+		let win = builder.EntityRecognizer.findEntity(args.entities, 'modifier::win');
+		let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
 
 		let result = session.dialogData.result = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
 			s1: s1 ? s1.entity : null,
 			s2: s2 ? s2.entity : null,
+			win: win !== null,
+			loss: loss !== null
 		};
 
 		checkForMe('p1', result, session);
@@ -91,7 +95,7 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.p2 = results.response;
 			checkForMe('p2', result, session);
-			result.p2 = util.getPlayerFromArray(results.p2, playerDocs);
+			result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
 		}
 
 		//now we have the final player docs, do validation
@@ -148,7 +152,7 @@ dialog.on('AddResult', [
 
 		if (result.p1 && result.p2 && result.s1 && result.s2 && validation.passed) {
 
-			controller.submitResult(result.p1, result.p2, result.s1, result.s2, function(message, endResult) {
+			controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
 				//check it created a result
 				if (endResult) {
 
