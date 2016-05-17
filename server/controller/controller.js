@@ -74,24 +74,29 @@ class Controller {
         return {passed: pass, message: errorMessage};
     }
 
-    submitResult(player1, player2, score1, score2, callback) {
+    submitResult(player1, player2, score1, score2, win, loss, callback) {
 
-        let intScoreWinner = parseInt(score1);
-        let intScoreLoser = parseInt(score2);
+        let intScoreLeft = parseInt(score1);
+        let intScoreRight = parseInt(score2);
 
-        //check if player 2 is the winner
-        if (intScoreLoser > intScoreWinner) {
-            //if player 2 is the winner, swap the inputs
-            let storeScore = intScoreLoser;
+        //if they said loss OR they didnt specify but the right team had a higher score
+        if (loss || (!loss && !win && intScoreRight > intScoreLeft)) {
+            //swap the players
             let storePlayer = player2;
-
-            intScoreLoser = intScoreWinner;
-            intScoreWinner = storeScore;
-
             player2 = player1;
             player1 = storePlayer;
-
         }
+
+        //the winner will be player1 and loser player 2
+        //so make sure that the scores reflect that
+        if (intScoreRight > intScoreLeft) {
+            let storeScore = intScoreRight;
+            intScoreRight = intScoreLeft;
+            intScoreLeft = storeScore;
+        }
+
+        let intScoreWinner = intScoreLeft;
+        let intScoreLoser = intScoreRight;
 
         //atempt to add the results
         DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, function(added) {
