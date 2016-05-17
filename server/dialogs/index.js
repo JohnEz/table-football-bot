@@ -74,7 +74,7 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.p1 = results.response;
 			checkForMe('p1', result, session);
-			result.p1 = util.getPlayerFromArray(results.p1, playerDocs);
+			result.p1 = util.getPlayerFromArray(result.p1, playerDocs);
 		}
 
 		result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
