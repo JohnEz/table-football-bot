@@ -1,38 +1,50 @@
 'use strict';
 const DAO = require('./dao.js');
 const prompts = require('../prompts.js')
-const MAXSCORE = 10;
+const MAXSCORE = require('../config').maxScore;
+const MAXRESULTS = require('../config').maxResults;
+const admins = require('../config').admins;
+const createResultString = require('../util').createResultString;
+const capitaliseWords = require('../util').capitaliseWords;
 
 class Controller {
     constructor() {
 
     }
 
-    getPlayers(player1, player2, callback) {
-        let player1ID = null;
-        let player2ID = null;
-
-        DAO.getInstance().getPlayerID(player1, function(id1) {
-            player1ID = id1;
-
-            DAO.getInstance().getPlayerID(player2, function(id2) {
-                player2ID = id2;
-
-                callback(player1ID, player2ID);
-
-            });
-        });
-    }
-
-    validatePlayers(player1ID, player2ID) {
+    validatePlayers(player1Doc, player2Doc, myID) {
         let pass = true;
         let errorMessage = '';
 
-        if (player1ID === null) {
+        if (!player1Doc) {
             errorMessage = prompts.player1NotFound;
             pass = false;
-        } else if (player2ID === null) {
+        } else if (!player2Doc) {
             errorMessage = prompts.player2NotFound;
+            pass = false;
+        } else if (player1Doc._id.equals(player2Doc._id)) {
+            errorMessage = prompts.sameTeamEntered;
+            pass = false;
+        } else if (player1Doc.slackCode !== myID && player2Doc.slackCode !== myID && admins.indexOf(myID) === -1) {
+            errorMessage = prompts.notOwner;
+            pass = false;
+        }
+
+        return {passed: pass, message: errorMessage};
+    }
+
+    validateScore(score) {
+        let pass = true;
+        let errorMessage = '';
+
+        if (score !== null) {
+            score = parseInt(score);
+
+            if (score > MAXSCORE || score < 0) {
+                errorMessage = prompts.incorrectScore + MAXSCORE;
+                pass = false;
+            }
+        } else {
             pass = false;
         }
 
@@ -43,75 +55,132 @@ class Controller {
         let pass = true;
         let errorMessage = '';
 
-        //check the values arent above the max value
-        if (!(score1 >= 0 && score1 <= MAXSCORE && score2 >= 0 && score2 <= MAXSCORE)) {
-            errorMessage = prompts.incorrectScore + MAXSCORE;
-            pass = false;
-        }
+        score1 = parseInt(score1);
+        score2 = parseInt(score2);
+
         //check that one value is 10 and only that value is 10
-        else if (score1 !== MAXSCORE && score2 !== MAXSCORE) {
+        if (score1 !== MAXSCORE && score2 !== MAXSCORE) {
             errorMessage = prompts.noMaxScore + MAXSCORE;
             pass = false;
+
+
         }
         //check that both values are not the maxscore
         else if (score1 === MAXSCORE && score2 === MAXSCORE) {
-            cerrorMessage = prompts.twoMaxScores + MAXSCORE;
+            errorMessage = prompts.twoMaxScores + MAXSCORE;
             pass = false;
         }
 
         return {passed: pass, message: errorMessage};
     }
 
-    validateInputs(player1, player2, score1, score2, callback) {
+    submitResult(player1, player2, score1, score2, win, loss, callback) {
 
-        this.getPlayers(player1, player2, function(player1ID, player2ID) {
+        let intScoreLeft = parseInt(score1);
+        let intScoreRight = parseInt(score2);
 
-            //get the validation results
-            let validatePlayersResults = this.validatePlayers(player1ID, player2ID);
-            let validateScoreResults = this.validateScores(score1, score2);
+        //if they said loss OR they didnt specify but the right team had a higher score
+        if (loss || (!loss && !win && intScoreRight > intScoreLeft)) {
+            //swap the players
+            let storePlayer = player2;
+            player2 = player1;
+            player1 = storePlayer;
+        }
 
-            //if the players dont pass validation
-            if (!validatePlayersResults.passed) {
-                //return false and the error message
-                callback(false, validatePlayersResults.message);
-            } else if (!validateScoreResults.passed) {
-                //else if the scores dont pass validation
-                //return false and the error message
-                callback(false, validateScoreResults.message);
+        //the winner will be player1 and loser player 2
+        //so make sure that the scores reflect that
+        if (intScoreRight > intScoreLeft) {
+            let storeScore = intScoreRight;
+            intScoreRight = intScoreLeft;
+            intScoreLeft = storeScore;
+        }
+
+        let intScoreWinner = intScoreLeft;
+        let intScoreLoser = intScoreRight;
+
+        //atempt to add the results
+        DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, function(added) {
+            //if the results were added successfully
+            if (added) {
+                let winnerString = this.convertPlayerToString(player1);
+                let loserString = this.convertPlayerToString(player2);
+
+                let result = {
+                    winner: player1,
+                    loser: player2,
+                    winnerScore: intScoreWinner,
+                    loserScore: intScoreLoser,
+                    toString: createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
+                }
+
+                //return the added message
+                callback(prompts.resultCreated, result);
             } else {
-                //else return true
-                callback(true, 'woo', player1ID, player2ID);
+                //else there must have been an error with the database
+                //return the defualt database error message
+                callback(prompts.databaseError);
             }
+        }.bind(this));
+
+    }
+
+    getResults(count, player1, player2, callback) {
+
+        if (!count || count > MAXRESULTS || count < 1) {
+            count = MAXRESULTS;
+        }
+
+        //get the documents for the players
+        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
+            //get the results between the players
+            DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
+
+                if (!err) {
+
+                    results.forEach(function(result) {
+                        result.winner = this.convertPlayerToString(result.winner);
+                        result.loser = this.convertPlayerToString(result.loser);
+                    }.bind(this));
+
+                    callback(results, null);
+                } else {
+                    callback(null, err);
+                }
+
+            }.bind(this));
 
         }.bind(this));
 
     }
 
-    submitResult(player1, player2, score1, score2, callback) {
-        let intScore1 = parseInt(score1);
-        let intScore2 = parseInt(score2);
-
-        this.validateInputs(player1, player2, intScore1, intScore2, function(passed, message, player1ID, player2ID) {
-            //if it passed validation
-            if (passed) {
-                //atempt to add the results
-                DAO.getInstance().addResult(player1ID, player2ID, intScore1, intScore2, function(added) {
-                    //if the results were added successfully
-                    if (added) {
-                        //return the added message
-                        callback(prompts.resultCreated);
-                    } else {
-                        //else there must have been an error with the database
-                        //return the defualt database error message
-                        callback(prompts.databaseError);
-                    }
-                });
-
-            } else {
-                callback(message);
-            }
-
+    getAllPlayers(callback) {
+        DAO.getInstance().getAllPlayers(function(playersMap) {
+            callback([...playersMap.values()]);
         });
+    }
+
+    convertPlayerToString(player) {
+        let playerName = 'No player found';
+        let slackName = `@${player.slackID}`;
+
+        if (player.slackCode) {
+            slackName = `<@${player.slackCode}>`;
+        }
+
+        if (player) {
+            playerName = `${capitaliseWords(player.country)} (${slackName})`;
+        }
+        return playerName;
+    }
+
+    addUsers(users) {
+        DAO.getInstance().addUsers(users);
+    }
+
+    checkScoreDifference(winnerScore, loserScore) {
+        let difference = Math.abs(winnerScore - loserScore);
+
+        return difference;
     }
 
 
