@@ -74,7 +74,16 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.p1 = results.response;
 			checkForMe('p1', result, session);
-			result.p1 = util.getPlayerFromArray(result.p1, playerDocs);
+
+			let playerSearch = util.getPlayerFromArray(result.p1, playerDocs);
+			if (playerSearch) {
+				result.p1 = playerSearch;
+			} else {
+				session.dialogData.validation = validation = {
+					passed: false,
+					message: prompts.player1NotFound
+				}
+			}
 		}
 
 		result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
@@ -95,7 +104,16 @@ dialog.on('AddResult', [
 		if (results.response) {
 			result.p2 = results.response;
 			checkForMe('p2', result, session);
-			result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
+
+			let playerSearch = util.getPlayerFromArray(result.p2, playerDocs);
+			if (playerSearch) {
+				result.p2 = playerSearch;
+			} else {
+				session.dialogData.validation = validation = {
+					passed: false,
+					message: prompts.player2NotFound
+				}
+			}
 		}
 
 		//now we have the final player docs, do validation
@@ -181,7 +199,7 @@ dialog.on('AddResult', [
 			});
 
 		} else if (!validation.passed) {
-			session.send(validation.message);
+			session.send(validation.message, {player1: result.p1, player2: result.p2});
 		} else {
 			session.send(prompts.error);
 		}
