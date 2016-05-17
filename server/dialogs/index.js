@@ -166,7 +166,9 @@ dialog.on('AddResult', [
 					}
 
 					//tell the main channel
-					slackBot.sendMessage(config.mainChannel.code, prompts.result, {result: endResult.toString});
+					let broadcast = prompts.result;
+					if (difference === 3 ) broadcast = `<!channel> ${broadcast} :clap:`
+					slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
 
 				} else {
 					session.send(message, {player1: result.p1, player2: result.p2});
