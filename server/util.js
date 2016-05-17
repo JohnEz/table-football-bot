@@ -58,7 +58,6 @@ module.exports = {
     },
 
     convertWordToNumber(word) {
-        console.log(word);
         if (isNaN(parseInt(word, 10))) {
             if(numbers.hasOwnProperty(word)) {
                 return numbers[word.toLowerCase()];
