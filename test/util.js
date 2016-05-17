@@ -27,5 +27,34 @@ describe('Util', function () {
 		expect(util.isMe(undefined)).to.be.false;
 	});
 
+	it('shouldn\'t change numbers', function() {
+		let numbers = [0, -10, 5, 10, 9873];
+		numbers.forEach(function(num) {
+			expect(util.convertWordToNumber(num)).to.equal(num)
+		});
+	});
+
+	it('should change numbers which are strings', function() {
+		let numbers = ['0', '-10', '5', '10', '9873'];
+		numbers.forEach(function(num) {
+			expect(util.convertWordToNumber(num)).to.equal(parseInt(num))
+		});
+	});
+
+	it('should change numbers which are words', function() {
+		let numbers = {'nil': 0, 'zero': 0, 'three': 3, 'seven': 7, 'ten': 10};
+		for (let key in numbers){
+			expect(util.convertWordToNumber(key)).to.equal(numbers[key]);
+		}
+	});
+
+	it('should not match words above 10', function() {
+		expect(util.convertWordToNumber('eleven')).to.equal(null);
+	});
+
+	it('should not fail on null or undefined', function() {
+		expect(util.convertWordToNumber(null)).to.equal(null);
+		expect(util.convertWordToNumber()).to.equal(null);
+	})
 
 });

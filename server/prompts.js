@@ -29,9 +29,9 @@ module.exports = {
     ],
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
-        'Congratulations, you beat %(country)s.',
+        'Congratulations, on your win against %(country)s.',
         'Nicely done, you beat %(country)s easily.',
-        'Congrats on beating %(country)s 10 - 0.'
+        'Congratulations on your mightily impressive win against %(country)s 10 - 0.'
     ],
     loseMessage: [
         'Commiserations. %(country)s beat you, but only just.',
