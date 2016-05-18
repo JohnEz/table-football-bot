@@ -21,19 +21,17 @@ var ResultTable = React.createClass({
 	},
 	componentDidMount: function() {
 		this.loadResultsFromServer();
-		// IDEA Poll for updates?
-		//setInterval(this.loadResultsFromServer, 60000);
 	},
 	render: function() {
 		var rows = [];
 		if(this.state.results.length > 0 ) {
 			this.state.results.forEach(function(result) {
 				rows.push(
-					<tr key={result._id}>
-						<td>{result.winner.country}</td>
-						<td>{result.winnerScore}</td>
-						<td>{result.loserScore}</td>
-						<td>{result.loser.country}</td>
+					<tr key={result.id}>
+						<td>{result.winner}</td>
+						<td>{result.winScore}</td>
+						<td>{result.loseScore}</td>
+						<td>{result.loser}</td>
 					</tr>
 				)
 			});

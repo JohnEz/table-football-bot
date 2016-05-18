@@ -3,7 +3,9 @@
 const path = require('path');
 const express = require('express');
 const DAO = require('./server/controller/dao.js');
+const Controller = require('./server/controller/controller.js');
 const slackbot = require('./server/slackbot');
+const controller = new Controller();
 
 // process.env.PORT is heroku's assigned port
 const PORT = process.env.PORT || 8000;
@@ -23,7 +25,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/bot/results', function(req, res) {
-    DAO.getResults(30, null, null, function(data, err) {
+    controller.getResultsTable(function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);
@@ -33,12 +35,12 @@ app.get('/bot/results', function(req, res) {
 });
 
 app.get('/bot/users', function(req, res) {
-    DAO.getAllPlayers(function(data, err) {
+    controller.getLeagueTable(function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);
         }
-        res.json([...data.values()]);
+        res.json(data);
     });
 });
 
