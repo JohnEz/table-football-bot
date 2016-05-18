@@ -7,7 +7,8 @@
         "test": "mocha test",
         "dev": "webpack --watch --colors --progress",
         "build": "webpack -p",
-        "start": "node server"
+        "start": "node server",
+        "postinstall": "webpack -p"
     },
     "author": "",
     "license": "",
