@@ -1,3 +1,4 @@
+'use strict';
 
 const path = require('path');
 const express = require('express');
@@ -19,6 +20,26 @@ app.use(express.static(path.join(__dirname, 'build')));
 */
 app.get('/', function(req, res) {
     res.sendFile(path.join(__dirname + 'build/index.html'));
+});
+
+app.get('/bot/results', function(req, res) {
+    DAO.getResults(30, null, null, function(data, err) {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+        res.json(data);
+    });
+});
+
+app.get('/bot/users', function(req, res) {
+    DAO.getAllPlayers(function(data, err) {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+        res.json([...data.values()]);
+    });
 });
 
 /**

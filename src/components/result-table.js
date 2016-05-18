@@ -1,0 +1,64 @@
+'use strict';
+
+import React from 'react';
+
+var ResultTable = React.createClass({
+	getInitialState: function() {
+		return {
+			results: []
+		}
+	},
+	loadResultsFromServer: function() {
+		fetch('/bot/results', {
+			method: 'get',
+		}).then(function(response) {
+			return response.json()
+		}).then(function(data) {
+			this.setState({results: data});
+		}.bind(this)).catch(function(ex) {
+			console.log('json parse failed', ex);
+		});
+	},
+	componentDidMount: function() {
+		this.loadResultsFromServer();
+		// IDEA Poll for updates?
+		//setInterval(this.loadResultsFromServer, 60000);
+	},
+	render: function() {
+		var rows = [];
+		if(this.state.results.length > 0 ) {
+			this.state.results.forEach(function(result) {
+				rows.push(
+					<tr key={result._id}>
+						<td>{result.winner.country}</td>
+						<td>{result.winnerScore}</td>
+						<td>{result.loserScore}</td>
+						<td>{result.loser.country}</td>
+					</tr>
+				)
+			});
+		}
+		return (
+			<div className='results'>
+				<h2>Results</h2>
+				<table>
+					<thead>
+						<tr>
+							<th>Winner</th>
+							<th></th>
+							<th></th>
+							<th>Loser</th>
+						</tr>
+					</thead>
+					<tbody>
+						{rows}
+					</tbody>
+				</table>
+
+
+			</div>
+		);
+	}
+});
+
+export default ResultTable;
