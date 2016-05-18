@@ -12,6 +12,20 @@ class Controller {
 
     }
 
+    validatePlayer(playersFound, notFoundPrompt) {
+        let pass = true;
+        let errorMessage = '';
+        if (playersFound.length === 0) {
+            pass = false;
+            errorMessage = notFoundPrompt;
+        } else if (playersFound.length > 1) {
+            pass = false;
+            errorMessage = prompts.tooManyPlayersFound;
+        }
+
+        return {passed: pass, message: errorMessage};
+    }
+
     validatePlayers(player1Doc, player2Doc, myID) {
         let pass = true;
         let errorMessage = '';
