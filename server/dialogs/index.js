@@ -142,13 +142,29 @@ function askForPlayerOne(session, results, next) {
 	let playerDocs = session.dialogData.playerDocs;
 	let result = session.dialogData.result;
 	let validation = session.dialogData.validation;
+	let foundString = '';
 
-	//get player from array
-	result.p1 = util.getPlayerFromArray(result.p1, playerDocs);
+	//get matching players from array
+	let playersFound = util.getPlayerFromArray(result.p1, playerDocs);
+	result.p1 = null;
+	if (playersFound.length > 1) {
+		playersFound.forEach(function(player, index, array) {
+			foundString = foundString + player.country + '|';
+		});
+		foundString = foundString.slice(0, foundString.length-1);
+
+	} else if (playersFound.length === 1) {
+		result.p1 = playersFound[0];
+	}
+
 
 	//ask for p1 if not provided or we couldn't find it
 	if (!result.p1 && validation.passed) {
-		builder.Prompts.text(session, prompts.getFirstTeam);
+		if (foundString !== '') {
+			builder.Prompts.choice(session, prompts.confirmPlayer1, foundString);
+		} else {
+			builder.Prompts.text(session, prompts.getFirstTeam);
+		}
 	}
 	else {
 		next();
@@ -159,12 +175,28 @@ function askForPlayerTwo(session, results, next) {
 	let playerDocs = session.dialogData.playerDocs;
 	let result = session.dialogData.result;
 	let validation = session.dialogData.validation;
+	let foundString = '';
 
-	result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
+	//get matching players from array
+	let playersFound = util.getPlayerFromArray(result.p2, playerDocs);
+	result.p2 = null;
+	if (playersFound.length > 1) {
+		playersFound.forEach(function(player, index, array) {
+			foundString = foundString + player.country + '|';
+		});
+		foundString = foundString.slice(0, foundString.length-1);
+
+	} else if (playersFound.length === 1) {
+		result.p2 = playersFound[0];
+	}
 
 	//ask for p2 if not provided
 	if(result.p1 && !result.p2 && validation.passed) {
-		builder.Prompts.text(session,prompts.getSecondTeam);
+		if (foundString !== '') {
+			builder.Prompts.choice(session, prompts.confirmPlayer2, foundString);
+		} else {
+			builder.Prompts.text(session, prompts.getSecondTeam);
+		}
 	}
 	else {
 		next()
@@ -174,22 +206,24 @@ function askForPlayerTwo(session, results, next) {
 function getPlayer(player, failPrompt) {
 	return function (session, results, next) {
 		if (results.response) {
+			if (results.response.entity) {
+				results.response = results.response.entity;
+			}
+
 			let playerDocs = session.dialogData.playerDocs;
 			let result = session.dialogData.result;
 			result[player] = results.response;
 			checkForMe(player, result, session);
 
-			let playerSearch = util.getPlayerFromArray(result[player], playerDocs);
-			if (playerSearch) {
-				result[player] = playerSearch;
-			} else {
-				session.dialogData.validation = {
-					passed: false,
-					message: failPrompt
-				}
-			}
-		}
+			let playersFound = util.getPlayerFromArray(result[player], playerDocs);
 
+			session.dialogData.validation = controller.validatePlayer(playersFound);
+
+			if (session.dialogData.validation.passed) {
+				result[player] = playersFound[0];
+			}
+
+		}
 		next();
 	};
 }
