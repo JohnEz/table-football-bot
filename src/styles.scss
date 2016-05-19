@@ -43,6 +43,11 @@
 	&.h {
 		order: 8;
 	}
+	&.table-group-header, &.table-date {
+		margin-top: 20px;
+		margin-bottom: 5px;
+		font-weight: bold;
+	}
 }
 
 .table-header {
@@ -53,11 +58,7 @@
 .table-row.consolidated {
 	order: 0;
 }
-.table-row.table-group-header {
-	margin-top: 20px;
-	margin-bottom: 5px;
-	font-weight: bold;
-}
+
 .hidden {
 	display: none;
 }

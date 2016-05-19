@@ -30,6 +30,7 @@
     "express": "^4.13.4",
     "html-webpack-plugin": "^2.16.1",
     "imports-loader": "^0.6.5",
+    "moment": "^2.13.0",
     "mongodb": "^2.1.18",
     "node-sass": "^3.4.2",
     "react": "^15.0.2",

@@ -6,6 +6,7 @@ const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
 const createResultString = require('../util').createResultString;
 const capitaliseWords = require('../util').capitaliseWords;
+const moment = require('moment');
 
 class Controller {
     constructor() {
@@ -212,18 +213,26 @@ class Controller {
     getResultsTable(callback) {
         DAO.getInstance().getResults(null, null, null, function(results, err) {
             if (!err) {
-                let res = [];
+                let days = new Map();
                 results.forEach(function(result) {
-                    res.push({
+                    let day = moment(result.date).format('DD/MM/YYYY');
+                    let res = {
                         id: result._id,
                         winner: capitaliseWords(result.winner.country),
                         loser:  capitaliseWords(result.loser.country),
                         winScore: result.winnerScore,
-                        loseScore: result.loserScore
-                    })
-                });
+                        loseScore: result.loserScore,
+                    }
 
-                callback(res);
+                    if(days.has(day)){
+                        days.get(day).results.push(res);
+                    }
+                    else {
+                        days.set(day, {date: day, results: [res]})
+                    }
+
+                })
+                callback([...days.values()]);
             } else {
                 callback([], err);
             }
