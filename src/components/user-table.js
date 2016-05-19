@@ -2,9 +2,9 @@
 
 import React from 'react';
 import classnames from 'classnames';
-import UserTableElement from './user-table-element.js';
-import TableGroupHeader from './table-group-header.js';
-import ToggleSwitch from './toggle-switch.js';
+import UserTableElement from './users/user-table-element.js';
+import TableGroupHeader from './users/table-group-header.js';
+import ToggleSwitch from './users/toggle-switch.js';
 
 var UserTable = React.createClass({
 	getInitialState: function() {
@@ -30,7 +30,7 @@ var UserTable = React.createClass({
 						diff = b.against - a.against;
 					}
 				}
-				return diff;			
+				return diff;
 			});
 			this.setState({users: data});
 		}.bind(this)).catch(function(ex) {
