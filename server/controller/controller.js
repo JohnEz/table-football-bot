@@ -4,8 +4,7 @@ const prompts = require('../prompts.js')
 const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
-const createResultString = require('../util').createResultString;
-const capitaliseWords = require('../util').capitaliseWords;
+const util = require('../util');
 
 class Controller {
     constructor() {
@@ -26,7 +25,7 @@ class Controller {
         return {passed: pass, message: errorMessage};
     }
 
-    validatePlayers(player1Doc, player2Doc, myID) {
+    validatePlayers(player1Doc, player2Doc, myID, matchesCount, match) {
         let pass = true;
         let errorMessage = '';
 
@@ -38,6 +37,12 @@ class Controller {
             pass = false;
         } else if (player1Doc._id.equals(player2Doc._id)) {
             errorMessage = prompts.sameTeamEntered;
+            pass = false;
+        } else if (matchesCount === 0) {
+            errorMessage = prompts.noMatchFound;
+            pass = false;
+        } else if (!match) {
+            errorMessage = prompts.allMatchesHaveResults;
             pass = false;
         } else if (player1Doc.slackCode !== myID && player2Doc.slackCode !== myID && admins.indexOf(myID) === -1) {
             errorMessage = prompts.notOwner;
@@ -88,7 +93,7 @@ class Controller {
         return {passed: pass, message: errorMessage};
     }
 
-    submitResult(player1, player2, score1, score2, win, loss, callback) {
+    submitResult(player1, player2, score1, score2, win, loss, match, callback) {
 
         let intScoreLeft = parseInt(score1);
         let intScoreRight = parseInt(score2);
@@ -113,7 +118,7 @@ class Controller {
         let intScoreLoser = intScoreRight;
 
         //atempt to add the results
-        DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, function(added) {
+        DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, match, function(added) {
             //if the results were added successfully
             if (added) {
                 let winnerString = this.convertPlayerToString(player1);
@@ -124,7 +129,7 @@ class Controller {
                     loser: player2,
                     winnerScore: intScoreWinner,
                     loserScore: intScoreLoser,
-                    toString: createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
+                    toString: util.createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
                 }
 
                 //return the added message
@@ -182,7 +187,7 @@ class Controller {
                 players.forEach(function(player) {
                     let thisPlayer = {
                         id: player._id,
-                        country: capitaliseWords(player.country),
+                        country: util.capitaliseWords(player.country),
                         slackId: player.slackID,
                         group: player.group,
                         won: 0,
@@ -216,8 +221,8 @@ class Controller {
                 results.forEach(function(result) {
                     res.push({
                         id: result._id,
-                        winner: capitaliseWords(result.winner.country),
-                        loser:  capitaliseWords(result.loser.country),
+                        winner: util.capitaliseWords(result.winner.country),
+                        loser:  util.capitaliseWords(result.loser.country),
                         winScore: result.winnerScore,
                         loseScore: result.loserScore
                     })
@@ -239,7 +244,7 @@ class Controller {
         }
 
         if (player) {
-            playerName = `${capitaliseWords(player.country)} (${slackName})`;
+            playerName = `${util.capitaliseWords(player.country)} (${slackName})`;
         }
         return playerName;
     }
@@ -254,6 +259,38 @@ class Controller {
         return difference;
     }
 
+    //temp method to add scheduled matches
+    addMatches() {
+
+        this.getAllPlayers(function(playerDocs) {
+
+            //add one match
+            let team1 = util.getPlayerFromArray('sweden', playerDocs);
+            let team2 = util.getPlayerFromArray('italy', playerDocs);
+
+            console.log(team1);
+
+            DAO.getInstance().addMatch(team1[0]._id, team2[0]._id, function(added) {
+                console.log('match was added:', added);
+            });
+
+        });
+
+    }
+
+    getMatches(team1, team2, callback) {
+        DAO.getInstance().getMatches(team1._id, team2._id, callback);
+    }
+
+    getValidMatch(matches) {
+        let validMatch = null;
+        matches.forEach(function (match, id) {
+            if (!match.result) {
+                validMatch = match;
+            }
+        });
+        return validMatch;
+    }
 
 }
 
