@@ -173,6 +173,63 @@ class Controller {
         });
     }
 
+    getLeagueTable(callback) {
+        var table = [];
+        DAO.getInstance().getAllPlayers(function(players) {
+
+            DAO.getInstance().getResults(null, null, null, function(results) {
+
+                players.forEach(function(player) {
+                    let thisPlayer = {
+                        id: player._id,
+                        country: capitaliseWords(player.country),
+                        slackId: player.slackID,
+                        group: player.group,
+                        won: 0,
+                        lost: 0,
+                        for: 0,
+                        against: 0
+                    };
+                    results.forEach(function(result) {
+                        if (player._id.equals(result.winner._id)) {
+                            thisPlayer.won++;
+                            thisPlayer.for += result.winnerScore;
+                            thisPlayer.against += result.loserScore;
+                        }
+                        else if (player._id.equals(result.loser._id)) {
+                            thisPlayer.lost++;
+                            thisPlayer.for += result.loserScore;
+                            thisPlayer.against += result.winnerScore;
+                        }
+                    });
+                    table.push(thisPlayer);
+                });
+                callback(table);
+            });
+        });
+    }
+
+    getResultsTable(callback) {
+        DAO.getInstance().getResults(null, null, null, function(results, err) {
+            if (!err) {
+                let res = [];
+                results.forEach(function(result) {
+                    res.push({
+                        id: result._id,
+                        winner: capitaliseWords(result.winner.country),
+                        loser:  capitaliseWords(result.loser.country),
+                        winScore: result.winnerScore,
+                        loseScore: result.loserScore
+                    })
+                });
+
+                callback(res);
+            } else {
+                callback([], err);
+            }
+        })
+    }
+
     convertPlayerToString(player) {
         let playerName = 'No player found';
         let slackName = `@${player.slackID}`;

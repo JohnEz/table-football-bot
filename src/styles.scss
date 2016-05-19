@@ -1,0 +1,63 @@
+.table {
+	display: flex;
+	flex-flow: column wrap;
+	width: 450px;
+}
+.table-row {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	.against, .for, .won, .lost {
+		width: 30px
+	}
+	.slack {
+		width: 100px;
+	}
+	.country {
+		width: 170px;
+	}
+	&.col {
+		padding: 2px;
+	}
+	&.a {
+		order: 1;
+	}
+	&.b {
+		order: 2;
+	}
+	&.c {
+		order: 3;
+	}
+	&.d {
+		order: 4;
+	}
+	&.e {
+		order: 5;
+	}
+	&.f {
+		order: 6;
+	}
+	&.g {
+		order: 7;
+	}
+	&.h {
+		order: 8;
+	}
+}
+
+.table-header {
+	font-weight: bolder;
+	text-transform: uppercase;
+}
+
+.table-row.consolidated {
+	order: 0;
+}
+.table-row.table-group-header {
+	margin-top: 20px;
+	margin-bottom: 5px;
+	font-weight: bold;
+}
+.hidden {
+	display: none;
+}
