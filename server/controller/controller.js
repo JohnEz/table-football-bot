@@ -259,19 +259,83 @@ class Controller {
         return difference;
     }
 
-    //temp method to add scheduled matches
     addMatches() {
+        //group A
+        this.addMatch('albania', 'france');
+        this.addMatch('albania', 'romania');
+        this.addMatch('albania', 'switzerland');
+        this.addMatch('france', 'romania');
+        this.addMatch('france', 'switzerland');
+        this.addMatch('romania', 'switzerland');
+
+        //group B
+        this.addMatch('england', 'russia');
+        this.addMatch('england', 'slovakia');
+        this.addMatch('england', 'wales');
+        this.addMatch('russia', 'slovakia');
+        this.addMatch('russia', 'wales');
+        this.addMatch('slovakia', 'wales');
+
+        //group C
+        this.addMatch('germany', 'northern ireland');
+        this.addMatch('germany', 'poland');
+        this.addMatch('germany', 'ukraine');
+        this.addMatch('northern ireland', 'poland');
+        this.addMatch('northern ireland', 'ukraine');
+        this.addMatch('poland', 'ukraine');
+
+        //group D
+        this.addMatch('croatia', 'czech');
+        this.addMatch('croatia', 'spain');
+        this.addMatch('croatia', 'turkey');
+        this.addMatch('czech', 'spain');
+        this.addMatch('czech', 'turkey');
+        this.addMatch('spain', 'turkey');
+
+        //group E
+        this.addMatch('belgium', 'italy');
+        this.addMatch('belgium', 'republic of ireland');
+        this.addMatch('belgium', 'sweden');
+        this.addMatch('italy', 'republic of ireland');
+        this.addMatch('italy', 'sweden');
+        this.addMatch('republic of ireland', 'sweden');
+
+        //group F
+        this.addMatch('austria', 'hungary');
+        this.addMatch('austria', 'iceland');
+        this.addMatch('austria', 'portugal');
+        this.addMatch('hungary', 'iceland');
+        this.addMatch('hungary', 'portugal');
+        this.addMatch('iceland', 'portugal');
+
+        //group G
+        this.addMatch('copeman', 'enclava');
+        this.addMatch('copeman', 'sealand');
+        this.addMatch('copeman', 'forvik');
+        this.addMatch('enclava', 'sealand');
+        this.addMatch('enclava', 'forvik');
+        this.addMatch('sealand', 'forvik');
+
+        //group H
+        this.addMatch('austenasia', 'perloja');
+        this.addMatch('austenasia', 'elleore');
+        this.addMatch('austenasia', 'frestonia');
+        this.addMatch('perloja', 'elleore');
+        this.addMatch('perloja', 'frestonia');
+        this.addMatch('elleore', 'frestonia');
+    }
+
+    //temp method to add scheduled matches
+    addMatch(team1, team2) {
 
         this.getAllPlayers(function(playerDocs) {
 
             //add one match
-            let team1 = util.getPlayerFromArray('sweden', playerDocs);
-            let team2 = util.getPlayerFromArray('italy', playerDocs);
+            let team1Doc = util.getPlayerFromArray(team1, playerDocs);
+            let team2Doc = util.getPlayerFromArray(team2, playerDocs);
 
-            console.log(team1);
+            DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, function(added) {
 
-            DAO.getInstance().addMatch(team1[0]._id, team2[0]._id, function(added) {
-                console.log('match was added:', added);
             });
 
         });
