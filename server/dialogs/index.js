@@ -23,170 +23,18 @@ dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
 
 /** Prompts a user for the two teams and their scores and saves it.  */
 dialog.on('AddResult', [
-	function (session, args, next) {
-		// See if got the tasks title from our LUIS model.
-		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-		let s1 = builder.EntityRecognizer.findEntity(args.entities, 'score::s1');
-		let s2 = builder.EntityRecognizer.findEntity(args.entities, 'score::s2');
-		let win = builder.EntityRecognizer.findEntity(args.entities, 'modifier::win');
-		let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
-
-		let result = session.dialogData.result = {
-			p1: p1 ? p1.entity : null,
-			p2: p2 ? p2.entity : null,
-			s1: s1 ? s1.entity : null,
-			s2: s2 ? s2.entity : null,
-			win: win !== null,
-			loss: loss !== null
-		};
-
-		checkForMe('p1', result, session);
-		checkForMe('p2', result, session);
-
-		let validation = session.dialogData.validation = {
-			passed: true,
-			message: 'Error'
-		};
-
-		//get all players from the database
-		controller.getAllPlayers(function(playersArray) {
-			session.dialogData.playerDocs = playersArray;
-			//get player from array
-			let playerDoc = util.getPlayerFromArray(result.p1, playersArray);
-
-			session.dialogData.result.p1 = playerDoc;
-
-			//ask for p1 if not provided or we couldn't find it
-			if (!playerDoc && validation.passed) {
-				builder.Prompts.text(session, prompts.getFirstTeam);
-			}
-			else {
-				next()
-			}
-		});
-	},
-	function(session, results, next) {
-		let playerDocs = session.dialogData.playerDocs;
-		let result = session.dialogData.result;
-		let validation = session.dialogData.validation;
-
-		if (results.response) {
-			result.p1 = results.response;
-			checkForMe('p1', result, session);
-			result.p1 = util.getPlayerFromArray(result.p1, playerDocs);
-		}
-
-		result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
-
-		//ask for p2 if not provided
-		if(result.p1 && !result.p2 && validation.passed) {
-			builder.Prompts.text(session,prompts.getSecondTeam);
-		}
-		else {
-			next()
-		}
-	},
-	function(session, results, next) {
-		let playerDocs = session.dialogData.playerDocs;
-		let result = session.dialogData.result;
-		let validation = session.dialogData.validation;
-
-		if (results.response) {
-			result.p2 = results.response;
-			checkForMe('p2', result, session);
-			result.p2 = util.getPlayerFromArray(result.p2, playerDocs);
-		}
-
-		//now we have the final player docs, do validation
-		if (validation.passed) {
-			session.dialogData.validation = validation = controller.validatePlayers(result.p1, result.p2, session.userData.id);
-		}
-
-		//check the score is a valid score
-		let scoreValidation = controller.validateScore(result.s1);
-
-		//ask for the score of team 1
-		if(result.p1 && result.p2 && (!result.s1 || !scoreValidation.passed) && validation.passed) {
-			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p1.country)} (${result.p1.slackID}) score? ${scoreValidation.message}`);
-		}
-		else {
-			next()
-		}
-	},
-	function(session, results, next) {
-		let result = session.dialogData.result;
-		let validation = session.dialogData.validation;
-
-		if (results.response) {
-			result.s1 = results.response;
-			session.dialogData.validation = validation = controller.validateScore(result.s1);
-		}
-
-		//check the score2 is a valid score
-		if (validation.passed && result.s2) {
-			session.dialogData.validation = validation = controller.validateScore(result.s2);
-		}
-
-		//ask for s2 if not provided
-		if(result.p1 && result.p2 && result.s1 && !result.s2 && validation.passed) {
-			builder.Prompts.number(session,`What did ${util.capitaliseWords(result.p2.country)} (${result.p2.slackID}) score? ${validation.message}`);
-		}
-		else {
-			next()
-		}
-	},
-	function(session, results) {
-		let result = session.dialogData.result;
-		let validation = session.dialogData.validation;
-
-		if (results.response) {
-			result.s2 = results.response;
-			validation = controller.validateScore(result.s2);
-		}
-
-		//check the re added score is a valid score
-		if (validation.passed) {
-			validation = controller.validateScores(result.s1, result.s2);
-		}
-
-		if (result.p1 && result.p2 && result.s1 && result.s2 && validation.passed) {
-
-			controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
-				//check it created a result
-				if (endResult) {
-
-					let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
-					// difference is 1-10 for to get correct messages from array we need (0-9) / 3
-					difference = Math.floor((difference - 1) / 3);
-					//tell the winner he won
-					if (endResult.winner.slackCode) {
-						slackBot.sendMessage(endResult.winner.slackCode, prompts.winMessage[difference] , {country: endResult.loser.country});
-					}
-
-					//tell the user he lost
-					if (endResult.loser.slackCode) {
-						slackBot.sendMessage(endResult.loser.slackCode, prompts.loseMessage[difference], {country: endResult.winner.country});
-					}
-
-					//tell the main channel
-					let broadcast = prompts.result;
-					if (difference === 3 ) broadcast = `<!channel> ${broadcast} :clap:`
-					slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
-
-				} else {
-					session.send(message, {player1: result.p1, player2: result.p2});
-				}
-
-			});
-
-		} else if (!validation.passed) {
-			session.send(validation.message);
-		} else {
-			session.send(prompts.error);
-		}
-		session.endDialog();
-	}
+	getIntialAddInputs,
+	askForPlayerOne,
+	getPlayer('p1', prompts.player1NotFound),
+	askForPlayerTwo,
+	getPlayer('p2', prompts.player2NotFound),
+	validatePlayers,
+	askForFirstScore,
+	getScore('s1'),
+	askForSecondScore,
+	getScore('s2'),
+	validateScores,
+	respondFinalResult
 ]);
 
 /** Shows the user a list of Results. */
@@ -200,7 +48,7 @@ dialog.on('ListResults', [
 		let request = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
-			limit: limit ? limit.entity : null
+			limit: util.convertWordToNumber(limit.entity)
 		};
 
 		checkForMe('p1', request, session);
@@ -255,4 +103,241 @@ function checkForMe(p, result, session) {
 	if (util.isMe(player)) {
 		result[p] = session.userData.id;
 	}
+}
+
+function getIntialAddInputs(session, args, next) {
+	// See if got the tasks title from our LUIS model.
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let s1 = builder.EntityRecognizer.findEntity(args.entities, 'score::s1');
+	let s2 = builder.EntityRecognizer.findEntity(args.entities, 'score::s2');
+	let win = builder.EntityRecognizer.findEntity(args.entities, 'modifier::win');
+	let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
+
+	let result = session.dialogData.result = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		s1: s1 ? util.convertWordToNumber(s1.entity) : null,
+		s2: s2 ? util.convertWordToNumber(s2.entity) : null,
+		win: win !== null,
+		loss: loss !== null
+	};
+
+	checkForMe('p1', result, session);
+	checkForMe('p2', result, session);
+
+	let validation = session.dialogData.validation = {
+		passed: true,
+		message: 'Error'
+	};
+
+	//get all players from the database
+	controller.getAllPlayers(function(playersArray) {
+		session.dialogData.playerDocs = playersArray;
+		next();
+	});
+}
+
+function askForPlayerOne(session, results, next) {
+	let playerDocs = session.dialogData.playerDocs;
+	let result = session.dialogData.result;
+	let validation = session.dialogData.validation;
+	let foundString = '';
+
+	//get matching players from array
+	let playersFound = util.getPlayerFromArray(result.p1, playerDocs);
+	result.p1 = null;
+	if (playersFound.length > 1) {
+		playersFound.forEach(function(player, index, array) {
+			foundString = foundString + player.country + '|';
+		});
+		foundString = foundString.slice(0, foundString.length-1);
+
+	} else if (playersFound.length === 1) {
+		result.p1 = playersFound[0];
+	}
+
+
+	//ask for p1 if not provided or we couldn't find it
+	if (!result.p1 && validation.passed) {
+		if (foundString !== '') {
+			builder.Prompts.choice(session, prompts.confirmPlayer1, foundString);
+		} else {
+			builder.Prompts.text(session, prompts.getFirstTeam);
+		}
+	}
+	else {
+		next();
+	}
+}
+
+function askForPlayerTwo(session, results, next) {
+	let playerDocs = session.dialogData.playerDocs;
+	let result = session.dialogData.result;
+	let validation = session.dialogData.validation;
+	let foundString = '';
+
+	//get matching players from array
+	let playersFound = util.getPlayerFromArray(result.p2, playerDocs);
+	result.p2 = null;
+	if (playersFound.length > 1) {
+		playersFound.forEach(function(player, index, array) {
+			foundString = foundString + player.country + '|';
+		});
+		foundString = foundString.slice(0, foundString.length-1);
+
+	} else if (playersFound.length === 1) {
+		result.p2 = playersFound[0];
+	}
+
+	//ask for p2 if not provided
+	if(result.p1 && !result.p2 && validation.passed) {
+		if (foundString !== '') {
+			builder.Prompts.choice(session, prompts.confirmPlayer2, foundString);
+		} else {
+			builder.Prompts.text(session, prompts.getSecondTeam);
+		}
+	}
+	else {
+		next()
+	}
+}
+
+function getPlayer(player, failPrompt) {
+	return function (session, results, next) {
+		if (results.response) {
+			if (results.response.entity) {
+				results.response = results.response.entity;
+			}
+
+			let playerDocs = session.dialogData.playerDocs;
+			let result = session.dialogData.result;
+			result[player] = results.response;
+			result[player] = removeIllegalCharacters(result[player]);
+			checkForMe(player, result, session);
+
+			let playersFound = util.getPlayerFromArray(result[player], playerDocs);
+
+			session.dialogData.validation = controller.validatePlayer(playersFound, failPrompt);
+
+			if (session.dialogData.validation.passed) {
+				result[player] = playersFound[0];
+			}
+
+		}
+		next();
+	};
+}
+
+function validatePlayers(session, results, next) {
+	let result = session.dialogData.result;
+
+	//now we have the final player docs, do validation
+	if (session.dialogData.validation.passed) {
+		session.dialogData.validation = controller.validatePlayers(result.p1, result.p2, session.userData.id);
+	}
+	next();
+}
+
+function askForFirstScore(session, results, next) {
+	let playerDocs = session.dialogData.playerDocs;
+	let result = session.dialogData.result;
+	let validation = session.dialogData.validation;
+
+	//check the score is a valid score
+	let scoreValidation = controller.validateScore(result.s1);
+
+	//ask for the score of team 1
+	if(result.p1 && result.p2 && (result.s1 === null || !scoreValidation.passed) && validation.passed) {
+		builder.Prompts.text(session,`What did ${util.capitaliseWords(result.p1.country)} (${result.p1.slackID}) score? ${scoreValidation.message}`);
+	}
+	else {
+		next()
+	}
+}
+
+function askForSecondScore(session, results, next) {
+	let result = session.dialogData.result;
+	let validation = session.dialogData.validation;
+
+	//check the score2 is a valid score
+	if (validation.passed && result.s2) {
+		session.dialogData.validation = validation = controller.validateScore(result.s2);
+	}
+
+	//ask for s2 if not provided
+	if(result.p1 && result.p2 && result.s1 !== null && result.s2 === null && validation.passed) {
+		builder.Prompts.text(session,`What did ${util.capitaliseWords(result.p2.country)} (${result.p2.slackID}) score? ${validation.message}`);
+	}
+	else {
+		next()
+	}
+}
+
+function getScore(score) {
+	return function(session, results, next) {
+		if (results.response) {
+			let result = session.dialogData.result;
+			result[score] = util.convertWordToNumber(results.response);
+			session.dialogData.validation = controller.validateScore(result[score]);
+		}
+
+		next();
+	};
+}
+
+function validateScores(session, results, next) {
+	//check the re added score is a valid score
+	if (session.dialogData.validation.passed) {
+		let result = session.dialogData.result;
+		session.dialogData.validation = controller.validateScores(result.s1, result.s2);
+	}
+
+	next();
+}
+
+function respondFinalResult(session, results) {
+	let result = session.dialogData.result;
+	let validation = session.dialogData.validation;
+
+	if (result.p1 && result.p2 && result.s1 !== null && result.s2 !== null && validation.passed) {
+
+		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
+			//check it created a result
+			if (endResult) {
+
+				let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
+				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
+				difference = Math.floor((difference - 1) / 3);
+				//tell the winner he won
+				if (endResult.winner.slackCode) {
+					slackBot.sendMessage(endResult.winner.slackCode, prompts.winMessage[difference] , {country: endResult.loser.country});
+				}
+
+				//tell the user he lost
+				if (endResult.loser.slackCode) {
+					slackBot.sendMessage(endResult.loser.slackCode, prompts.loseMessage[difference], {country: endResult.winner.country});
+				}
+
+				//tell the main channel
+				let broadcast = prompts.result;
+				if (difference === 3 ) broadcast = `<!channel> ${broadcast} :clap:`
+				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
+
+			} else {
+				session.send(message, {player1: result.p1, player2: result.p2});
+			}
+
+		});
+
+	} else if (!validation.passed) {
+		session.send(validation.message, {player1: result.p1, player2: result.p2});
+	} else {
+		session.send(prompts.error);
+	}
+	session.endDialog();
+}
+
+function removeIllegalCharacters(str) {
+	return str.replace(/<|@|>/g, '');
 }

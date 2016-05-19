@@ -1,6 +1,21 @@
 'use strict';
 const prompts = require('./prompts')
 
+let numbers = {
+    nil: 0,
+    zero: 0,
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10
+}
+
 let capWords = function(s) {
     return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
 }
@@ -29,16 +44,28 @@ module.exports = {
     },
 
     getPlayerFromArray: function(searchTerm, array) {
-        let playerDoc = null;
+        let playersFound = [];
 
-        if (searchTerm) {
+        if (searchTerm && searchTerm !== '') {
             array.forEach(function(document) {
-                if (document.country === searchTerm || document.slackID === searchTerm || document.slackCode === searchTerm) {
-                    playerDoc = document;
+                if (document.country.indexOf(searchTerm) > -1 || document.slackID === searchTerm || document.slackCode === searchTerm.toUpperCase()) {
+                    playersFound.push(document);
                 }
             });
         }
 
-        return playerDoc;
+        return playersFound;
+    },
+
+    convertWordToNumber(word) {
+        if (isNaN(parseInt(word, 10))) {
+            if(numbers.hasOwnProperty(word)) {
+                return numbers[word.toLowerCase()];
+            }
+            return null;
+        }
+        else {
+            return parseInt(word, 10);
+        }
     }
 };

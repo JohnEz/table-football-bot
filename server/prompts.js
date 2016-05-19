@@ -9,8 +9,11 @@ module.exports = {
     resultCreated: "Added a new result: '%(result)s'",
     listResultsList: 'Results\n%s',
     listNoResult: 'There are no results for that search',
+    confirmPlayer1: 'Can you confirm the first player?',
+    confirmPlayer2: 'Did you mean one of these for the second player?',
     player1NotFound: '%(player1)s was not found',
     player2NotFound: '%(player2)s was not found',
+    tooManyPlayersFound: 'Please try to be more specific with your player names',
     sameTeamEntered: 'A team can\'t play against itself',
     notOwner: 'Only people that played in the game can add results',
     incorrectScore: 'Scores should be between 0-',
@@ -29,9 +32,9 @@ module.exports = {
     ],
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
-        'Congratulations, you beat %(country)s.',
+        'Congratulations, on your win against %(country)s.',
         'Nicely done, you beat %(country)s easily.',
-        'Congrats on beating %(country)s 10 - 0.'
+        'Congratulations on your mightily impressive win against %(country)s 10 - 0.'
     ],
     loseMessage: [
         'Commiserations. %(country)s beat you, but only just.',
