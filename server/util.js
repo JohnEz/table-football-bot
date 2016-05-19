@@ -48,7 +48,7 @@ module.exports = {
 
         if (searchTerm && searchTerm !== '') {
             array.forEach(function(document) {
-                if (document.country.indexOf(searchTerm) > -1 || document.slackID === searchTerm || document.slackCode === searchTerm) {
+                if (document.country.indexOf(searchTerm) > -1 || document.slackID === searchTerm || document.slackCode === searchTerm.toUpperCase()) {
                     playersFound.push(document);
                 }
             });
