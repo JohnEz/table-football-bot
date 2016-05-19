@@ -15,6 +15,8 @@ module.exports = {
     player2NotFound: '%(player2)s was not found',
     tooManyPlayersFound: 'Please try to be more specific with your player names',
     sameTeamEntered: 'A team can\'t play against itself',
+    noMatchFound: 'There are no scheduled matches between these teams',
+    allMatchesHaveResults: 'All matches between these teams already have results',
     notOwner: 'Only people that played in the game can add results',
     incorrectScore: 'Scores should be between 0-',
     noMaxScore: 'One of the scores should be ',

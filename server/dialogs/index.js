@@ -234,9 +234,18 @@ function validatePlayers(session, results, next) {
 
 	//now we have the final player docs, do validation
 	if (session.dialogData.validation.passed) {
-		session.dialogData.validation = controller.validatePlayers(result.p1, result.p2, session.userData.id);
+		controller.getMatches(result.p1, result.p2, function(matches) {
+			let match = controller.getValidMatch(matches);
+			session.dialogData.validation = controller.validatePlayers(result.p1, result.p2, session.userData.id, matches.size, match);
+
+			session.dialogData.match = match;
+
+			next();
+		});
+	} else {
+		next();
 	}
-	next();
+
 }
 
 function askForFirstScore(session, results, next) {
@@ -302,7 +311,7 @@ function respondFinalResult(session, results) {
 
 	if (result.p1 && result.p2 && result.s1 !== null && result.s2 !== null && validation.passed) {
 
-		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
+		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, session.dialogData.match, function(message, endResult) {
 			//check it created a result
 			if (endResult) {
 
