@@ -213,11 +213,12 @@ function getPlayer(player, failPrompt) {
 			let playerDocs = session.dialogData.playerDocs;
 			let result = session.dialogData.result;
 			result[player] = results.response;
+			result[player] = removeIllegalCharacters(result[player]);
 			checkForMe(player, result, session);
 
 			let playersFound = util.getPlayerFromArray(result[player], playerDocs);
 
-			session.dialogData.validation = controller.validatePlayer(playersFound);
+			session.dialogData.validation = controller.validatePlayer(playersFound, failPrompt);
 
 			if (session.dialogData.validation.passed) {
 				result[player] = playersFound[0];
@@ -335,4 +336,8 @@ function respondFinalResult(session, results) {
 		session.send(prompts.error);
 	}
 	session.endDialog();
+}
+
+function removeIllegalCharacters(str) {
+	return str.replace(/<|@|>/g, '');
 }
