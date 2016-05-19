@@ -12,6 +12,20 @@ class Controller {
 
     }
 
+    validatePlayer(playersFound, notFoundPrompt) {
+        let pass = true;
+        let errorMessage = '';
+        if (playersFound.length === 0) {
+            pass = false;
+            errorMessage = notFoundPrompt;
+        } else if (playersFound.length > 1) {
+            pass = false;
+            errorMessage = prompts.tooManyPlayersFound;
+        }
+
+        return {passed: pass, message: errorMessage};
+    }
+
     validatePlayers(player1Doc, player2Doc, myID) {
         let pass = true;
         let errorMessage = '';
@@ -161,10 +175,10 @@ class Controller {
 
     getLeagueTable(callback) {
         var table = [];
-        DAO.getInstance().getAllPlayers(function(allPlayers) {
-            let players = allPlayers
-            DAO.getInstance().getResults(null, null, null, function(allResults) {
-                let results = allResults;
+        DAO.getInstance().getAllPlayers(function(players) {
+
+            DAO.getInstance().getResults(null, null, null, function(results) {
+
                 players.forEach(function(player) {
                     let thisPlayer = {
                         id: player._id,
@@ -178,12 +192,12 @@ class Controller {
                     };
                     results.forEach(function(result) {
                         if (player._id.equals(result.winner._id)) {
-                            thisPlayer.won ++;
+                            thisPlayer.won++;
                             thisPlayer.for += result.winnerScore;
                             thisPlayer.against += result.loserScore;
                         }
                         else if (player._id.equals(result.loser._id)) {
-                            thisPlayer.lost ++;
+                            thisPlayer.lost++;
                             thisPlayer.for += result.loserScore;
                             thisPlayer.against += result.winnerScore;
                         }

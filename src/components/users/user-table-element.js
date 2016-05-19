@@ -9,7 +9,7 @@ var UserTableElement = React.createClass({
 			'table-row': true,
 			[`table-${this.props.rowType}`]: true,
 			[`${this.props.group}`]: this.props.group,
-			'grouped': !this.props.grouped
+			'consolidated': !this.props.grouped
 		});
 		return (
 			<div className={rowClass}>

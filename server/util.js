@@ -44,17 +44,17 @@ module.exports = {
     },
 
     getPlayerFromArray: function(searchTerm, array) {
-        let playerDoc = null;
+        let playersFound = [];
 
-        if (searchTerm) {
+        if (searchTerm && searchTerm !== '') {
             array.forEach(function(document) {
-                if (document.country === searchTerm || document.slackID === searchTerm || document.slackCode === searchTerm) {
-                    playerDoc = document;
+                if (document.country.indexOf(searchTerm) > -1 || document.slackID === searchTerm || document.slackCode === searchTerm.toUpperCase()) {
+                    playersFound.push(document);
                 }
             });
         }
 
-        return playerDoc;
+        return playersFound;
     },
 
     convertWordToNumber(word) {

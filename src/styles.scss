@@ -1,7 +1,7 @@
 .table {
 	display: flex;
 	flex-flow: column wrap;
-	width: 450px
+	width: 450px;
 }
 .table-row {
 	display: flex;
@@ -20,28 +20,28 @@
 		padding: 2px;
 	}
 	&.a {
-		order: 1
+		order: 1;
 	}
 	&.b {
-		order: 2
+		order: 2;
 	}
 	&.c {
-		order: 3
+		order: 3;
 	}
 	&.d {
-		order: 4
+		order: 4;
 	}
 	&.e {
-		order: 5
+		order: 5;
 	}
 	&.f {
-		order: 6
+		order: 6;
 	}
 	&.g {
-		order: 7
+		order: 7;
 	}
 	&.h {
-		order: 8
+		order: 8;
 	}
 }
 
@@ -50,7 +50,7 @@
 	text-transform: uppercase;
 }
 
-.table-row.grouped {
+.table-row.consolidated {
 	order: 0;
 }
 .table-row.table-group-header {

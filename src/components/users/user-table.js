@@ -23,11 +23,14 @@ var UserTable = React.createClass({
 			return response.json()
 		}).then(function(data) {
 			data.sort(function(a,b) {
-				let win = b.won - a.won;
-				if(win) return win;
-				let scored = b.for - a.for;
-				if(scored) return scored;
-				return b.against - a.against;
+				let diff = b.won - a.won;
+				if(diff === 0) {
+					diff = b.for - a.for;
+					if (diff === 0) {
+						diff = b.against - a.against;
+					}
+				}
+				return diff;			
 			});
 			this.setState({users: data});
 		}.bind(this)).catch(function(ex) {
