@@ -170,6 +170,7 @@ class Controller {
                         id: player._id,
                         country: capitaliseWords(player.country),
                         slackId: player.slackID,
+                        group: player.group,
                         won: 0,
                         lost: 0,
                         for: 0,

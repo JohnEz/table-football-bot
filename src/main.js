@@ -2,8 +2,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import UserTable from './components/user-table';
+import UserTable from './components/users/user-table';
 import ResultTable from './components/result-table';
+
+require('./styles.scss');
 
 let App = React.createClass({
     render() {

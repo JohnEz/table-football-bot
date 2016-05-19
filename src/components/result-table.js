@@ -23,6 +23,7 @@ var ResultTable = React.createClass({
 		this.loadResultsFromServer();
 	},
 	render: function() {
+		var table = <p>No-one has played a game yet</p>;
 		var rows = [];
 		if(this.state.results.length > 0 ) {
 			this.state.results.forEach(function(result) {
@@ -35,10 +36,7 @@ var ResultTable = React.createClass({
 					</tr>
 				)
 			});
-		}
-		return (
-			<div className='results'>
-				<h2>Results</h2>
+			table = (
 				<table>
 					<thead>
 						<tr>
@@ -52,6 +50,13 @@ var ResultTable = React.createClass({
 						{rows}
 					</tbody>
 				</table>
+			)
+
+		}
+		return (
+			<div className='results'>
+				<h2>Results</h2>
+				{table}
 
 
 			</div>
