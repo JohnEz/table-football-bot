@@ -5,10 +5,88 @@ const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
 const util = require('../util');
+const Reminder = require('reminder');
+const remind = new Reminder();
 
 class Controller {
     constructor() {
 
+    }
+
+    setupReminders(slackBot){
+        remind.every('09:00', function(date) {
+
+            console.log('<-- Sending reminders -->');
+
+            this.getMatchesToBePlayed(date, function(matches) {
+
+                matches.today.forEach(function(match) {
+                    if (match.team1.slackCode) {
+                        let slackName = this.getSlackHandle(match.team2);
+
+                        slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { country: match.team2.country, slackHandle: slackName });
+    				}
+
+                    if (match.team2.slackCode) {
+                        let slackName = this.getSlackHandle(match.team1);
+
+                        slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { country: match.team2.country, slackHandle: slackName });
+                    }
+                }.bind(this));
+
+                matches.overdue.forEach(function(match) {
+                    if (match.team1.slackCode) {
+                        let slackName = this.getSlackHandle(match.team2);
+
+                        slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { country: match.team2.country, slackHandle: slackName });
+                    }
+
+                    if (match.team2.slackCode) {
+                        let slackName = this.getSlackHandle(match.team1);
+
+                        slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { country: match.team2.country, slackHandle: slackName });
+                    }
+                }.bind(this));
+
+                console.log('<-- Reminders sent -->');
+
+            }.bind(this));
+        }.bind(this));
+    }
+
+    getMatchesToBePlayed(date, callback) {
+        DAO.getInstance().getAllMatches(function(matchesMap) {
+
+            let todaysGames = [];
+            let overdueGames = [];
+
+            matchesMap.forEach(function(match) {
+
+                //if it has a date set, and no results given
+                if (match.date && !match.result) {
+
+                    //check if its meant to be played today
+                    if (match.date.getDay() === date.getDay() && match.date.getMonth() === date.getMonth()) {
+                        todaysGames.push(match);
+                    } else if ( match.date.getMonth() < date.getMonth() || (match.date.getDay() < date.getDay() && match.date.getMonth() === date.getMonth()) ) {
+                        // if its not meant to be played today, check if it was last month or earlier this month
+                        overdueGames.push(match);
+                    }
+                }
+
+            });
+
+            callback( { today: todaysGames, overdue: overdueGames } );
+        });
+    }
+
+    getSlackHandle(player) {
+        let slackName = `(@${player.slackID})`;
+        if (player.slackCode) {
+            slackName = `(<@${player.slackCode}>)`;
+        }
+
+        return slackName;
     }
 
     validatePlayer(playersFound, notFoundPrompt) {
@@ -293,12 +371,12 @@ class Controller {
         this.addMatch('spain', 'turkey');
 
         //group E
-        this.addMatch('belgium', 'italy');
+        this.addMatch('belgium', 'italy', new Date('2016-05-21'));
         this.addMatch('belgium', 'republic of ireland');
-        this.addMatch('belgium', 'sweden');
-        this.addMatch('italy', 'republic of ireland');
-        this.addMatch('italy', 'sweden');
-        this.addMatch('republic of ireland', 'sweden');
+        this.addMatch('belgium', 'sweden', new Date('2016-05-19'));
+        this.addMatch('italy', 'republic of ireland', new Date('2016-05-19'));
+        this.addMatch('italy', 'sweden', new Date('2016-05-20'));
+        this.addMatch('republic of ireland', 'sweden', new Date('2016-05-21'));
 
         //group F
         this.addMatch('austria', 'hungary');
@@ -326,7 +404,7 @@ class Controller {
     }
 
     //temp method to add scheduled matches
-    addMatch(team1, team2) {
+    addMatch(team1, team2, date) {
 
         this.getAllPlayers(function(playerDocs) {
 
@@ -334,7 +412,7 @@ class Controller {
             let team1Doc = util.getPlayerFromArray(team1, playerDocs);
             let team2Doc = util.getPlayerFromArray(team2, playerDocs);
 
-            DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, function(added) {
+            DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, function(added) {
 
             });
 

@@ -44,5 +44,7 @@ module.exports = {
         'You lost to %(country)s, and quite badly too.  Maybe you need more practice.',
         '10-0. Were you even trying?'
     ],
-    result: 'Result just in: \n %(result)s'
+    result: 'Result just in: \n %(result)s',
+    matchToday: 'You have a match against %(country)s %(slackHandle)s scheduled for today',
+    matchOverdue: 'You have a match against %(country)s %(slackHandle)s that is overdue'
 }
