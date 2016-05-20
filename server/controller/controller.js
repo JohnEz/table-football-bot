@@ -55,7 +55,7 @@ class Controller {
     }
 
     getMatchesToBePlayed(date, callback) {
-        DAO.getInstance().getAllMatches(function(matchesMap) {
+        DAO.getInstance().getMatches(null, null, function(matchesMap) {
 
             let todaysGames = [];
             let overdueGames = [];
