@@ -27,7 +27,10 @@ var ResultTable = React.createClass({
 
 		return (
 			<div className='results'>
-				<h2>Results</h2>
+				<div className='section-header'>
+					<h2>Results</h2>
+				</div>
+
 				<div className="table">
 					{
 						this.state.results.map(function(day) {
