@@ -24,6 +24,7 @@ module.exports = {
     databaseError: 'There was a database error, please contact @amjones',
     getFirstTeam:'Sorry who was the first team?',
     getSecondTeam: 'Who was the second team?',
+    noGames: 'erm... you have played all your games',
     defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
     hello: [
         'Welcome to the Thunderdome',
@@ -45,6 +46,6 @@ module.exports = {
         '10-0. Were you even trying?'
     ],
     result: 'Result just in: \n %(result)s',
-    matchToday: 'You have a match against %(country)s %(slackHandle)s scheduled for today',
-    matchOverdue: 'You have a match against %(country)s %(slackHandle)s that is overdue'
+    matchToday: 'You have a match against %(opponent)s scheduled for today',
+    matchOverdue: 'You have a match against %(opponent)s that is overdue'
 }
