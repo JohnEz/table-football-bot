@@ -62,4 +62,5 @@ DAO.getInstance().init(function() {
     //run this code if the database was successfully setup
     console.log('Database setup complete');
     slackbot.startBot();
+    controller.setupReminders(slackbot);
 });

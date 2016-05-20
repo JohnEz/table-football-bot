@@ -175,10 +175,10 @@ class DAO {
 		);
 	}
 
-	addMatch(team1ID, team2ID, callback) {
+	addMatch(team1ID, team2ID, scheduledDate, callback) {
 		let collection = this.db.collection(matchesCollection);
 
-		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'result': null }, function(err) {
+		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null }, function(err) {
 
 			if (err) {
 				console.log(err);
@@ -191,21 +191,36 @@ class DAO {
 	getMatches(team1ID, team2ID, callback) {
 		let collection = this.db.collection(matchesCollection);
 		let matchesMap = new Map();
-		let query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
+		let query = {};
 
-		collection.find(query).each(function(err, doc) {
-
-			if (err) {
-				callback(null, err);
-				console.log('Error in getMatches:', err);
-			} else if (doc) {
-				matchesMap.set(JSON.stringify(doc._id), doc);
+		if (team1ID) {
+			if(team2ID) {
+				query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
 			} else {
-				callback(matchesMap);
+				query = { $or: [ { team1 : team1ID }, { team1 : team2ID } ] };
 			}
+		}
+		//get the players
+		this.getAllPlayers(function(playersMap, err) {
+			collection.find(query).each(function(err, doc) {
 
+				if (err) {
+					callback(null, err);
+					console.log('Error in getMatches:', err);
+				} else if (doc) {
+
+					doc.team1 = playersMap.get(JSON.stringify(doc.team1));
+					doc.team2 = playersMap.get(JSON.stringify(doc.team2));
+
+					matchesMap.set(JSON.stringify(doc._id), doc);
+				} else {
+					callback(matchesMap);
+				}
+
+			});
 		});
 	}
+
 }
 
 let _dao = new DAO();
