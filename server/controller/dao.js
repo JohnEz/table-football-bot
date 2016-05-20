@@ -191,34 +191,22 @@ class DAO {
 	getMatches(team1ID, team2ID, callback) {
 		let collection = this.db.collection(matchesCollection);
 		let matchesMap = new Map();
-		let query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
+		let query = {};
 
-		collection.find(query).each(function(err, doc) {
-
-			if (err) {
-				callback(null, err);
-				console.log('Error in getMatches:', err);
-			} else if (doc) {
-				matchesMap.set(JSON.stringify(doc._id), doc);
+		if (team1ID) {
+			if(team2ID) {
+				query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
 			} else {
-				callback(matchesMap);
+				query = { $or: [ { team1 : team1ID }, { team1 : team2ID } ] };
 			}
-
-		});
-	}
-
-	getAllMatches(callback) {
-		let collection = this.db.collection(matchesCollection);
-		let matchesMap = new Map();
-
+		}
 		//get the players
 		this.getAllPlayers(function(playersMap, err) {
-
-			collection.find().each(function(err, doc) {
+			collection.find(query).each(function(err, doc) {
 
 				if (err) {
 					callback(null, err);
-					console.log('Error in getAllMatches:', err);
+					console.log('Error in getMatches:', err);
 				} else if (doc) {
 
 					doc.team1 = playersMap.get(JSON.stringify(doc.team1));
@@ -232,6 +220,7 @@ class DAO {
 			});
 		});
 	}
+
 }
 
 let _dao = new DAO();
