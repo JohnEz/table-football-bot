@@ -33,6 +33,12 @@ const common = {
 				test: /\.scss$/,
 				loaders: ['style', 'css', 'sass'],
 				include: path.resolve(__dirname, 'src')
+			},
+			{
+				test: /\.jpg$/,
+				loader: 'url-loader',
+				include: path.resolve(__dirname, 'src/img'),
+				query: { mimetype: 'image/jpg' }
 			}
 		]
 	},

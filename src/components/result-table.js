@@ -1,6 +1,7 @@
 'use strict';
 
 import React from 'react';
+import MatchDay from './matches/match-day.js';
 
 var ResultTable = React.createClass({
 	getInitialState: function() {
@@ -23,42 +24,23 @@ var ResultTable = React.createClass({
 		this.loadResultsFromServer();
 	},
 	render: function() {
-		var table = <p>No-one has played a game yet</p>;
-		var rows = [];
-		if(this.state.results.length > 0 ) {
-			this.state.results.forEach(function(result) {
-				rows.push(
-					<tr key={result.id}>
-						<td>{result.winner}</td>
-						<td>{result.winScore}</td>
-						<td>{result.loseScore}</td>
-						<td>{result.loser}</td>
-					</tr>
-				)
-			});
-			table = (
-				<table>
-					<thead>
-						<tr>
-							<th>Winner</th>
-							<th></th>
-							<th></th>
-							<th>Loser</th>
-						</tr>
-					</thead>
-					<tbody>
-						{rows}
-					</tbody>
-				</table>
-			)
 
-		}
 		return (
 			<div className='results'>
 				<h2>Results</h2>
-				{table}
-
-
+				<div className="table">
+					{
+						this.state.results.map(function(day) {
+							return (
+								<MatchDay
+									key={`result-${day.date}`}
+									day = {day.date}
+									results = {day.results}
+									/>
+							);
+						})
+					}
+				</div>
 			</div>
 		);
 	}

@@ -4,6 +4,7 @@ const prompts = require('../prompts.js')
 const MAXSCORE = require('../config').maxScore;
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
+const moment = require('moment');
 const util = require('../util');
 const Reminder = require('reminder');
 const remind = new Reminder();
@@ -295,18 +296,26 @@ class Controller {
     getResultsTable(callback) {
         DAO.getInstance().getResults(null, null, null, function(results, err) {
             if (!err) {
-                let res = [];
+                let days = new Map();
                 results.forEach(function(result) {
-                    res.push({
+                    let day = moment(result.date).format('YYYY-MM-DD');
+                    let res = {
                         id: result._id,
                         winner: util.capitaliseWords(result.winner.country),
                         loser:  util.capitaliseWords(result.loser.country),
                         winScore: result.winnerScore,
-                        loseScore: result.loserScore
-                    })
-                });
+                        loseScore: result.loserScore,
+                    }
 
-                callback(res);
+                    if(days.has(day)){
+                        days.get(day).results.push(res);
+                    }
+                    else {
+                        days.set(day, {date: day, results: [res]})
+                    }
+
+                })
+                callback([...days.values()]);
             } else {
                 callback([], err);
             }
