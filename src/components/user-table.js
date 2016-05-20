@@ -10,7 +10,7 @@ var UserTable = React.createClass({
 	getInitialState: function() {
 		return {
 			users: [],
-			grouped: true
+			grouped: false
 		}
 	},
 	handleGroupToggle: function() {
@@ -44,47 +44,53 @@ var UserTable = React.createClass({
 		let groups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 		let users = this.state.users;
 		return (
-			<div className="table">
-				<ToggleSwitch
-				 	toggle = {this.handleGroupToggle}
-					grouped = {this.state.grouped}
-					/>
-				<h2>User Tables</h2>
-				<UserTableElement
-					rowType = 'header'
-					country = 'Country'
-					slack = 'Slack ID'
-					won = 'W'
-					lost = 'L'
-					scored = 'F'
-					against = 'A'
-
-				/>
-				{groups.map(function(group) {
-					return (
-						<TableGroupHeader
-							key={`group ${group}`}
-						 	group = {group}
-							grouped = {this.state.grouped}
-							/>
-					)
-				}.bind(this))}
-				{users.map(function(user) {
-					return (
-						<UserTableElement
-							key={user.id}
-							rowType = 'body'
-							country = {user.country}
-							slack = {'@' + user.slackId}
-							won = {user.won}
-							lost = {user.lost}
-							scored = {user.for}
-							against = {user.against}
-							group = {user.group}
-							grouped = {this.state.grouped}
+			<div className="user-leagues">
+				<div className="section-header">
+					<h2>League Tables</h2>
+					<ToggleSwitch
+						toggle = {this.handleGroupToggle}
+						grouped = {this.state.grouped}
 						/>
-					)
-				}.bind(this))}
+				</div>
+				<div className='table'>
+					<UserTableElement
+						rowType = 'header'
+						country = 'Country'
+						slack = 'Slack ID'
+						won = 'W'
+						lost = 'L'
+						scored = 'F'
+						against = 'A'
+
+						/>
+					<div className="table-content">
+						{groups.map(function(group) {
+							return (
+								<TableGroupHeader
+									key={`group ${group}`}
+									group = {group}
+									grouped = {this.state.grouped}
+									/>
+							)
+						}.bind(this))}
+						{users.map(function(user) {
+							return (
+								<UserTableElement
+									key={user.id}
+									rowType = 'body'
+									country = {user.country}
+									slack = {'@' + user.slackId}
+									won = {user.won}
+									lost = {user.lost}
+									scored = {user.for}
+									against = {user.against}
+									group = {user.group}
+									grouped = {this.state.grouped}
+									/>
+							)
+						}.bind(this))}
+					</div>
+					</div>
 
 			</div>
 		)

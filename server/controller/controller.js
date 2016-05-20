@@ -298,7 +298,7 @@ class Controller {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {
-                    let day = moment(result.date).format('DD/MM/YYYY');
+                    let day = moment(result.date).format('YYYY-MM-DD');
                     let res = {
                         id: result._id,
                         winner: util.capitaliseWords(result.winner.country),
