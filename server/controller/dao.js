@@ -175,10 +175,10 @@ class DAO {
 		);
 	}
 
-	addMatch(team1ID, team2ID, callback) {
+	addMatch(team1ID, team2ID, scheduledDate, callback) {
 		let collection = this.db.collection(matchesCollection);
 
-		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'result': null }, function(err) {
+		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null }, function(err) {
 
 			if (err) {
 				console.log(err);
@@ -204,6 +204,32 @@ class DAO {
 				callback(matchesMap);
 			}
 
+		});
+	}
+
+	getAllMatches(callback) {
+		let collection = this.db.collection(matchesCollection);
+		let matchesMap = new Map();
+
+		//get the players
+		this.getAllPlayers(function(playersMap, err) {
+
+			collection.find().each(function(err, doc) {
+
+				if (err) {
+					callback(null, err);
+					console.log('Error in getAllMatches:', err);
+				} else if (doc) {
+
+					doc.team1 = playersMap.get(JSON.stringify(doc.team1));
+					doc.team2 = playersMap.get(JSON.stringify(doc.team2));
+
+					matchesMap.set(JSON.stringify(doc._id), doc);
+				} else {
+					callback(matchesMap);
+				}
+
+			});
 		});
 	}
 }

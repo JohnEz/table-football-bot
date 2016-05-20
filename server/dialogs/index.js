@@ -82,7 +82,11 @@ dialog.on('ListResults', [
 dialog.on('WhoIs', function(session, args) {
 	let user = builder.EntityRecognizer.findEntity(args.entities, 'player');
 	if (user) {
-		controller.getPlayer(user.entity, function(player) {
+		controller.getAllPlayers(function(allPlayers) {
+
+			let playersFound = util.getPlayerFromArray(user.entity, allPlayers);
+			let player = playersFound[0];
+
 			if (player) {
 				let slack = player.slackCode ? player.slackCode : player.slackID
 				session.send(`<@${slack}> plays as ${player.country}`);
