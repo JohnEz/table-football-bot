@@ -167,53 +167,68 @@ class Controller {
         return {passed: pass, message: errorMessage};
     }
 
-    validateScores(score1, score2) {
+    validateScores(score1, score2, win, loss, draw) {
         let pass = true;
         let errorMessage = '';
 
         score1 = parseInt(score1);
         score2 = parseInt(score2);
 
+        if (win || loss) {
+            //scores cannot be equal
+            if(score1 === score2) {
+                errorMessage = prompts.cannotBeEqualScores;
+                pass = false;
+            }
+        } else if (draw) {
+            if(score1 !== score2) {
+                errorMessage = prompts.shouldHaveSameScore;
+                pass = false;
+            }
+        }
+
         return {passed: pass, message: errorMessage};
     }
 
-    submitResult(player1, player2, score1, score2, win, loss, match, callback) {
+    submitResult(player1, player2, score1, score2, win, loss, draw, match, callback) {
 
         let intScoreLeft = parseInt(score1);
         let intScoreRight = parseInt(score2);
+        let playersSwitched = false;
 
-        //if they said loss OR they didnt specify but the right team had a higher score
-        if (loss || (!loss && !win && intScoreRight > intScoreLeft)) {
+        //if player 1 is not the player 1 of the match
+        if (player1 !== match.player1) {
             //swap the players
             let storePlayer = player2;
             player2 = player1;
             player1 = storePlayer;
+            playersSwitched = true;
         }
 
-        //the winner will be player1 and loser player 2
-        //so make sure that the scores reflect that
-        if (intScoreRight > intScoreLeft) {
+        let leftScoreIsBigger = intScoreLeft > intScoreRight;
+
+        //if the scores need to be switched
+        if (((leftScoreIsBigger === playersSwitched) && win) ||
+        ((leftScoreIsBigger !== playersSwitched) && loss) ||
+        (!win && !loss && playersSwitched)) {
             let storeScore = intScoreRight;
             intScoreRight = intScoreLeft;
             intScoreLeft = storeScore;
         }
 
-        let intScoreWinner = intScoreLeft;
-        let intScoreLoser = intScoreRight;
-
         //atempt to add the results
-        DAO.getInstance().addResult(player1._id, player2._id, intScoreWinner, intScoreLoser, match, function(added) {
+        DAO.getInstance().addResult(player1._id, player2._id, intScoreLeft, intScoreRight, match, function(added) {
             //if the results were added successfully
             if (added) {
-                let winnerString = this.convertPlayerToString(player1);
-                let loserString = this.convertPlayerToString(player2);
+                let player1String = this.convertPlayerToString(player1);
+                let player2String = this.convertPlayerToString(player2);
 
                 let result = {
-                    winner: player1,
-                    loser: player2,
-                    winnerScore: intScoreWinner,
-                    loserScore: intScoreLoser,
-                    toString: util.createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
+                    player1: player1,
+                    player2: player2,
+                    score1: intScoreLeft,
+                    score2: intScoreRight,
+                    toString: util.createResultString(player1String, player2String, intScoreLeft, intScoreRight)
                 };
 
                 //return the added message
@@ -241,8 +256,8 @@ class Controller {
                 if (!err) {
 
                     results.forEach(function(result) {
-                        result.winner = this.convertPlayerToString(result.winner);
-                        result.loser = this.convertPlayerToString(result.loser);
+                        result.player1 = this.convertPlayerToString(result.player1);
+                        result.player2 = this.convertPlayerToString(result.player2);
                     }.bind(this));
 
                     callback(results, null);
@@ -280,32 +295,25 @@ class Controller {
             DAO.getInstance().getResults(null, null, null, function(results) {
 
                     results.forEach(function(result) {
-                        let winner = allPlayers.get(JSON.stringify(result.winner._id));
-                        let loser = allPlayers.get(JSON.stringify(result.loser._id));
-                        if (result.winnerScore > result.loserScore) {
-                            winner.won++;
-                            winner.for += result.winnerScore;
-                            winner.against += result.loserScore;
-                            loser.lost++;
-                            loser.for += result.loserScore;
-                            loser.against += result.winnerScore;
+                        let player1 = allPlayers.get(JSON.stringify(result.player1._id));
+                        let player2 = allPlayers.get(JSON.stringify(result.player2._id));
+                        if (result.score1 > result.score2) {
+                            player1.won++;
+                            player2.lost++;
                         }
-                        else if (result.winnerScore < result.loserScore) {
-                            loser.won++;
-                            loser.for += result.winnerScore;
-                            loser.against += result.loserScore;
-                            winner.lost++;
-                            winner.for += result.loserScore;
-                            winner.against += result.winnerScore;
+                        else if (result.score1 < result.score2) {
+                            player2.won++;
+                            player1.lost++;
                         }
                         else {
-                            winner.draw++;
-                            winner.for += result.winnerScore;
-                            winner.against += result.loserScore;
-                            loser.draw++;
-                            loser.for += result.loserScore;
-                            loser.against += result.winnerScore;
+                            player1.draw++;
+                            player2.draw++;
                         }
+
+                        player1.for += result.score1;
+                        player1.against += result.score2;
+                        player2.for += result.score2;
+                        player2.against += result.score1;
 
                     });
                 callback([...allPlayers.values()]);
@@ -321,10 +329,10 @@ class Controller {
                     let day = moment(result.date).format('YYYY-MM-DD');
                     let res = {
                         id: result._id,
-                        winner: result.winner.country,
-                        loser:  result.loser.country,
-                        winScore: result.winnerScore,
-                        loseScore: result.loserScore,
+                        player1: result.player1.country,
+                        player2:  result.player2.country,
+                        winScore: result.score1,
+                        loseScore: result.score2,
                     };
 
                     if(days.has(day)){
@@ -360,8 +368,8 @@ class Controller {
         DAO.getInstance().addUsers(users);
     }
 
-    checkScoreDifference(winnerScore, loserScore) {
-        let difference = Math.abs(winnerScore - loserScore);
+    checkScoreDifference(score1, score2) {
+        let difference = Math.abs(score1 - score2);
 
         return difference;
     }

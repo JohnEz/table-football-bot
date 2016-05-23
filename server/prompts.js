@@ -19,6 +19,8 @@ module.exports = {
     allMatchesHaveResults: 'All matches between these teams already have results',
     notOwner: 'Only people that played in the game can add results',
     negativeScore: 'Scores should be greater than 0',
+    shouldHaveSameScore: 'If the game was a draw, the scores should be the same',
+    cannotBeEqualScores: 'if someone won the game, one score must be higher than the other',
     twoMaxScores: 'Only one score should be ',
     databaseError: 'There was a database error, please contact @amjones',
     getFirstTeam:'Sorry who was the first team?',
