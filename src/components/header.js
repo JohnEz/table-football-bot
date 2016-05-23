@@ -8,7 +8,7 @@ var Header = React.createClass({
 
 		return (
 			<header>
-				<h1>Scott Logic Table Football Bot</h1>
+				<h1><span className="sl">Scott <span className="logic">Logic</span></span> Euro 2016 Foosball</h1>
 			</header>
 		);
 	}
