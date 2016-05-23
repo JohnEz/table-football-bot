@@ -1,4 +1,10 @@
-html:before {
+@import 'mixins';
+
+html {
+	background-color: #000;
+}
+
+body::before {
 	content: " ";
 	position: absolute;
 	top: 0;
@@ -6,16 +12,10 @@ html:before {
 	right: 0;
 	left: 0;
 	background: url('./img/background.jpg') top left repeat scroll;
-	z-index: -1;
-	-webkit-filter: blur(5px);
-	-moz-filter: blur(5px);
-	-o-filter: blur(5px);
-	-ms-filter: blur(5px);
-	filter: blur(5px);
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-	background-size: cover;
+	background-attachment: fixed;
+	@include coverBackground();
+	@include blur(5px);
+	z-index: -150;
 }
 
 html, body, #app {
@@ -26,7 +26,6 @@ html, body, #app {
 	margin: 0;
 	padding: 0;
 	font-family: Segoe UI,Frutiger,Frutiger Linotype,Dejavu Sans,Helvetica Neue,Arial,sans-serif;
-	//background-color: #D0D0D0;
 }
 
 .app {
@@ -36,6 +35,19 @@ html, body, #app {
 	position: relative;
 	background-color: rgba(236, 236, 236, 0.9);
 
+}
+
+#video-background {
+/*  making the video fullscreen  */
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  min-width: 100%;
+  min-height: 100%;
+  width: auto;
+  height: auto;
+  z-index: -100;
+  @include blur(5px);
 }
 
 header {
