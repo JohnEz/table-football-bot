@@ -19,33 +19,25 @@ class Controller {
 
             console.log('<-- Sending reminders -->');
 
-            this.getMatchesToBePlayed(date, function(matches) {
+            this.getMatchesToBePlayed(date, null, null, function(matches) {
 
                 matches.today.forEach(function(match) {
                     if (match.team1.slackCode) {
-                        let slackName = this.getSlackHandle(match.team2);
-
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { country: match.team2.country, slackHandle: slackName });
+                        slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
     				}
 
                     if (match.team2.slackCode) {
-                        let slackName = this.getSlackHandle(match.team1);
-
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { country: match.team2.country, slackHandle: slackName });
+                        slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
                     }
                 }.bind(this));
 
                 matches.overdue.forEach(function(match) {
                     if (match.team1.slackCode) {
-                        let slackName = this.getSlackHandle(match.team2);
-
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { country: match.team2.country, slackHandle: slackName });
+                        slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
                     }
 
                     if (match.team2.slackCode) {
-                        let slackName = this.getSlackHandle(match.team1);
-
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { country: match.team2.country, slackHandle: slackName });
+                        slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
                     }
                 }.bind(this));
 
@@ -55,30 +47,36 @@ class Controller {
         }.bind(this));
     }
 
-    getMatchesToBePlayed(date, callback) {
-        DAO.getInstance().getMatches(null, null, function(matchesMap) {
+    getMatchesToBePlayed(date, team1, team2, callback) {
+
+        DAO.getInstance().getMatches(team1, team2, function(matchesMap) {
 
             let todaysGames = [];
             let overdueGames = [];
+            let upcomingGames = [];
 
             matchesMap.forEach(function(match) {
 
                 //if it has a date set, and no results given
                 if (match.date && !match.result) {
 
+                    let whenToPlay = this.compareMatchDate(date, match);
+
                     //check if its meant to be played today
-                    if (match.date.getDay() === date.getDay() && match.date.getMonth() === date.getMonth()) {
+                    if (whenToPlay === 0) {
                         todaysGames.push(match);
-                    } else if ( match.date.getMonth() < date.getMonth() || (match.date.getDay() < date.getDay() && match.date.getMonth() === date.getMonth()) ) {
+                    } else if ( whenToPlay === -1 ) {
                         // if its not meant to be played today, check if it was last month or earlier this month
                         overdueGames.push(match);
+                    } else {
+                        upcomingGames.push(match);
                     }
                 }
 
-            });
+            }.bind(this));
 
-            callback( { today: todaysGames, overdue: overdueGames } );
-        });
+            callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames } );
+        }.bind(this));
     }
 
     getSlackHandle(player) {
@@ -88,6 +86,27 @@ class Controller {
         }
 
         return slackName;
+    }
+
+    //returns -1 (overdue), 0 (today), 1 (upcoming)
+    compareMatchDate(date, match) {
+        let outcome = 1;
+
+        //check if its meant to be played today
+        if (match.date.getDate() === date.getDate() && match.date.getMonth() === date.getMonth()) {
+            outcome = 0;
+        } else if ( match.date.getMonth() < date.getMonth() || (match.date.getDate() < date.getDate() && match.date.getMonth() === date.getMonth()) ) {
+            // if its not meant to be played today, check if it was last month or earlier this month
+            outcome = -1;
+        }
+
+        return outcome;
+    }
+
+    getMyMatches(id, callback) {
+        DAO.getInstance().getPlayer(id, function(player) {
+            this.getMatchesToBePlayed(new Date(), player._id, null, callback);
+        }.bind(this));
     }
 
     validatePlayer(playersFound, notFoundPrompt) {

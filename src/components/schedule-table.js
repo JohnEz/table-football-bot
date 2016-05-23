@@ -16,7 +16,7 @@ var ScheduleTable = React.createClass({
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({today: data.today, overdue: data.overdue});
+			this.setState({today: data.today, overdue: data.overdue, upcoming: data.upcoming});
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});

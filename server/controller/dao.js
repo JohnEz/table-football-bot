@@ -197,7 +197,7 @@ class DAO {
 			if(team2ID) {
 				query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
 			} else {
-				query = { $or: [ { team1 : team1ID }, { team1 : team2ID } ] };
+				query = { $or: [ { team1 : team1ID }, { team2 : team1ID } ] };
 			}
 		}
 		//get the players

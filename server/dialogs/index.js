@@ -6,6 +6,7 @@ var config = require('../config');
 const util = require('../util');
 const Controller = require('../controller/controller');
 const slackBot = require('../slackbot');
+const moment = require('moment');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
 var model = process.env.model || config.luisToken;
@@ -48,7 +49,7 @@ dialog.on('ListResults', [
 		let request = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
-			limit: util.convertWordToNumber(limit.entity)
+			limit: limit ? util.convertWordToNumber(limit.entity) : null
 		};
 
 		checkForMe('p1', request, session);
@@ -101,6 +102,49 @@ dialog.on('WhoIs', function(session, args) {
 	}
 	session.endDialog()
 });
+
+/**shows upcoming matches to the user. */
+dialog.on('UpcomingMatches', function(session, args) {
+
+	controller.getMyMatches(session.userData.id, function(matches) {
+		let matchesString = '';
+
+		if(matches.overdue.length > 0) {
+			matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
+
+			matches.overdue.forEach(function(match) {
+				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was ${moment(match.date).format('dddd Do MMMM')}\n`;
+			});
+			matchesString = matchesString + '\n';
+		}
+
+		if (matches.today.length > 0) {
+			matchesString = matchesString + 'Today\'s games:\n';
+
+			matches.today.forEach(function(match) {
+				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
+			});
+			matchesString = matchesString + '\n';
+		}
+
+		if (matches.upcoming.length > 0) {
+			matchesString = matchesString + 'Upcoming games:\n';
+
+			matches.upcoming.forEach(function(match) {
+				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
+			});
+		}
+
+		if (matchesString === '') {
+			session.send(prompts.noGames);
+		} else {
+			session.send(matchesString);
+		}
+
+	});
+
+});
+
 
 function checkForMe(p, result, session) {
 	let player = result[p];

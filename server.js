@@ -45,7 +45,7 @@ app.get('/bot/users', function(req, res) {
 });
 
 app.get('/bot/schedule', function(req, res) {
-    controller.getMatchesToBePlayed(new Date(), function(data, err) {
+    controller.getMatchesToBePlayed(new Date(), null, null, function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);
