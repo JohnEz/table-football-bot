@@ -214,7 +214,7 @@ class Controller {
                     winnerScore: intScoreWinner,
                     loserScore: intScoreLoser,
                     toString: util.createResultString(winnerString, loserString, intScoreWinner, intScoreLoser)
-                }
+                };
 
                 //return the added message
                 callback(prompts.resultCreated, result);
@@ -265,35 +265,50 @@ class Controller {
     getLeagueTable(callback) {
         var table = [];
         DAO.getInstance().getAllPlayers(function(players) {
-
+            let allPlayers = players;
+            allPlayers.forEach(function(player) {
+                Object.assign(
+                    player,
+                    {
+                    won: 0,
+                    lost: 0,
+                    draw: 0,
+                    for: 0,
+                    against: 0
+                });
+            });
             DAO.getInstance().getResults(null, null, null, function(results) {
 
-                players.forEach(function(player) {
-                    let thisPlayer = {
-                        id: player._id,
-                        country: util.capitaliseWords(player.country),
-                        slackId: player.slackID,
-                        group: player.group,
-                        won: 0,
-                        lost: 0,
-                        for: 0,
-                        against: 0
-                    };
                     results.forEach(function(result) {
-                        if (player._id.equals(result.winner._id)) {
-                            thisPlayer.won++;
-                            thisPlayer.for += result.winnerScore;
-                            thisPlayer.against += result.loserScore;
+                        let winner = allPlayers.get(JSON.stringify(result.winner._id));
+                        let loser = allPlayers.get(JSON.stringify(result.loser._id));
+                        if (result.winnerScore > result.loserScore) {
+                            winner.won++;
+                            winner.for += result.winnerScore;
+                            winner.against += result.loserScore;
+                            loser.lost++;
+                            loser.for += result.loserScore;
+                            loser.against += result.winnerScore;
                         }
-                        else if (player._id.equals(result.loser._id)) {
-                            thisPlayer.lost++;
-                            thisPlayer.for += result.loserScore;
-                            thisPlayer.against += result.winnerScore;
+                        else if (result.winnerScore < result.loserScore) {
+                            loser.won++;
+                            loser.for += result.winnerScore;
+                            loser.against += result.loserScore;
+                            winner.lost++;
+                            winner.for += result.loserScore;
+                            winner.against += result.winnerScore;
                         }
+                        else {
+                            winner.draw++;
+                            winner.for += result.winnerScore;
+                            winner.against += result.loserScore;
+                            loser.draw++;
+                            loser.for += result.loserScore;
+                            loser.against += result.winnerScore;
+                        }
+
                     });
-                    table.push(thisPlayer);
-                });
-                callback(table);
+                callback([...allPlayers.values()]);
             });
         });
     }
@@ -306,25 +321,25 @@ class Controller {
                     let day = moment(result.date).format('YYYY-MM-DD');
                     let res = {
                         id: result._id,
-                        winner: util.capitaliseWords(result.winner.country),
-                        loser:  util.capitaliseWords(result.loser.country),
+                        winner: result.winner.country,
+                        loser:  result.loser.country,
                         winScore: result.winnerScore,
                         loseScore: result.loserScore,
-                    }
+                    };
 
                     if(days.has(day)){
                         days.get(day).results.push(res);
                     }
                     else {
-                        days.set(day, {date: day, results: [res]})
+                        days.set(day, {date: day, results: [res]});
                     }
 
-                })
+                });
                 callback([...days.values()]);
             } else {
                 callback([], err);
             }
-        })
+        });
     }
 
     convertPlayerToString(player) {

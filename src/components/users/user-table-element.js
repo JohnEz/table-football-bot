@@ -16,9 +16,12 @@ var UserTableElement = React.createClass({
 				<div className="col country">{this.props.country}</div>
 				<div className="col slack">{this.props.slack}</div>
 				<div className="col won">{this.props.won}</div>
+				<div className="col draw">{this.props.draw}</div>
 				<div className='col lost'>{this.props.lost}</div>
 				<div className="col for">{this.props.scored}</div>
 				<div className="col against">{this.props.against}</div>
+				<div className="col diff">{this.props.diff}</div>
+				<div className="col points">{this.props.points}</div>
 			</div>
 		);
 	}
