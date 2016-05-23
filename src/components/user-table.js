@@ -23,11 +23,11 @@ var UserTable = React.createClass({
 			return response.json()
 		}).then(function(data) {
 			data.sort(function(a,b) {
-				let diff = b.won - a.won;
+				let diff = (b.won*3 + b.draw) - (a.won*3 + a.draw);
 				if(diff === 0) {
-					diff = b.for - a.for;
+					diff = b.won - a.won;
 					if (diff === 0) {
-						diff = b.against - a.against;
+						diff = (b.for-b.against) - (a.for-a.against);
 					}
 				}
 				return diff;
@@ -58,9 +58,12 @@ var UserTable = React.createClass({
 						country = 'Country'
 						slack = 'Slack ID'
 						won = 'W'
+						draw = 'D'
 						lost = 'L'
 						scored = 'F'
 						against = 'A'
+						diff = 'GD'
+						points = 'Pts'
 
 						/>
 					<div className="table-content">
@@ -76,22 +79,24 @@ var UserTable = React.createClass({
 						{users.map(function(user) {
 							return (
 								<UserTableElement
-									key={user.id}
+									key={user._id}
 									rowType = 'body'
 									country = {user.country}
-									slack = {'@' + user.slackId}
+									slack = {'@' + user.slackID}
 									won = {user.won}
+									draw = {user.draw}
 									lost = {user.lost}
 									scored = {user.for}
 									against = {user.against}
+									diff = {user.for - user.against}
+									points = {user.won*3 + user.draw}
 									group = {user.group}
 									grouped = {this.state.grouped}
 									/>
 							)
 						}.bind(this))}
 					</div>
-					</div>
-
+				</div>
 			</div>
 		)
 	}

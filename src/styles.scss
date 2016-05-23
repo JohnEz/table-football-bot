@@ -34,7 +34,6 @@ html, body, #app {
 	margin: 0 auto;
 	position: relative;
 	background-color: rgba(236, 236, 236, 0.9);
-
 }
 
 #video-background {
@@ -77,10 +76,7 @@ header {
 	bottom:0;
 	display: flex;
 	justify-content: space-around;
-
 }
-
-
 
 .col-right {
 	display:flex;
@@ -107,20 +103,14 @@ header {
 		flex-direction: column;
 		align-items: center;
 	}
-
-
 }
-
-
-
-
 
 /// TABLE DISPLAY ///
 
 .table-content, .table {
 	display: flex;
 	flex-flow: column wrap;
-	width: 450px;
+	width: 470px;
 }
 
 .table-row {
@@ -128,16 +118,16 @@ header {
 	display: flex;
 	flex-flow: row nowrap;
 	justify-content: space-between;
-	padding: 2px;
+	padding: 2px 5px 2px 5px;
 	border-bottom: 1px solid #D0D0D0;
 	background-color: #B4CCAF;
 
-
-	.against, .for, .won, .lost {
-		width: 15px
+	.won, .draw, .lost, .for, .against, .diff, .points, .score {
+		width: 20px;
+		text-align: right;
 	}
 	.slack {
-		width: 100px;
+		width: 85px;
 	}
 	.country {
 		width: 170px;
@@ -145,6 +135,7 @@ header {
 	}
 	&.col {
 		padding: 2px;
+
 	}
 	&.a {
 		order: 1;
@@ -190,11 +181,14 @@ header {
 
 .table-header {
 	font-weight: bolder;
-	text-transform: uppercase;
 	background-color: #ECECEC;
 }
 
-
+.table-body {
+	.won, .draw, .lost, .for, .against, .diff, .points, .score {
+		padding-right: 2px;
+	}
+}
 
 .hidden {
 	display: none;
