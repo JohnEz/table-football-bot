@@ -1,7 +1,6 @@
 'use strict';
 const DAO = require('./dao.js');
-const prompts = require('../prompts.js')
-const MAXSCORE = require('../config').maxScore;
+const prompts = require('../prompts.js');
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
 const moment = require('moment');
@@ -138,8 +137,8 @@ class Controller {
         if (score !== null) {
             score = parseInt(score);
 
-            if (score > MAXSCORE || score < 0) {
-                errorMessage = prompts.incorrectScore + MAXSCORE;
+            if (score < 0) {
+                errorMessage = prompts.negativeScore;
                 pass = false;
             }
         } else {
@@ -155,19 +154,6 @@ class Controller {
 
         score1 = parseInt(score1);
         score2 = parseInt(score2);
-
-        //check that one value is 10 and only that value is 10
-        if (score1 !== MAXSCORE && score2 !== MAXSCORE) {
-            errorMessage = prompts.noMaxScore + MAXSCORE;
-            pass = false;
-
-
-        }
-        //check that both values are not the maxscore
-        else if (score1 === MAXSCORE && score2 === MAXSCORE) {
-            errorMessage = prompts.twoMaxScores + MAXSCORE;
-            pass = false;
-        }
 
         return {passed: pass, message: errorMessage};
     }
