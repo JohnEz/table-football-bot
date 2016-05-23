@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const merge = require('webpack-merge');
 const validate = require('webpack-validator');
 const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const PATHS = {
 	app: path.join(__dirname, 'src'),
@@ -45,11 +46,15 @@ const common = {
 	plugins: [
 		new HtmlWebpackPlugin({
 			title: 'Scott Logic Table Football Euros',
+			videoBackground: 'background.mp4',
 			template: 'my-index.ejs'
 		}),
 		new webpack.ProvidePlugin({
 			'fetch': 'imports?this=>global!exports?global.fetch!whatwg-fetch'
 		}),
+		new CopyWebpackPlugin([
+			{from: 'src/video', to: 'src/video'}
+		])
 	]
 };
 
