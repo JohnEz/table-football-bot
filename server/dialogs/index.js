@@ -81,7 +81,11 @@ dialog.on('ListResults', [
 
 /**Shows the user who is a country or user. */
 dialog.on('WhoIs', function(session, args) {
-	let user = builder.EntityRecognizer.findEntity(args.entities, 'player');
+	let user = builder.EntityRecognizer.findEntity(args.entities, 'player') ||
+	 builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
+	 builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
+	 null;
+
 	if (user) {
 		controller.getAllPlayers(function(allPlayers) {
 
@@ -364,7 +368,7 @@ function respondFinalResult(session, results) {
 		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, result.draw, session.dialogData.match, function(message, endResult) {
 			//check it created a result
 			if (endResult) {
-				
+
 				let difference = controller.checkScoreDifference(endResult.score1, endResult.score2);
 				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
 				difference = Math.floor((difference - 1) / 3);
