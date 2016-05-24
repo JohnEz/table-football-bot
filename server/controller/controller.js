@@ -331,8 +331,8 @@ class Controller {
                         id: result._id,
                         player1: result.player1.country,
                         player2:  result.player2.country,
-                        winScore: result.score1,
-                        loseScore: result.score2,
+                        score1: result.score1,
+                        score2: result.score2,
                     };
 
                     if(days.has(day)){
