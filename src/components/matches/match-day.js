@@ -13,10 +13,10 @@ var MatchDay = React.createClass({
 					return (
 						<MatchTableElement
 							key={result.id}
-							p1 = {result.winner}
-							p2 = {result.loser}
-							p1Score = {result.winScore}
-							p2Score = {result.loseScore}
+							p1 = {result.player1}
+							p2 = {result.player2}
+							p1Score = {result.score1}
+							p2Score = {result.score2}
 							/>
 					)
 				})}
