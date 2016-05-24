@@ -86,12 +86,12 @@ class DAO {
 		});
 	}
 
-	addResult(winnerID, loserID, winningScore, losingScore, match, callback) {
+	addResult(player1ID, player2ID, winningScore, losingScore, match, callback) {
 		let results = this.db.collection(resultsCollection);
 		let matches = this.db.collection(matchesCollection);
 		let dateAdded = new Date();
 
-		results.insertOne( { winner: winnerID, loser: loserID, winnerScore: winningScore, loserScore: losingScore, date: dateAdded }, function(err, result) {
+		results.insertOne( { player1: player1ID, player2: player2ID, score1: winningScore, score2: losingScore, date: dateAdded }, function(err, result) {
 			if (err) {
 				console.log(err);
 				callback(!err);
@@ -123,9 +123,9 @@ class DAO {
 
 				//create the query
 				if (player1Doc && player2Doc) {
-					query = { $or: [ { winner : player1Doc._id, loser : player2Doc._id }, { winner : player2Doc._id, loser : player1Doc._id } ] };
+					query = { $or: [ { player1 : player1Doc._id, player2 : player2Doc._id }, { player1 : player2Doc._id, player2 : player1Doc._id } ] };
 				} else if (player1Doc) {
-					query = { $or: [ { winner : player1Doc._id }, { loser : player1Doc._id } ] };
+					query = { $or: [ { player1 : player1Doc._id }, { player2 : player1Doc._id } ] };
 				}
 
 				let aggregate = count ? [ { $match: query }, {$sort : { date : -1 }}, { $limit : count } ] : [ { $match: query }, {$sort : { date : -1 }} ];
@@ -137,8 +137,8 @@ class DAO {
 						console.log('error', err);
 					} else if (doc) {
 						//if there is a document, add it
-						doc.winner = playersMap.get(JSON.stringify(doc.winner));
-						doc.loser = playersMap.get(JSON.stringify(doc.loser));
+						doc.player1 = playersMap.get(JSON.stringify(doc.player1));
+						doc.player2 = playersMap.get(JSON.stringify(doc.player2));
 
 						resultArray.push(doc);
 					} else {

@@ -62,7 +62,7 @@ dialog.on('ListResults', [
 				if (resultsArray.length > 0) {
 					let resultsString = '';
 					resultsArray.forEach(function(result) {
-						resultsString = resultsString + util.createResultString(result.winner, result.loser, result.winnerScore, result.loserScore) + '\n';
+						resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
 					});
 
 					session.send(prompts.listResultsList, resultsString);
@@ -161,6 +161,7 @@ function getIntialAddInputs(session, args, next) {
 	let s2 = builder.EntityRecognizer.findEntity(args.entities, 'score::s2');
 	let win = builder.EntityRecognizer.findEntity(args.entities, 'modifier::win');
 	let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
+	let draw = builder.EntityRecognizer.findEntity(args.entities, 'modifier::draw');
 
 	let result = session.dialogData.result = {
 		p1: p1 ? p1.entity : null,
@@ -168,7 +169,8 @@ function getIntialAddInputs(session, args, next) {
 		s1: s1 ? util.convertWordToNumber(s1.entity) : null,
 		s2: s2 ? util.convertWordToNumber(s2.entity) : null,
 		win: win !== null,
-		loss: loss !== null
+		loss: loss !== null,
+		draw: draw !== null
 	};
 
 	checkForMe('p1', result, session);
@@ -347,7 +349,7 @@ function validateScores(session, results, next) {
 	//check the re added score is a valid score
 	if (session.dialogData.validation.passed) {
 		let result = session.dialogData.result;
-		session.dialogData.validation = controller.validateScores(result.s1, result.s2);
+		session.dialogData.validation = controller.validateScores(result.s1, result.s2, result.win, result.loss, result.draw);
 	}
 
 	next();
@@ -359,21 +361,21 @@ function respondFinalResult(session, results) {
 
 	if (result.p1 && result.p2 && result.s1 !== null && result.s2 !== null && validation.passed) {
 
-		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, session.dialogData.match, function(message, endResult) {
+		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, result.draw, session.dialogData.match, function(message, endResult) {
 			//check it created a result
 			if (endResult) {
-
-				let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
+				
+				let difference = controller.checkScoreDifference(endResult.score1, endResult.score2);
 				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
 				difference = Math.floor((difference - 1) / 3);
 				//tell the winner he won
-				if (endResult.winner.slackCode) {
-					slackBot.sendMessage(endResult.winner.slackCode, prompts.winMessage[difference] , {country: endResult.loser.country});
+				if (endResult.player1.slackCode) {
+					slackBot.sendMessage(endResult.player1.slackCode, prompts.winMessage[difference] , {country: endResult.player2.country});
 				}
 
 				//tell the user he lost
-				if (endResult.loser.slackCode) {
-					slackBot.sendMessage(endResult.loser.slackCode, prompts.loseMessage[difference], {country: endResult.winner.country});
+				if (endResult.player2.slackCode) {
+					slackBot.sendMessage(endResult.player2.slackCode, prompts.loseMessage[difference], {country: endResult.player1.country});
 				}
 
 				//tell the main channel
