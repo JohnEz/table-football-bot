@@ -42,15 +42,18 @@ describe('Util', function () {
 	});
 
 	it('should change numbers which are words', function() {
-		let numbers = {'nil': 0, 'zero': 0, 'three': 3, 'seven': 7, 'ten': 10};
+		let numbers = {'nil': 0, 'zero': 0, 'three': 3, 'seven': 7, 'ten': 10, 'fifteen': 15, 'nineteen': 19};
 		for (let key in numbers){
 			expect(util.convertWordToNumber(key)).to.equal(numbers[key]);
 		}
 	});
 
-	it('should not match words above 10', function() {
-		expect(util.convertWordToNumber('eleven')).to.equal(null);
-	});
+	it('should return null for an unknown number or word', function() {
+		let  words = ['twenty five', 'thirty', 'a jillion', 'one hundred million'];
+		words.forEach(function(word) {
+			expect(util.convertWordToNumber(word)).to.equal(null);
+		})
+	})
 
 	it('should not fail on null or undefined', function() {
 		expect(util.convertWordToNumber(null)).to.equal(null);
