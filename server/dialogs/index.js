@@ -370,21 +370,32 @@ function respondFinalResult(session, results) {
 			if (endResult) {
 
 				let difference = controller.checkScoreDifference(endResult.score1, endResult.score2);
+				let maxDifference = prompts.winMessage.length-1;
+
+				if (difference > maxDifference) {
+					difference = maxDifference;
+				}
+
 				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
 				difference = Math.floor((difference - 1) / 3);
+
+				let resultMessages = controller.calculateResultsMessages(result.s1, result.s2, difference);
+
 				//tell the winner he won
 				if (endResult.player1.slackCode) {
-					slackBot.sendMessage(endResult.player1.slackCode, prompts.winMessage[difference] , {country: endResult.player2.country});
+					slackBot.sendMessage(endResult.player1.slackCode, resultMessages.player1Message, {country: endResult.player2.country});
 				}
 
 				//tell the user he lost
 				if (endResult.player2.slackCode) {
-					slackBot.sendMessage(endResult.player2.slackCode, prompts.loseMessage[difference], {country: endResult.player1.country});
+					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player1Message, {country: endResult.player1.country});
 				}
 
 				//tell the main channel
 				let broadcast = prompts.result;
-				if (difference === 3 ) broadcast = `<!channel> ${broadcast} :clap:`
+				if (difference === maxDifference && (score1 === 0 || score2 === 0)) {
+					broadcast = `<!channel> ${broadcast} :clap:`
+				}
 				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
 
 			} else {

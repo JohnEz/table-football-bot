@@ -43,8 +43,17 @@ module.exports = {
         return capWords(s);
     },
 
-    createResultString: function(winner, loser, winnerScore, loserScore) {
-        return `${winner} beat ${loser} ${winnerScore}-${loserScore}`;
+    createResultString: function(player1, player2, score1, score2) {
+
+        let resultMod = 'beat';
+
+        if (score1 < score2) {
+            resultMod = 'lost to';
+        } else if (score1 === score2) {
+            resultMod = 'drew with';
+        }
+
+        return `${player1} ${resultMod} ${player2} ${score1}-${score2}`;
     },
 
     isMe: function(name) {

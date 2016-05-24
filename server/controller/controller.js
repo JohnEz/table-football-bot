@@ -197,7 +197,7 @@ class Controller {
         let playersSwitched = false;
 
         //if player 1 is not the player 1 of the match
-        if (player1 !== match.player1) {
+        if (player1.country !== match.team1.country) {
             //swap the players
             let storePlayer = player2;
             player2 = player1;
@@ -362,6 +362,26 @@ class Controller {
             playerName = `${util.capitaliseWords(player.country)} (${slackName})`;
         }
         return playerName;
+    }
+
+    calculateResultsMessages(score1, score2, difference) {
+        let player1Message = '';
+        let player2Message = '';
+
+        if (score1 > score2) {
+            player1Message = prompts.winMessage[difference];
+            player2Message = prompts.loseMessage[difference];
+        } else if (score1 < score2) {
+            player1Message = prompts.loseMessage[difference];
+            player2Message = prompts.winMessage[difference];
+        } else {
+            let drawMessage1 = Math.floor(Math.random() * prompts.drawMessage.length);
+            let drawMessage2 = Math.floor(Math.random() * prompts.drawMessage.length);
+            player1Message = prompts.drawMessage[drawMessage1];
+            player2Message = prompts.drawMessage[drawMessage2];
+        }
+
+        return {player1Message: player1Message, player2Message: player2Message};
     }
 
     addUsers(users) {
