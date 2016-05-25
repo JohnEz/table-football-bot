@@ -39,8 +39,7 @@ dialog.on('AddResult', [
 ]);
 
 /** Shows the user a list of Results. */
-dialog.on('ListResults', [
-	function (session, args) {
+dialog.on('ListResults', function (session, args) {
 		// See if got the tasks title from our LUIS model.
 		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
 		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
@@ -77,7 +76,7 @@ dialog.on('ListResults', [
 
 		session.endDialog();
 	}
-]);
+);
 
 /**Shows the user who is a country or user. */
 dialog.on('WhoIs', function(session, args) {
@@ -148,6 +147,40 @@ dialog.on('UpcomingMatches', function(session, args) {
 	});
 
 });
+
+dialog.on('Schedule', function(session, args, next) {
+
+
+		if (config.admins.indexOf(session.userData.id) === -1 ){
+			session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
+			return; // annoyingly endDialog doesn't end the dialog!
+		}
+
+		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+		let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
+
+		let schedule = {
+			p1: p1 ? p1.entity : null,
+			p2: p2 ? p2.entity : null,
+			date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null
+		};
+		if (isNaN(schedule.date.getTime())) {
+			session.endDialog(prompts.cantParseDate);
+		}
+		else {
+			controller.addMatch(schedule.p1, schedule.p2, schedule.date, function(match) {
+				if(!match.error) {
+					session.endDialog(prompts.scheduleSuccess, match)
+				}
+				else {
+					session.endDialog(match.message, match.args);
+				}
+
+			});
+		}
+	}
+);
 
 
 function checkForMe(p, result, session) {
