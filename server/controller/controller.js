@@ -23,7 +23,7 @@ class Controller {
                 matches.today.forEach(function(match) {
                     if (match.team1.slackCode) {
                         slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
-    				}
+                    }
 
                     if (match.team2.slackCode) {
                         slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
@@ -285,37 +285,38 @@ class Controller {
                 Object.assign(
                     player,
                     {
-                    won: 0,
-                    lost: 0,
-                    draw: 0,
-                    for: 0,
-                    against: 0
-                });
+                        won: 0,
+                        lost: 0,
+                        draw: 0,
+                        for: 0,
+                        against: 0
+                    }
+                );
             });
             DAO.getInstance().getResults(null, null, null, function(results) {
 
-                    results.forEach(function(result) {
-                        let player1 = allPlayers.get(JSON.stringify(result.player1._id));
-                        let player2 = allPlayers.get(JSON.stringify(result.player2._id));
-                        if (result.score1 > result.score2) {
-                            player1.won++;
-                            player2.lost++;
-                        }
-                        else if (result.score1 < result.score2) {
-                            player2.won++;
-                            player1.lost++;
-                        }
-                        else {
-                            player1.draw++;
-                            player2.draw++;
-                        }
+                results.forEach(function(result) {
+                    let player1 = allPlayers.get(JSON.stringify(result.player1._id));
+                    let player2 = allPlayers.get(JSON.stringify(result.player2._id));
+                    if (result.score1 > result.score2) {
+                        player1.won++;
+                        player2.lost++;
+                    }
+                    else if (result.score1 < result.score2) {
+                        player2.won++;
+                        player1.lost++;
+                    }
+                    else {
+                        player1.draw++;
+                        player2.draw++;
+                    }
 
-                        player1.for += result.score1;
-                        player1.against += result.score2;
-                        player2.for += result.score2;
-                        player2.against += result.score1;
+                    player1.for += result.score1;
+                    player1.against += result.score2;
+                    player2.for += result.score2;
+                    player2.against += result.score1;
 
-                    });
+                });
                 callback([...allPlayers.values()]);
             });
         });
@@ -509,6 +510,79 @@ class Controller {
             }
         });
         return validMatch;
+    }
+
+    getBracketMatches(callback) {
+        let testData = {
+            prelims: [
+                { team1:{country:'Sweden'}, team2:{country:'Italy'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
+                { team1:{country:'Belgium'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
+                { team1:{country:'France'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
+                { team1:{country:'Sealand'}, team2:{country:'Russia'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
+                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'Italy'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
+                { team1:{country:'Belgium'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
+                { team1:{country:'France'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
+                { team1:{country:'Sealand'}, team2:{country:'Russia'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 }
+            ],
+
+            quaterFinals: [
+                { team1:{country:'Sweden'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 6, score2: 2 }, winner: 1 },
+                { team1:{country:'England'}, team2:{country:'Sealand'}, date: new Date(), result: {score1: 4, score2: 3 }, winner: 1 },
+                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 60, score2: 2 }, winner: 1 },
+                { team1:{country:'England'}, team2:{country:'Sealand'}, date: new Date(), result: {score1: 4, score2: 3 }, winner: 1 },
+            ],
+
+            semiFinals: [
+                { team1:{country:'Sweden'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
+                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
+            ],
+
+            finals: [
+                { team1:{country:'Sweden'}, team2:{country:'Sovereign State Of Forvik'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
+            ]
+        };
+
+        DAO.getInstance().getMatches(null, null, function(matches, err) {
+
+            let brackets = {
+                prelims: [],
+                quaterFinals: [],
+                semiFinals: [],
+                finals: []
+            }
+
+            if (err) {
+
+                matches.forEach(function(match) {
+
+                    if (!match.team1) {
+                        match.team1 = {country: 'Team 1'};
+                    }
+
+                    if (!match.team2) {
+                        match.team2 = {country: 'Team 2'};
+                    }
+
+                    if (!match.result) {
+                        match.result = {score1: null, score2: null};
+                    }
+
+                    switch(match.stage) {
+                        case 16: brackets.prelims.push(match);
+                        break;
+                        case 8: brackets.quaterFinals.push(match);
+                        break;
+                        case 4: brackets.semiFinals.push(match);
+                        break;
+                        case 2: brackets.finals.push(match);
+                        break;
+                    };
+
+                });
+            }
+
+            callback(brackets);
+        });
     }
 
 }
