@@ -20,11 +20,11 @@ app.use(express.static(path.join(__dirname, 'build')));
 /**
 *   ROUTES
 */
-app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + 'build/index.html'));
+app.get('/*', function(req, res) {
+    res.sendFile(path.join(__dirname + '/build/index.html'));
 });
 
-app.get('/bot/results', function(req, res) {
+app.post('/bot/results', function(req, res) {
     controller.getResultsTable(function(data, err) {
         if (err) {
             console.error(err);
@@ -34,7 +34,7 @@ app.get('/bot/results', function(req, res) {
     });
 });
 
-app.get('/bot/users', function(req, res) {
+app.post('/bot/users', function(req, res) {
     controller.getLeagueTable(function(data, err) {
         if (err) {
             console.error(err);
@@ -44,7 +44,7 @@ app.get('/bot/users', function(req, res) {
     });
 });
 
-app.get('/bot/schedule', function(req, res) {
+app.post('/bot/schedule', function(req, res) {
     controller.getMatchesToBePlayed(new Date(), null, null, function(data, err) {
         if (err) {
             console.error(err);

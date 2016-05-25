@@ -12,7 +12,7 @@ var ScheduleTable = React.createClass({
 	},
 	loadResultsFromServer: function() {
 		fetch('/bot/schedule', {
-			method: 'get',
+			method: 'post',
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
