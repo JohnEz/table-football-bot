@@ -54,5 +54,9 @@ module.exports = {
     ],
     result: 'Result just in: \n %(result)s',
     matchToday: 'You have a match against %(opponent)s scheduled for today',
-    matchOverdue: 'You have a match against %(opponent)s that is overdue'
+    matchOverdue: 'You have a match against %(opponent)s that is overdue',
+    scheduleSuccess: 'I\'ve just scheduled %(t1)s (@%(p1)s) vs %(t2)s (@%(p2)s) to be played on %(date)s.\nThe match ID is %(id)s',
+    missingPlayer: 'One of the teams wasn\'t found. Bear in mind I\'m only looking for the 32 countries in the tournament and not some fanciful made-up nations!',
+    notAdmin: 'You aren\'t an admin. You\'re not allowed to %(intent)s so I\' not listening to you! \n %(url)s',
+    cantParseDate: 'Sorry I didn\'t understand the date please try again'
 }

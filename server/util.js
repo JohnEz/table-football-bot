@@ -91,31 +91,31 @@ module.exports = {
     parseLuisDate(date, refDate) {
         /* remember getMonth returns 0 - 11  */
 
-            let today = refDate || new Date();
+        let today = refDate || new Date();
 
-            let parts = date.split('-');
+        let parts = date.split('-');
 
-            //parse day
-            parts[2] = parseInt(parts[2]);
+        //parse day
+        parts[2] = parseInt(parts[2]);
 
-            // parse month
-            if (parts[1] === 'XX') {
-                if (today.getDate() > parts[2] ) {
-                    parts[1] = (today.getMonth() + 1 ) % 12; // to account for December
-                }
-                else {
-                    parts[1] = today.getMonth();
-                }
+        // parse month
+        if (parts[1] === 'XX') {
+            if (today.getDate() > parts[2] ) {
+                parts[1] = (today.getMonth() + 1 ) % 12; // to account for December
             }
             else {
-                parts[1] = parseInt(parts[1]) - 1; // so month is 0 - 11
+                parts[1] = today.getMonth();
             }
+        }
+        else {
+            parts[1] = parseInt(parts[1]) - 1; // so month is 0 - 11
+        }
 
-            // parse year
-            if (parts[0] === 'XXXX') {
-                if (
-                    today.getMonth() > parts[1]  ||
-                    today.getMonth() === parts[1]  && today.getDate() > parts[2]) {
+        // parse year
+        if (parts[0] === 'XXXX') {
+            if (
+                today.getMonth() > parts[1]  ||
+                today.getMonth() === parts[1]  && today.getDate() > parts[2]) {
                     parts[0] = today.getFullYear() + 1;
                 }
                 else {
@@ -127,6 +127,5 @@ module.exports = {
             }
 
             return new Date(...parts)
-        //}
-    }
-};
+        }
+    };

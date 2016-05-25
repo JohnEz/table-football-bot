@@ -461,17 +461,37 @@ class Controller {
     }
 
     //temp method to add scheduled matches
-    addMatch(team1, team2, date) {
+    addMatch(team1, team2, date, callback) {
 
         this.getAllPlayers(function(playerDocs) {
 
             //add one match
             let team1Doc = util.getPlayerFromArray(team1, playerDocs);
             let team2Doc = util.getPlayerFromArray(team2, playerDocs);
+            if (team1Doc.length === 0 ) {
+                callback({error: true, message: prompts.player1NotFound, args:{player1: team1}})
+            }
+            else if(team2Doc.length === 0) {
+                callback({error: true, message: prompts.player2NotFound, args:{player2: team2}})
+            }
+            else {
+                DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, function(err, added) {
+                    let match = {error: true, message: prompts.databaseError};
+                    if (!err) {
+                        match = {
+                            error: false,
+                            id: added,
+                            t1:util.capitaliseWords(team1Doc[0].country),
+                            p1:team1Doc[0].slackID,
+                            t2:util.capitaliseWords(team2Doc[0].country),
+                            p2:team2Doc[0].slackID,
+                            date: moment(date).format('dddd Do MMMM')
+                        }
+                    }
+                    callback(match);
 
-            DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, function(added) {
-
-            });
+                });
+            }
 
         });
 

@@ -177,13 +177,16 @@ class DAO {
 
 	addMatch(team1ID, team2ID, scheduledDate, callback) {
 		let collection = this.db.collection(matchesCollection);
-
-		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null }, function(err) {
-
+		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null }, function(err, data) {
 			if (err) {
 				console.log(err);
 			}
-			callback(!err);
+			if(data) {
+				callback(err, data.insertedId);
+			}
+			else {
+				callback(err);
+			}
 
 		});
 	}
