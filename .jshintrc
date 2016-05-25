@@ -1,0 +1,11 @@
+{
+  "esversion": 6,
+  "globals": {
+      "console": false,
+      "Math": false,
+      "fetch": false,
+      "require": false,
+      "module": false,
+      "import": false
+  }
+}

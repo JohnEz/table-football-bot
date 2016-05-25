@@ -49,14 +49,21 @@ html, body, #app {
   @include blur(5px);
 }
 
-header {
+.head {
 	position: absolute;
 	top: 0;
 	height: 50px;
 	width: 100%;
+	display:flex;
+	justify-content: space-between;
 	background-color: #000;
 	color: #FFF;
+}
+
+header {
+
 	h1 {
+		display: inline-flex;
 		margin-top: 5px;
 		margin-left: 10px;
 		.sl {
@@ -66,6 +73,28 @@ header {
 		.logic {
 			font-weight: normal;
 		}
+	}
+}
+.nav {
+	  list-style: none;
+	  text-align: center;
+	  padding: 0;
+	  margin: 0 10px;
+
+	li {
+		display:inline-flex;
+	  	font-size: 1em;
+	  	line-height: 40px;
+	  	height: 40px;
+		margin: 0 10px;
+		a {
+			color: #FFF;
+			text-decoration: none;
+		}
+
+	}
+	.active {
+			color: #FA1;
 	}
 }
 

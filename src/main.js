@@ -1,25 +1,21 @@
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {render} from 'react-dom';
+import {Router, Route, hashHistory, IndexRoute } from 'react-router'
 
-import Header from './components/header';
+import App from './components/app';
 import GroupStage from './components/group-stage';
-
+import KnockoutStage from './components/knockout-stage';
 require('./styles.scss');
 
-let App = React.createClass({
-    render() {
-        return (
-            <div className='app'>
-                <Header />
-                <GroupStage />
-            </div>
-        );
-    }
-});
 
-ReactDOM.render(
-    <App />,
-    document.getElementById('app')
-)
+render((
+	<Router history={hashHistory}>
+		<Route path="/" component={App}>
+            <IndexRoute component={GroupStage}/>
+			<Route path="/group" component={GroupStage}/>
+			<Route path="/knockout" component={KnockoutStage}/>
+		</Route>
+	</Router>
+), document.getElementById('app'))
