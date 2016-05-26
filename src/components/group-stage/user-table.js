@@ -59,6 +59,7 @@ var UserTable = React.createClass({
 						grouped = {this.state.grouped}
 						/>
 				</div>
+				<div className="section-body">
 				<div className='table'>
 					<UserTableElement
 						rowType = 'header'
@@ -104,7 +105,9 @@ var UserTable = React.createClass({
 						}.bind(this))}
 					</div>
 					{spinner}
+					</div>
 				</div>
+				
 			</div>
 		)
 	}

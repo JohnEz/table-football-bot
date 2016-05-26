@@ -29,31 +29,35 @@ var ResultTable = React.createClass({
 
 		if (!this.state.loaded) {
 			spinner = <div className="loader">Loading...</div>;
+			}
+
+			return (
+				<div className='results'>
+					<div className='section-header'>
+						<h2>Results</h2>
+					</div>
+					<div className="section-body">
+						<div className="table">
+							{
+								this.state.results.map(function(day) {
+									return (
+										<MatchDay
+											key={`result-${day.date}`}
+											day = {day.date}
+											results = {day.results}
+											/>
+									);
+								})
+							}
+							{spinner}
+						</div>
+					</div>
+					<div className="section-footer">
+						<a href="#" >more...</a>
+					</div>
+				</div>
+			);
 		}
+	});
 
-		return (
-			<div className='results'>
-				<div className='section-header'>
-					<h2>Results</h2>
-				</div>
-
-				<div className="table">
-					{
-						this.state.results.map(function(day) {
-							return (
-								<MatchDay
-									key={`result-${day.date}`}
-									day = {day.date}
-									results = {day.results}
-									/>
-							);
-						})
-					}
-					{spinner}
-				</div>
-			</div>
-		);
-	}
-});
-
-export default ResultTable;
+	export default ResultTable;

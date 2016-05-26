@@ -10,14 +10,9 @@ var GroupStage = React.createClass({
 	render: function() {
 		return (
 			<div className="content">
-				<section className="col-left">
-					<ScheduleTable />
-					<ResultTable />
-				</section>
-				<section className="col-right">
-					<UserTable />
-
-				</section>
+				<ScheduleTable />
+				<ResultTable />
+				<UserTable />
 			</div>
 		);
 	}
