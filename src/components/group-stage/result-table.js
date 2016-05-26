@@ -6,7 +6,8 @@ import MatchDay from '../matches/match-day.js';
 var ResultTable = React.createClass({
 	getInitialState: function() {
 		return {
-			results: []
+			results: [],
+			loaded: false
 		}
 	},
 	loadResultsFromServer: function() {
@@ -15,7 +16,7 @@ var ResultTable = React.createClass({
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({results: data});
+			this.setState({results: data, loaded: true});
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
@@ -24,6 +25,11 @@ var ResultTable = React.createClass({
 		this.loadResultsFromServer();
 	},
 	render: function() {
+		let spinner = null;
+
+		if (!this.state.loaded) {
+			spinner = <div className="loader">Loading...</div>;
+		}
 
 		return (
 			<div className='results'>
@@ -43,6 +49,7 @@ var ResultTable = React.createClass({
 							);
 						})
 					}
+					{spinner}
 				</div>
 			</div>
 		);
