@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import MatchDay from './matches/match-day.js';
+import MatchDay from '../matches/match-day.js';
 
 var ResultTable = React.createClass({
 	getInitialState: function() {

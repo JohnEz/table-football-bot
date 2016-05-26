@@ -1,7 +1,7 @@
 'use strict';
 
 import React from 'react';
-import MatchTableElement from './matches/match-table-element.js'
+import MatchTableElement from '../matches/match-table-element.js'
 
 var ScheduleTable = React.createClass({
 	getInitialState: function() {

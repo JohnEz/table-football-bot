@@ -1,11 +1,9 @@
 'use strict';
 
 import React from 'react';
-import BracketColumn from './bracketColumn.js';
+import BracketColumn from './knockout-stage/bracket-column.js';
 
-require('./styles.scss');
-
-var Bracket = React.createClass({
+var KnockoutStage = React.createClass({
 	getInitialState: function() {
 		return {
 			matches: {}
@@ -47,4 +45,4 @@ var Bracket = React.createClass({
 	}
 });
 
-export default Bracket;
+export default KnockoutStage;

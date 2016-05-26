@@ -2,8 +2,6 @@
 
 import React from 'react';
 
-require('./styles.scss');
-
 var bracketColumn = React.createClass({
 
 	render: function() {
