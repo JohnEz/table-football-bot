@@ -54,7 +54,7 @@ app.post('/bot/schedule', function(req, res) {
     });
 });
 
-app.get('/bot/brackets', function(req, res) {
+app.post('/bot/brackets', function(req, res) {
     controller.getBracketMatches(function(data) {
         res.json(data);
     });
