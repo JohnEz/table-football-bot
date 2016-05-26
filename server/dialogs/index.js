@@ -405,12 +405,12 @@ function respondFinalResult(session, results) {
 				let difference = controller.checkScoreDifference(endResult.score1, endResult.score2);
 				let maxDifference = prompts.winMessage.length-1;
 
+				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
+				difference = Math.floor((difference - 1) / 3);
+
 				if (difference > maxDifference) {
 					difference = maxDifference;
 				}
-
-				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
-				difference = Math.floor((difference - 1) / 3);
 
 				let resultMessages = controller.calculateResultsMessages(result.s1, result.s2, difference);
 
@@ -421,12 +421,12 @@ function respondFinalResult(session, results) {
 
 				//tell the user he lost
 				if (endResult.player2.slackCode) {
-					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player1Message, {country: endResult.player1.country});
+					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player2Message, {country: endResult.player1.country});
 				}
 
 				//tell the main channel
 				let broadcast = prompts.result;
-				if (difference === maxDifference && (score1 === 0 || score2 === 0)) {
+				if (difference === maxDifference && (endResult.score1 === 0 || endResult.score2 === 0)) {
 					broadcast = `<!channel> ${broadcast} :clap:`
 				}
 				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
