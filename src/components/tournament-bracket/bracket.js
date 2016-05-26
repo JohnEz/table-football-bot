@@ -13,7 +13,7 @@ var Bracket = React.createClass({
 	},
 	loadResultsFromServer: function() {
 		fetch('/bot/brackets', {
-			method: 'get',
+			method: 'post',
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
@@ -37,9 +37,12 @@ var Bracket = React.createClass({
 		}
 
 		return (
-			<div className="bracket">
-				{columns}
+			<div className="content">
+				<div className="bracket">
+					{columns}
+				</div>
 			</div>
+
 		);
 	}
 });

@@ -551,7 +551,7 @@ class Controller {
                 finals: []
             }
 
-            if (err) {
+            if (!err) {
 
                 matches.forEach(function(match) {
 

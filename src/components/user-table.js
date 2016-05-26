@@ -18,7 +18,7 @@ var UserTable = React.createClass({
 	},
 	loadTableFromServer: function() {
 		fetch('/bot/users', {
-			method: 'get',
+			method: 'post',
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {

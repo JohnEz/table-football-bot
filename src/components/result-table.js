@@ -11,7 +11,7 @@ var ResultTable = React.createClass({
 	},
 	loadResultsFromServer: function() {
 		fetch('/bot/results', {
-			method: 'get',
+			method: 'post',
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {

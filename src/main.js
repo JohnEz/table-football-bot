@@ -1,37 +1,25 @@
 'use strict';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {render} from 'react-dom';
+import {Router, Route, browserHistory, IndexRoute } from 'react-router'
 
-import Header from './components/header';
-import UserTable from './components/user-table';
-import ResultTable from './components/result-table';
-import ScheduleTable from './components/schedule-table';
-
+import App from './components/app';
+import GroupStage from './components/group-stage';
+import Bracket from './components/tournament-bracket/bracket';
+import PageNotFound from './components/page-not-found';
 require('./styles.scss');
 
-let App = React.createClass({
-    render() {
-        return (
-            <div className='app'>
-                <Header />
 
-                <div className="content">
-                    <section className="col-left">
-                        <ScheduleTable />
-                        <ResultTable />
-                    </section>
-                    <section className="col-right">
-                        <UserTable />
+render((
+	<Router history={browserHistory}>
+		<Route path="/" component={App}>
+            <IndexRoute component={GroupStage}/>
+			<Route path="/group" component={GroupStage}/>
 
-                    </section>
-                </div>
-            </div>
-        );
-    }
-});
-
-ReactDOM.render(
-    <App />,
-    document.getElementById('app')
-)
+			<Route path="/knockout" component={Bracket}/>
+			<Route path="*" component={PageNotFound} />
+		</Route>
+		<Route path="*" component={PageNotFound} />
+	</Router>
+), document.getElementById('app'))
