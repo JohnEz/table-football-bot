@@ -462,7 +462,16 @@ class Controller {
     }
 
     //temp method to add scheduled matches
-    addMatch(team1, team2, date, callback) {
+    addMatch(team1, team2, date, matchCode, callback) {
+        let bracket = null;
+        let match = null;
+
+        if (matchCode) {
+            matchCode = matchCode.split(/[rm]/i);
+
+            bracket = parseInt(matchCode[1]);
+            match = parseInt(matchCode[2]);
+        }
 
         this.getAllPlayers(function(playerDocs) {
 
@@ -476,7 +485,7 @@ class Controller {
                 callback({error: true, message: prompts.player2NotFound, args:{player2: team2}})
             }
             else {
-                DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, function(err, added) {
+                DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, bracket, match, function(err, added) {
                     let match = {error: true, message: prompts.databaseError};
                     if (!err) {
                         match = {

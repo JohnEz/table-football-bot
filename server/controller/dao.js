@@ -175,20 +175,32 @@ class DAO {
 		);
 	}
 
-	addMatch(team1ID, team2ID, scheduledDate, callback) {
+	addMatch(team1ID, team2ID, scheduledDate, bracket, match, callback) {
 		let collection = this.db.collection(matchesCollection);
-		collection.insertOne({ 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null }, function(err, data) {
-			if (err) {
-				console.log(err);
-			}
-			if(data) {
-				callback(err, data.insertedId);
-			}
-			else {
-				callback(err);
-			}
+		let query = {$and: [ {stage: 'group'}, {matchNumber: 'x'} ]};
 
-		});
+		if (bracket && match) {
+			query = {$and: [ {stage: bracket}, {matchNumber: match} ]};
+		}
+
+		collection.findAndModify(
+			query,
+			[['match', 1]],
+			{$set : { 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null, stage: bracket, matchNumber: match }},
+			{upsert: true, new: true},
+			function(err, data) {
+				let id = null;
+				if (err) {
+					console.log(err);
+				}
+
+				if (data) {
+					id = data.value._id;
+				}
+
+				callback(err, id);
+			}
+		)
 	}
 
 	getMatches(team1ID, team2ID, callback) {
