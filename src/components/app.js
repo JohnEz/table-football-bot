@@ -8,9 +8,15 @@ import Header from './header';
 let App = React.createClass({
 	render() {
 		return (
-			<div className='app'>
-				<Header />			
-                {this.props.children}
+			<div className='wrapper'>
+				<Header />
+				<div className='app'>
+					<div className="fade leftFade"></div>
+					<div className="container centre">
+						{this.props.children}
+					</div>
+					<div className="fade rightFade"></div>
+				</div>
 			</div>
 		);
 	}
