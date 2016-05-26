@@ -1,4 +1,5 @@
 @import 'mixins';
+@import 'knockout-styles';
 
 html {
 	background-color: #000;
@@ -11,7 +12,7 @@ body::before {
 	bottom: 0;
 	right: 0;
 	left: 0;
-	background: url('./img/background.jpg') top left repeat scroll;
+	background: url('../img/background.jpg') top left repeat scroll;
 	background-attachment: fixed;
 	@include coverBackground();
 	@include blur(5px);

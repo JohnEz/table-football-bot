@@ -2,9 +2,9 @@
 
 import React from 'react';
 
-import UserTable from './user-table';
-import ResultTable from './result-table';
-import ScheduleTable from './schedule-table';
+import UserTable from './group-stage/user-table';
+import ResultTable from './group-stage/result-table';
+import ScheduleTable from './group-stage/schedule-table';
 
 var GroupStage = React.createClass({
 	render: function() {

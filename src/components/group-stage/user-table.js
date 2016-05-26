@@ -2,9 +2,9 @@
 
 import React from 'react';
 import classnames from 'classnames';
-import UserTableElement from './users/user-table-element.js';
-import TableGroupHeader from './users/table-group-header.js';
-import ToggleSwitch from './users/toggle-switch.js';
+import UserTableElement from '../users/user-table-element.js';
+import TableGroupHeader from '../users/table-group-header.js';
+import ToggleSwitch from '../users/toggle-switch.js';
 
 var UserTable = React.createClass({
 	getInitialState: function() {
