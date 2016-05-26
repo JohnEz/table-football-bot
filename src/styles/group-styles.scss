@@ -1,0 +1,116 @@
+
+.col-right {
+	display:flex;
+}
+
+.user-leagues {
+	position: relative;
+	overflow-y: auto;
+	overflow-x: hidden;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.section-header {
+	margin-bottom: 15px;
+	h2 {
+		margin-top: 3px;
+		margin-bottom: 5px;
+	}
+	.toggleswitch {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+}
+
+/// TABLE DISPLAY ///
+
+.table-content, .table {
+	display: flex;
+	flex-flow: column wrap;
+	width: 470px;
+}
+
+.table-row {
+	font-size: 0.9em;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-between;
+	padding: 2px 5px 2px 5px;
+	border-bottom: 1px solid #D0D0D0;
+	background-color: $tableBody;
+
+	.won, .draw, .lost, .for, .against, .diff, .points, .score {
+		width: 20px;
+		text-align: right;
+	}
+	.slack {
+		width: 85px;
+	}
+	.country {
+		width: 170px;
+		text-transform: capitalize;
+	}
+	&.col {
+		padding: 2px;
+
+	}
+	&.a {
+		order: 1;
+	}
+	&.b {
+		order: 2;
+	}
+	&.c {
+		order: 3;
+	}
+	&.d {
+		order: 4;
+	}
+	&.e {
+		order: 5;
+	}
+	&.f {
+		order: 6;
+	}
+	&.g {
+		order: 7;
+	}
+	&.h {
+		order: 8;
+	}
+	&.table-group-header, &.table-date {
+		margin-bottom: 5px;
+		font-weight: bold;
+		background-color: $tableHeader;
+		color: #D0D0D0
+	}
+	&.table-group-header {
+		margin-top: 20px;
+	}
+ 	&.table-date {
+		margin-top: 10px;
+	}
+
+	&.consolidated {
+		order: 0;
+	}
+}
+
+.table-header {
+	font-weight: bolder;
+	background-color: #ECECEC;
+}
+
+.table-body {
+	.won, .draw, .lost, .for, .against, .diff, .points, .score {
+		padding-right: 2px;
+	}
+}
+
+.hidden {
+	display: none;
+}
