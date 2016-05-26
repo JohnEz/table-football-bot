@@ -7,7 +7,8 @@ var ScheduleTable = React.createClass({
 	getInitialState: function() {
 		return {
 			today: [],
-			overdue: []
+			overdue: [],
+			loaded: false
 		}
 	},
 	loadResultsFromServer: function() {
@@ -16,7 +17,7 @@ var ScheduleTable = React.createClass({
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({today: data.today, overdue: data.overdue, upcoming: data.upcoming});
+			this.setState({today: data.today, overdue: data.overdue, upcoming: data.upcoming, loaded: true});
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
@@ -25,6 +26,11 @@ var ScheduleTable = React.createClass({
 		this.loadResultsFromServer();
 	},
 	render: function() {
+		let spinner = null;
+
+		if (!this.state.loaded) {
+			spinner = <div className="loader">Loading...</div>;
+		}
 
 		return (
 			<div className='results'>
@@ -46,6 +52,7 @@ var ScheduleTable = React.createClass({
 							);
 						})
 					}
+					{spinner}
 				</div>
 
 				<div className="table">
@@ -62,6 +69,7 @@ var ScheduleTable = React.createClass({
 							);
 						})
 					}
+					{spinner}
 				</div>
 
 			</div>

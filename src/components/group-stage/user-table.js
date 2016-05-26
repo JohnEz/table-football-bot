@@ -10,7 +10,8 @@ var UserTable = React.createClass({
 	getInitialState: function() {
 		return {
 			users: [],
-			grouped: false
+			grouped: false,
+			loaded: false
 		}
 	},
 	handleGroupToggle: function() {
@@ -32,7 +33,7 @@ var UserTable = React.createClass({
 				}
 				return diff;
 			});
-			this.setState({users: data});
+			this.setState({users: data, loaded: true});
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
@@ -43,6 +44,12 @@ var UserTable = React.createClass({
 	render: function() {
 		let groups = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
 		let users = this.state.users;
+		let spinner = null;
+
+		if (!this.state.loaded) {
+			spinner = <div className="loader">Loading...</div>;
+		}
+
 		return (
 			<div className="user-leagues">
 				<div className="section-header">
@@ -96,6 +103,7 @@ var UserTable = React.createClass({
 							)
 						}.bind(this))}
 					</div>
+					{spinner}
 				</div>
 			</div>
 		)
