@@ -100,12 +100,13 @@ class DAO {
 					{ _id: match._id },
 					[['_id', 1]],
 					{$set: { result: result.ops[0]._id } },
-				function(error, foundMatch) {
-					if (error) {
-						console.log(error);
+					function(error, foundMatch) {
+						if (error) {
+							console.log(error);
+						}
+						callback(!error);
 					}
-					callback(!error);
-				});
+				);
 			}
 		});
 
@@ -152,6 +153,24 @@ class DAO {
 			} else {
 				callback(null, err);
 			}
+		});
+	}
+
+	getResultsMap(callback) {
+		let collection = this.db.collection(resultsCollection);
+		let resultsMap = new Map();
+
+		collection.find().each(function (err, doc) {
+			if (err) {
+				console.log(err);
+			}
+
+			if (doc) {
+				resultsMap.set(JSON.stringify(doc._id), doc);
+			} else {
+				callback(err, resultsMap);
+			}
+
 		});
 	}
 

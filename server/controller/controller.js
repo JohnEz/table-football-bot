@@ -562,35 +562,51 @@ class Controller {
 
             if (!err) {
 
-                matches.forEach(function(match) {
+                DAO.getInstance().getResultsMap(function(err, results) {
 
-                    if (!match.team1) {
-                        match.team1 = {country: 'Team 1'};
-                    }
+                    if (!err) {
 
-                    if (!match.team2) {
-                        match.team2 = {country: 'Team 2'};
-                    }
+                        matches.forEach(function(match) {
 
-                    if (!match.result) {
-                        match.result = {score1: null, score2: null};
-                    }
+                            if (!match.team1) {
+                                match.team1 = {country: 'Team 1'};
+                            }
 
-                    switch(match.stage) {
-                        case 16: brackets.prelims.push(match);
-                        break;
-                        case 8: brackets.quaterFinals.push(match);
-                        break;
-                        case 4: brackets.semiFinals.push(match);
-                        break;
-                        case 2: brackets.finals.push(match);
-                        break;
+                            if (!match.team2) {
+                                match.team2 = {country: 'Team 2'};
+                            }
+
+                            if (!match.result) {
+                                match.result = {score1: null, score2: null};
+                            } else {
+                                match.result = results.get(JSON.stringify(match.result));
+                                let winner = 0;
+                                if (match.result.score1 > match.result.score2) {
+                                    winner = 1;
+                                } else if (match.result.score1 < match.result.score2) {
+                                    winner = 2;
+                                }
+                                match.winner = winner;
+                            }
+
+                            switch(match.stage) {
+                                case 16: brackets.prelims.push(match);
+                                break;
+                                case 8: brackets.quaterFinals.push(match);
+                                break;
+                                case 4: brackets.semiFinals.push(match);
+                                break;
+                                case 2: brackets.finals.push(match);
+                                break;
+                            };
+
+                        });
+
+                        callback(brackets);
                     };
-
                 });
             }
 
-            callback(brackets);
         });
     }
 
