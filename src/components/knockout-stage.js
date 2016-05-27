@@ -35,16 +35,28 @@ var KnockoutStage = React.createClass({
 		let columns = [];
 
 		if (this.state.matches.prelims) {
-			columns.push(<BracketColumn key={this.state.matches.prelims.length} matches={this.state.matches.prelims} />);
-			columns.push(<BracketColumn key={this.state.matches.quaterFinals.length} matches={this.state.matches.quaterFinals} />);
-			columns.push(<BracketColumn key={this.state.matches.semiFinals.length} matches={this.state.matches.semiFinals} />);
-			columns.push(<BracketColumn key={this.state.matches.finals.length} matches={this.state.matches.finals} />);
+			columns.push(<BracketColumn key={this.state.matches.prelims.length} matches={this.state.matches.prelims} date="25-27TH JUNE"/>);
+			columns.push(<BracketColumn key={this.state.matches.quaterFinals.length} matches={this.state.matches.quaterFinals} date="30-3RD JULY"/>);
+			columns.push(<BracketColumn key={this.state.matches.semiFinals.length} matches={this.state.matches.semiFinals} date="6-7TH JULY"/>);
+			columns.push(<BracketColumn key={this.state.matches.finals.length} matches={this.state.matches.finals} date="10TH JULY"/>);
 		}
 
 		return (
 			<div className="content">
 				<div className="bracket">
 					{columns}
+					<div className='bracket-column'>
+						<div className='bracket-header'>
+							<h3 className='column-date'>Winner</h3>
+						</div>
+						<div className='bracket-body'>
+							<div className='winner-divider'></div>
+							<div className='winner-divider winner-line'>
+								<div className='trophy-container'><img className='trophy' src={require('../img/trophy.png')}></img></div>
+								<div className='winner-name'> <div>Winner</div> </div>
+							</div>
+						</div>
+					</div>
 					{spinner}
 				</div>
 			</div>

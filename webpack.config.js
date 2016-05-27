@@ -40,6 +40,12 @@ const common = {
 				loader: 'url-loader',
 				include: path.resolve(__dirname, 'src/img'),
 				query: { mimetype: 'image/jpg' }
+			},
+			{
+				test: /\.png$/,
+				loader: 'url-loader',
+				include: path.resolve(__dirname, 'src/img'),
+				query: { mimetype: 'image/png' }
 			}
 		]
 	},
