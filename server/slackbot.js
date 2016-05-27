@@ -14,7 +14,7 @@ var botController = Botkit.slackbot({
 	log: false
 });
 var bot = botController.spawn({
-	token: require('./config').slackBotToken
+	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
 var slackBot = new builder.SlackBot(botController, bot);

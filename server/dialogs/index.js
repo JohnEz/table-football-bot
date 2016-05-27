@@ -9,7 +9,7 @@ const slackBot = require('../slackbot');
 const moment = require('moment');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
-var model = process.env.model || config.luisToken;
+var model = process.env.LUIS_TOKEN || config.luisToken; 
 var dialog = new builder.LuisDialog(model);
 module.exports = dialog;
 

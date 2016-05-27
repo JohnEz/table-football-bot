@@ -33,43 +33,47 @@ var ScheduleTable = React.createClass({
 		}
 
 		return (
-			<div className='results'>
+			<div className='schedule'>
 				<div className='section-header'>
 					<h2>Schedule</h2>
 				</div>
+				<div className="section-body">
+					<div className="table">
+						<div className='table-row table-date'>Today's Games</div>
+						{
+							this.state.today.map(function(match) {
+								return (
+									<MatchTableElement
+										key={match._id}
+										p1 = {match.team1.country}
+										p2 = {match.team2.country}
+										p1Score = 'vs'
+										/>
+								);
+							})
+						}
+						{spinner}
+					</div>
 
-				<div className="table">
-					<div className='table-row table-date'>Today's Games</div>
-					{
-						this.state.today.map(function(match) {
-							return (
-								<MatchTableElement
-									key={match._id}
-									p1 = {match.team1.country}
-									p2 = {match.team2.country}
-									p1Score = 'vs'
-									/>
-							);
-						})
-					}
-					{spinner}
+					<div className="table">
+						<div className='table-row table-date'>Overdue Games</div>
+						{
+							this.state.overdue.map(function(match) {
+								return (
+									<MatchTableElement
+										key={match._id}
+										p1 = {match.team1.country}
+										p2 = {match.team2.country}
+										p1Score = 'vs'
+										/>
+								);
+							})
+						}
+						{spinner}
+					</div>
 				</div>
-
-				<div className="table">
-					<div className='table-row table-date'>Overdue Games</div>
-					{
-						this.state.overdue.map(function(match) {
-							return (
-								<MatchTableElement
-									key={match._id}
-									p1 = {match.team1.country}
-									p2 = {match.team2.country}
-									p1Score = 'vs'
-									/>
-							);
-						})
-					}
-					{spinner}
+				<div className="section-footer">
+					<a href="#" >more...</a>
 				</div>
 
 			</div>

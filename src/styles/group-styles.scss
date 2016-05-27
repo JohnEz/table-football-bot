@@ -1,20 +1,40 @@
+$tableWidth: 470px;
 
-.col-right {
-	display:flex;
+.user-leagues, .results, .schedule {
+	position: absolute;
+	width: 50%;
+	padding: 3px;
+	display: flex;
+	flex-flow: column nowrap;
+	overflow: hidden;
+	justify-content:flex-start;
+	padding: 0 20px;
+	box-sizing: border-box;
+}
+
+.schedule {
+	top: 0;
+	left: 0;
+	height: 50%;
+}
+
+.results {
+	bottom: 0;
+	left: 0;
+	height: 50%;
 }
 
 .user-leagues {
-	position: relative;
-	overflow-y: auto;
-	overflow-x: hidden;
-
-	&::-webkit-scrollbar {
-		display: none;
-	}
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 50%;
 }
 
+
 .section-header {
-	margin-bottom: 15px;
+
+	margin: 5px 0 ;
 	h2 {
 		margin-top: 3px;
 		margin-bottom: 5px;
@@ -26,12 +46,24 @@
 	}
 }
 
+.section-footer {
+	height: 20px;
+
+}
+
+.section-body {
+
+	overflow-y: auto;
+	&::-webkit-scrollbar {
+		display: none;
+	}
+}
+
 /// TABLE DISPLAY ///
 
 .table-content, .table {
 	display: flex;
 	flex-flow: column wrap;
-	width: 470px;
 }
 
 .table-row {
