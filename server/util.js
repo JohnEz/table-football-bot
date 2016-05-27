@@ -1,5 +1,7 @@
 'use strict';
-const prompts = require('./prompts')
+
+const request = require('request');
+const prompts = require('./prompts');
 
 let numbers = {
     nil: 0,
@@ -127,5 +129,18 @@ module.exports = {
             }
 
             return new Date(...parts)
+        },
+
+        getGiphyURL(subject, callback) {
+            let url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${subject.replace(' ', '+')}`;
+            request(url, function(err, resp, body) {
+                if(!err) {
+                    let data = JSON.parse(body).data;
+                    callback(`http://i.giphy.com/${data.id}.${data.type}`)
+                }
+                else (
+                    callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif')
+                )
+            });
         }
     };

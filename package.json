@@ -10,9 +10,9 @@
     "start": "node server",
     "postinstall": "webpack -p"
   },
-  "author": "",
-  "license": "",
-  "homepage": "",
+  "author": "R Beckett & A Jones",
+  "license": "?",
+  "homepage": "https://sl-foosball.herokuapp.com/",
   "devDependencies": {
     "chai": "^3.5.0",
     "mocha": "^2.4.5"
@@ -40,6 +40,7 @@
     "react-dom": "^15.0.2",
     "react-router": "^2.4.1",
     "reminder": "^0.1.1",
+    "request": "^2.72.0",
     "sass-loader": "^3.1.2",
     "style-loader": "^0.13.0",
     "url-loader": "^0.5.7",
