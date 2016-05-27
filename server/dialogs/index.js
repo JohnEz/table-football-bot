@@ -159,17 +159,19 @@ dialog.on('Schedule', function(session, args, next) {
 		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
 		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
 		let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
+		let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
 
 		let schedule = {
 			p1: p1 ? p1.entity : null,
 			p2: p2 ? p2.entity : null,
-			date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null
+			date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
+			matchCode: matchCode ? matchCode.entity : null
 		};
 		if (isNaN(schedule.date.getTime())) {
 			session.endDialog(prompts.cantParseDate);
 		}
 		else {
-			controller.addMatch(schedule.p1, schedule.p2, schedule.date, function(match) {
+			controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, function(match) {
 				if(!match.error) {
 					session.endDialog(prompts.scheduleSuccess, match)
 				}
