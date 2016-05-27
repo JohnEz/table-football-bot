@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-var bracketColumn = React.createClass({
+let bracketColumn = React.createClass({
 
 	render: function() {
 		let elements = [];
