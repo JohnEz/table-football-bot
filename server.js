@@ -53,6 +53,16 @@ app.post('/bot/schedule', function(req, res) {
             console.error(err);
             process.exit(1);
         }
+        res.json({today: data.today, overdue: data.overdue});
+    });
+});
+
+app.post('/bot/future', function(req, res) {
+    controller.getUpcomingMatches(req.body.count, function(data, err) {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
         res.json(data);
     });
 });

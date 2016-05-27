@@ -60,7 +60,10 @@ var ResultTable = React.createClass({
 						</div>
 					</div>
 					<div className="section-footer">
-						<div onClick={this.loadResultsFromServer} >&bull; &bull; &bull;</div>
+						<div className="load-more"
+							onClick={this.loadResultsFromServer} >
+							&bull; &bull; &bull;
+						</div>
 					</div>
 				</div>
 			);
