@@ -322,8 +322,8 @@ class Controller {
         });
     }
 
-    getResultsTable(callback) {
-        DAO.getInstance().getResults(null, null, null, function(results, err) {
+    getResultsTable(callCount, callback) {
+        DAO.getInstance().getResults(callCount*10, null, null, function(results, err) {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {

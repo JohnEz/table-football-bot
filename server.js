@@ -2,6 +2,7 @@
 
 const path = require('path');
 const express = require('express');
+const bodyParser = require('body-parser');
 const DAO = require('./server/controller/dao.js');
 const Controller = require('./server/controller/controller.js');
 const slackbot = require('./server/slackbot');
@@ -16,6 +17,8 @@ const app = express();
 *   MIDDLEWARE
 */
 app.use(express.static(path.join(__dirname, 'build')));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 /**
 *   ROUTES
@@ -25,7 +28,7 @@ app.get('/*', function(req, res) {
 });
 
 app.post('/bot/results', function(req, res) {
-    controller.getResultsTable(function(data, err) {
+    controller.getResultsTable(req.body.count, function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);
