@@ -2,8 +2,9 @@
 
 import React from 'react';
 import BracketColumn from './knockout-stage/bracket-column.js';
+import WinnerColumn from './knockout-stage/winner-column.js';
 
-var KnockoutStage = React.createClass({
+let KnockoutStage = React.createClass({
 	getInitialState: function() {
 		return {
 			matches: {},
@@ -39,24 +40,13 @@ var KnockoutStage = React.createClass({
 			columns.push(<BracketColumn key={this.state.matches.quaterFinals.length} matches={this.state.matches.quaterFinals} date="30-3RD JULY"/>);
 			columns.push(<BracketColumn key={this.state.matches.semiFinals.length} matches={this.state.matches.semiFinals} date="6-7TH JULY"/>);
 			columns.push(<BracketColumn key={this.state.matches.finals.length} matches={this.state.matches.finals} date="10TH JULY"/>);
+			columns.push(<WinnerColumn key ='winnerColumn' winner='Winner'/>);
 		}
 
 		return (
 			<div className="content">
 				<div className="bracket">
 					{columns}
-					<div className='bracket-column'>
-						<div className='bracket-header'>
-							<h3 className='column-date'>Winner</h3>
-						</div>
-						<div className='bracket-body'>
-							<div className='winner-divider'></div>
-							<div className='winner-divider winner-line'>
-								<div className='trophy-container'><img className='trophy' src={require('../img/trophy.png')}></img></div>
-								<div className='winner-name'> <div>Winner</div> </div>
-							</div>
-						</div>
-					</div>
 					{spinner}
 				</div>
 			</div>
