@@ -56,6 +56,9 @@ $columnWidth: 190px;
 	display: flex;
 	justify-content: space-between;
 	box-sizing: border-box;
+	.country {
+		text-transform: capitalize;
+	}
 }
 
 .score {
@@ -83,4 +86,31 @@ $columnWidth: 190px;
 
 .column-date {
 	text-align: center;
+}
+
+.winner-divider {
+	height: 50%;
+	position: relative;
+	&.winner-line {
+		border-top: 2px black solid;
+	}
+	.winner-name {
+		text-align: center;
+		padding: 0 5px;
+		position: absolute;
+		top: -20px;
+		width: $columnWidth;
+		font-weight: bold;
+		font-size: smaller;
+	}
+	.trophy-container {
+		top: -60px;
+		text-align: center;
+		width: $columnWidth;
+		position: absolute;
+		.trophy {
+			-webkit-filter: opacity(25%);
+			filter: opacity(25%);
+		}
+	}
 }
