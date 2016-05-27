@@ -2,6 +2,7 @@
 
 const path = require('path');
 const express = require('express');
+const bodyParser = require('body-parser');
 const DAO = require('./server/controller/dao.js');
 const Controller = require('./server/controller/controller.js');
 const slackbot = require('./server/slackbot');
@@ -16,6 +17,8 @@ const app = express();
 *   MIDDLEWARE
 */
 app.use(express.static(path.join(__dirname, 'build')));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 /**
 *   ROUTES
@@ -25,7 +28,7 @@ app.get('/*', function(req, res) {
 });
 
 app.post('/bot/results', function(req, res) {
-    controller.getResultsTable(function(data, err) {
+    controller.getResultsTable(req.body.count, function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);
@@ -46,6 +49,16 @@ app.post('/bot/users', function(req, res) {
 
 app.post('/bot/schedule', function(req, res) {
     controller.getMatchesToBePlayed(new Date(), null, null, function(data, err) {
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
+        res.json({today: data.today, overdue: data.overdue});
+    });
+});
+
+app.post('/bot/future', function(req, res) {
+    controller.getUpcomingMatches(req.body.count, function(data, err) {
         if (err) {
             console.error(err);
             process.exit(1);

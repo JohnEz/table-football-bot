@@ -78,6 +78,53 @@ class Controller {
         }.bind(this));
     }
 
+    getUpcomingMatches(callCount, callback) {
+
+        DAO.getInstance().getMatches(null, null, function(matchesMap) {
+
+            let upcoming = new Map()
+
+            matchesMap.forEach(function(match) {
+
+                if (match.date && !match.result) {
+                    let whenToPlay = this.compareMatchDate(new Date(), match);
+                    //check if its meant to be played in the future
+                    if (whenToPlay === 1) {
+                        let day = moment(match.date).format('YYYY-MM-DD');
+                        let game = {
+                            id: match._id,
+                            player1: match.team1.country,
+                            player2:  match.team2.country,
+                            score1: 'vs',
+                            score2: '',
+                        };
+
+                        if(upcoming.has(day)){
+                            upcoming.get(day).matches.push(game);
+                        }
+                        else {
+                            upcoming.set(day, {date: day, matches: [game]});
+                        }
+                    }
+                }
+
+            }.bind(this));
+
+            let matches = [...upcoming.values()].sort(function(a,b) {
+                let val = 0;
+                if (a.date < b.date) {
+                    val = -1;
+                }
+                else if (a.date > b.date) {
+                    val = 1;
+                }
+                return val;
+            });
+            callback(matches.slice(0, 2*callCount));
+
+        }.bind(this));
+    }
+
     getSlackHandle(player) {
         let slackName = `(@${player.slackID})`;
         if (player.slackCode) {
@@ -322,8 +369,8 @@ class Controller {
         });
     }
 
-    getResultsTable(callback) {
-        DAO.getInstance().getResults(null, null, null, function(results, err) {
+    getResultsTable(callCount, callback) {
+        DAO.getInstance().getResults(callCount*10, null, null, function(results, err) {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {
