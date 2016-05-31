@@ -53,6 +53,7 @@ module.exports = {
         rpilling: 'The man, the legend. Robert Pilling.',
         sburnstone: 'Ah the Swiss delegate arrives. The money is all safe yeah?',
         mrapolk: 'Mr Polkinghorn , mae mor dda y gallech ymuno â ni!',
+        joelmagee: 'Welcome <Perilous> JGMaster!',
         amjones: 'Safe fam'
     },
     winMessage: [
