@@ -448,68 +448,68 @@ class Controller {
 
     addMatches() {
         //group A
-        this.addMatch('albania', 'france');
-        this.addMatch('albania', 'romania');
-        this.addMatch('albania', 'switzerland');
-        this.addMatch('france', 'romania');
-        this.addMatch('france', 'switzerland');
-        this.addMatch('romania', 'switzerland');
+        this.addMatch('france', 'albania', new Date('2016-06-15'));
+        this.addMatch('romania', 'albania', new Date('2016-06-19'));
+        this.addMatch('albania', 'switzerland', new Date('2016-06-11'));
+        this.addMatch('france', 'romania', new Date('2016-06-10'));
+        this.addMatch('switzerland', 'france', new Date('2016-06-19'));
+        this.addMatch('romania', 'switzerland', new Date('2016-06-15'));
 
         //group B
-        this.addMatch('england', 'russia');
-        this.addMatch('england', 'slovakia');
-        this.addMatch('england', 'wales');
-        this.addMatch('russia', 'slovakia');
-        this.addMatch('russia', 'wales');
-        this.addMatch('slovakia', 'wales');
+        this.addMatch('england', 'russia', new Date('2016-06-11'));
+        this.addMatch('slovakia', 'england', new Date('2016-06-20'));
+        this.addMatch('england', 'wales', new Date('2016-06-16'));
+        this.addMatch('russia', 'slovakia', new Date('2016-06-15'));
+        this.addMatch('russia', 'wales', new Date('2016-06-20'));
+        this.addMatch('wales', 'slovakia', new Date('2016-06-11'));
 
         //group C
-        this.addMatch('germany', 'northern ireland');
-        this.addMatch('germany', 'poland');
-        this.addMatch('germany', 'ukraine');
-        this.addMatch('northern ireland', 'poland');
-        this.addMatch('northern ireland', 'ukraine');
-        this.addMatch('poland', 'ukraine');
+        this.addMatch('northern ireland', 'germany', new Date('2016-06-21'));
+        this.addMatch('germany', 'poland', new Date('2016-06-16'));
+        this.addMatch('germany', 'ukraine', new Date('2016-06-12'));
+        this.addMatch('poland', 'northern ireland', new Date('2016-06-12'));
+        this.addMatch('ukraine', 'northern ireland', new Date('2016-06-16'));
+        this.addMatch('ukraine', 'poland', new Date('2016-06-21'));
 
         //group D
-        this.addMatch('croatia', 'czech');
-        this.addMatch('croatia', 'spain');
-        this.addMatch('croatia', 'turkey');
-        this.addMatch('czech', 'spain');
-        this.addMatch('czech', 'turkey');
-        this.addMatch('spain', 'turkey');
+        this.addMatch('czech', 'croatia', new Date('2016-06-17'));
+        this.addMatch('croatia', 'spain', new Date('2016-06-21'));
+        this.addMatch('turkey', 'croatia', new Date('2016-06-12'));
+        this.addMatch('spain', 'czech', new Date('2016-06-13'));
+        this.addMatch('czech', 'turkey', new Date('2016-06-21'));
+        this.addMatch('spain', 'turkey', new Date('2016-06-17'));
 
         //group E
-        this.addMatch('belgium', 'italy', new Date('2016-05-21'));
-        this.addMatch('belgium', 'republic of ireland');
-        this.addMatch('belgium', 'sweden', new Date('2016-05-19'));
-        this.addMatch('italy', 'republic of ireland', new Date('2016-05-19'));
-        this.addMatch('italy', 'sweden', new Date('2016-05-20'));
-        this.addMatch('republic of ireland', 'sweden', new Date('2016-05-21'));
+        this.addMatch('belgium', 'italy', new Date('2016-06-13'));
+        this.addMatch('belgium', 'republic of ireland', new Date('2016-06-18'));
+        this.addMatch('sweden', 'belgium', new Date('2016-06-22'));
+        this.addMatch('italy', 'republic of ireland', new Date('2016-06-22'));
+        this.addMatch('italy', 'sweden', new Date('2016-06-17'));
+        this.addMatch('republic of ireland', 'sweden', new Date('2016-06-13'));
 
         //group F
-        this.addMatch('austria', 'hungary');
-        this.addMatch('austria', 'iceland');
-        this.addMatch('austria', 'portugal');
-        this.addMatch('hungary', 'iceland');
-        this.addMatch('hungary', 'portugal');
-        this.addMatch('iceland', 'portugal');
+        this.addMatch('austria', 'hungary', new Date('2016-06-14'));
+        this.addMatch('iceland', 'austria', new Date('2016-06-22'));
+        this.addMatch('portugal', 'austria', new Date('2016-06-18'));
+        this.addMatch('iceland', 'hungary', new Date('2016-06-18'));
+        this.addMatch('hungary', 'portugal', new Date('2016-06-22'));
+        this.addMatch('portugal', 'iceland', new Date('2016-06-14'));
 
         //group G
-        this.addMatch('copeman', 'enclava');
-        this.addMatch('copeman', 'sealand');
-        this.addMatch('copeman', 'forvik');
-        this.addMatch('enclava', 'sealand');
-        this.addMatch('enclava', 'forvik');
-        this.addMatch('sealand', 'forvik');
+        this.addMatch('copeman', 'enclava', new Date('2016-06-15'));
+        this.addMatch('copeman', 'sealand', new Date('2016-06-19'));
+        this.addMatch('copeman', 'forvik', new Date('2016-06-11'));
+        this.addMatch('enclava', 'sealand', new Date('2016-06-10'));
+        this.addMatch('enclava', 'forvik', new Date('2016-06-19'));
+        this.addMatch('sealand', 'forvik', new Date('2016-06-15'));
 
         //group H
-        this.addMatch('austenasia', 'perloja');
-        this.addMatch('austenasia', 'elleore');
-        this.addMatch('austenasia', 'frestonia');
-        this.addMatch('perloja', 'elleore');
-        this.addMatch('perloja', 'frestonia');
-        this.addMatch('elleore', 'frestonia');
+        this.addMatch('austenasia', 'perloja', new Date('2016-06-11'));
+        this.addMatch('austenasia', 'elleore', new Date('2016-06-20'));
+        this.addMatch('austenasia', 'frestonia', new Date('2016-06-16'));
+        this.addMatch('perloja', 'elleore', new Date('2016-06-15'));
+        this.addMatch('perloja', 'frestonia', new Date('2016-06-20'));
+        this.addMatch('elleore', 'frestonia', new Date('2016-06-11'));
     }
 
     //temp method to add scheduled matches
