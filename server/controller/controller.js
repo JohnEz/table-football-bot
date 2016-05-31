@@ -7,6 +7,7 @@ const moment = require('moment');
 const util = require('../util');
 const Reminder = require('reminder');
 const remind = new Reminder();
+const mainChannel = require('../config').mainChannel;
 
 class Controller {
     constructor() {
@@ -14,10 +15,13 @@ class Controller {
     }
 
     setupReminders(slackBot){
-        remind.every('09:00', function(date) {
+        remind.every('08:59', function(date) {
+
+            // setup the random messages to be sent today
+            this.getTodaysRandomMessages(4, slackBot);
 
             console.log('<-- Sending reminders -->');
-
+            // send reminders for overdue and todays games
             this.getMatchesToBePlayed(date, null, null, function(matches) {
 
                 matches.today.forEach(function(match) {
@@ -656,6 +660,38 @@ class Controller {
 
         });
     }
+
+    getTodaysRandomMessages(number, slackBot) {
+        for (let i = 0; i < number; i++) {
+            let hour = Math.floor(Math.random() * 8) + 9 ;
+            hour = hour < 10 ? '0'+hour : hour;
+            let minutes = Math.floor(Math.random() * 60);
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            let time = `${hour}:${minutes}`;
+            remind.at(time, function() {
+                let message = "";
+                switch(i%3) {
+                    case 0:
+                    // Jokes
+                    message = util.getRandomMessage('jokes');
+                    slackBot.sendMessage(mainChannel.code, message);
+                    break;
+                    case 1:
+                    let subject = util.getRandomMessage('giphySubjects');
+                    util.getGiphyURL(subject, function(msg) {
+                        slackBot.sendMessage(mainChannel.code, msg);
+                    })
+                    break;
+                    case 2:
+                    message = util.getRandomMessage('quotes');
+                    slackBot.sendMessage(mainChannel.code, message);
+                    break;
+                }
+            }
+        )
+    }
+}
+
 
 }
 
