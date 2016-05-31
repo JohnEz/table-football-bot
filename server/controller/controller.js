@@ -684,6 +684,7 @@ class Controller {
                     break;
                     case 2:
                     message = util.getRandomMessage('quotes');
+                    message = `>>>"${message}"`
                     slackBot.sendMessage(mainChannel.code, message);
                     break;
                 }
