@@ -620,11 +620,11 @@ class Controller {
                         matches.forEach(function(match) {
 
                             if (!match.team1) {
-                                match.team1 = {country: 'Team 1'};
+                                match.team1 = {country: 'ERROR'};
                             }
 
                             if (!match.team2) {
-                                match.team2 = {country: 'Team 2'};
+                                match.team2 = {country: 'ERROR'};
                             }
 
                             if (!match.result) {

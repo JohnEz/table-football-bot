@@ -243,8 +243,13 @@ class DAO {
 					console.log('Error in getMatches:', err);
 				} else if (doc) {
 
-					doc.team1 = playersMap.get(JSON.stringify(doc.team1));
-					doc.team2 = playersMap.get(JSON.stringify(doc.team2));
+					if (playersMap.has(JSON.stringify(doc.team1))) {
+						doc.team1 = playersMap.get(JSON.stringify(doc.team1));
+					}
+
+					if (playersMap.has(JSON.stringify(doc.team2))) {
+						doc.team2 = playersMap.get(JSON.stringify(doc.team2));
+					}
 
 					matchesMap.set(JSON.stringify(doc._id), doc);
 				} else {
