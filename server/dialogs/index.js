@@ -9,7 +9,7 @@ const slackBot = require('../slackbot');
 const moment = require('moment');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
-var model = process.env.LUIS_TOKEN || config.luisToken; 
+var model = process.env.LUIS_TOKEN || config.luisToken;
 var dialog = new builder.LuisDialog(model);
 module.exports = dialog;
 
@@ -93,7 +93,7 @@ dialog.on('WhoIs', function(session, args) {
 
 			if (player) {
 				let slack = player.slackCode ? player.slackCode : player.slackID
-				session.send(`<@${slack}> plays as ${player.country}`);
+				session.send(`<@${slack}> plays as ${util.capitaliseWords(player.country)}`);
 			}
 			else {
 				session.send('No player found');
@@ -150,7 +150,6 @@ dialog.on('UpcomingMatches', function(session, args) {
 
 dialog.on('Schedule', function(session, args, next) {
 
-
 		if (config.admins.indexOf(session.userData.id) === -1 ){
 			session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
 			return; // annoyingly endDialog doesn't end the dialog!
@@ -167,6 +166,7 @@ dialog.on('Schedule', function(session, args, next) {
 			date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
 			matchCode: matchCode ? matchCode.entity : null
 		};
+
 		if (isNaN(schedule.date.getTime())) {
 			session.endDialog(prompts.cantParseDate);
 		}
@@ -414,16 +414,16 @@ function respondFinalResult(session, results) {
 					difference = maxDifference;
 				}
 
-				let resultMessages = controller.calculateResultsMessages(result.s1, result.s2, difference);
+				let resultMessages = controller.calculateResultsMessages(endResult.score1, endResult.score2, difference);
 
 				//tell the winner he won
 				if (endResult.player1.slackCode) {
-					slackBot.sendMessage(endResult.player1.slackCode, resultMessages.player1Message, {country: endResult.player2.country});
+					slackBot.sendMessage(endResult.player1.slackCode, resultMessages.player1Message, {country: util.capitaliseWords(endResult.player2.country)});
 				}
 
 				//tell the user he lost
 				if (endResult.player2.slackCode) {
-					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player2Message, {country: endResult.player1.country});
+					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player2Message, {country: util.capitaliseWords(endResult.player1.country)});
 				}
 
 				//tell the main channel
