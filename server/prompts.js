@@ -35,6 +35,25 @@ module.exports = {
         'Wotcha',
         'Hello'
     ],
+    personalHello: {
+        dmcavelia: '<@U0TD1CX43>: you must have a foot like a traction engine!',
+        jameshill: 'Hi James! You know they wrote me in Delphi? #whatever #bantz #hilarz #delphi #hashtag',
+        alisd23: 'Ali, welcome. No walking out when you\'re 9-0 down OK?',
+        dkerr: 'Parties over everyone. Dean\'s here now.',
+        jleftley: 'Achtung, die Deutschen kamen . Willkommen James.',
+        dmiley: 'Welcome Drew, and remember; no ball hogging.',
+        jhodges: 'Welcome to the arena Jonathan "10-0" Hodgson! … I mean Hodges!',
+        morchard: 'Orchard, just Roper to beat.',
+        cprice: 'Who invited Chris Price?',
+        rmcneill: 'Top o\' the morning to you Rob!',
+        rnewsome: 'Oh, it’s Rob… are you not barred after last year\'s cheating?',
+        sjob: 'Добро пожаловать Стив.',
+        alison22: 'Och aye, it\'s Alison!',
+        rpilling: 'The man, the legend. Robert Pilling.',
+        sburnstone: 'Ah the Swiss delegate arrives. The money is all safe yeah?',
+        mrapolk: 'Mr Polkinghorn , mae mor dda y gallech ymuno â ni!',
+        amjones: 'Safe fam'
+    },
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
         'Congratulations, on your win against %(country)s.',
