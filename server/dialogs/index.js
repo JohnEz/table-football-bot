@@ -19,6 +19,18 @@ let controller = new Controller();
 /** Return a default message if nothing else is recognised */
 dialog.onDefault(builder.DialogAction.send(prompts.defaultReply));
 
+dialog.on('Greeting', function(session, args) {
+	if (Math.random() > 0.8) {
+		util.getGiphyURL('hello', function(url) {
+			session.endDialog(url);
+		});
+	}
+	else {
+		session.endDialog(util.getRandomMessage('greetingReply'));
+	}
+
+});
+
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
 

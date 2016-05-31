@@ -36,6 +36,17 @@ module.exports = {
         'Wotcha',
         'Hello'
     ],
+    greetingReply: [
+        'Hello back at you',
+        'Grüß Gött',
+        'Ciao',
+        'Alles klar?',
+        'Hi there',
+        'Today is a good day for baksheesh. Hint... Hint...',
+        'I may be all powerful but I still have time to say "hello" to the little people. \n_Hello little person!_',
+        'Hello, I am the v1 BlatterBot, currently powered by Cyberdyne Systems - for a brighter future :wink:',
+        'Bonjour'
+    ],
     personalHello: {
         dmcavelia: '<@U0TD1CX43>: you must have a foot like a traction engine!',
         jameshill: 'Hi James! You know they wrote me in Delphi? #whatever #bantz #hilarz #delphi #hashtag',
