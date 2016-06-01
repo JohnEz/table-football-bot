@@ -37,6 +37,7 @@ module.exports = {
     databaseError: 'There was a database error, please contact @amjones',
     getFirstTeam:'Sorry who was the first team?',
     getSecondTeam: 'Who was the second team?',
+    notInLeague: 'Sorry I don\'t know who you are :/',
     noGames: 'erm... you have played all your games',
     defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
     hello: [

@@ -52,52 +52,59 @@ dialog.on('AddResult', [
 
 /** Shows the user a list of Results. */
 dialog.on('ListResults', function (session, args) {
-		// See if got the tasks title from our LUIS model.
-		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-		let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
+	// See if got the tasks title from our LUIS model.
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
 
-		let request = {
-			p1: p1 ? p1.entity : null,
-			p2: p2 ? p2.entity : null,
-			limit: limit ? util.convertWordToNumber(limit.entity) : null
-		};
+	let request = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		limit: limit ? util.convertWordToNumber(limit.entity) : null
+	};
 
-		checkForMe('p1', request, session);
-		checkForMe('p2', request, session);
+	checkForMe('p1', request, session);
+	checkForMe('p2', request, session);
 
-		controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
-			//if there was no error
-			if (!err) {
+	controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
+		//if there was no error
+		if (!err) {
 
-				if (resultsArray.length > 0) {
-					let resultsString = '';
-					resultsArray.forEach(function(result) {
-						resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
-					});
+			if (resultsArray.length > 0) {
+				let resultsString = '';
+				resultsArray.forEach(function(result) {
+					resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
+				});
 
-					session.send(prompts.listResultsList, resultsString);
-				} else {
-					session.send(prompts.listNoResult);
-				}
-
+				session.send(prompts.listResultsList, resultsString);
 			} else {
-				session.send(prompts.databaseError);
+				session.send(prompts.listNoResult);
 			}
-		});
 
-		session.endDialog();
-	}
-);
+		} else {
+			session.send(prompts.databaseError);
+		}
+	});
+
+	session.endDialog();
+});
 
 /**Shows the user who is a country or user. */
 dialog.on('WhoIs', function(session, args) {
 	let user = builder.EntityRecognizer.findEntity(args.entities, 'player') ||
-	 builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
-	 builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
-	 null;
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
+	null;
+	let isMe = null;
 
 	if (user) {
+
+		isMe = isItMe(user.entity, session);
+
+		if (isMe) {
+			user.entity = isMe;
+		}
+
 		controller.getAllPlayers(function(allPlayers) {
 
 			let playersFound = util.getPlayerFromArray(user.entity, allPlayers);
@@ -108,12 +115,16 @@ dialog.on('WhoIs', function(session, args) {
 				session.send(`<@${slack}> plays as ${util.capitaliseWords(player.country)}`);
 			}
 			else {
-				session.send(prompts.playerNotFound);
+				if (isMe) {
+					session.send(prompts.notInLeague);
+				} else {
+					session.send(prompts.playerNotFound);
+				}
 			}
 		});
 	}
 	else {
-		session.send(prompts.error);
+		session.send(prompts.playerNotFound);
 	}
 	session.endDialog()
 });
@@ -121,38 +132,38 @@ dialog.on('WhoIs', function(session, args) {
 /**shows upcoming matches to the user. */
 dialog.on('UpcomingMatches', function(session, args) {
 
-	controller.getMyMatches(session.userData.id, function(matches) {
+	controller.getMyMatches(session.userData.id, function(matches, err) {
 		let matchesString = '';
 
-		if(matches.overdue.length > 0) {
-			matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
-
-			matches.overdue.forEach(function(match) {
-				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was ${moment(match.date).format('dddd Do MMMM')}\n`;
-			});
-			matchesString = matchesString + '\n';
-		}
-
-		if (matches.today.length > 0) {
-			matchesString = matchesString + 'Today\'s games:\n';
-
-			matches.today.forEach(function(match) {
-				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
-			});
-			matchesString = matchesString + '\n';
-		}
-
-		if (matches.upcoming.length > 0) {
-			matchesString = matchesString + 'Upcoming games:\n';
-
-			matches.upcoming.forEach(function(match) {
-				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
-			});
-		}
-
-		if (matchesString === '') {
-			session.send(prompts.noGames);
+		if (err) {
+			session.send(err);
 		} else {
+			if(matches.overdue.length > 0) {
+				matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
+
+				matches.overdue.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was ${moment(match.date).format('dddd Do MMMM')}\n`;
+				});
+				matchesString = matchesString + '\n';
+			}
+
+			if (matches.today.length > 0) {
+				matchesString = matchesString + 'Today\'s games:\n';
+
+				matches.today.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
+				});
+				matchesString = matchesString + '\n';
+			}
+
+			if (matches.upcoming.length > 0) {
+				matchesString = matchesString + 'Upcoming games:\n';
+
+				matches.upcoming.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
+				});
+			}
+
 			session.send(matchesString);
 		}
 
@@ -162,38 +173,38 @@ dialog.on('UpcomingMatches', function(session, args) {
 
 dialog.on('Schedule', function(session, args, next) {
 
-		if (config.admins.indexOf(session.userData.id) === -1 ){
-			session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
-			return; // annoyingly endDialog doesn't end the dialog!
-		}
-
-		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-		let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
-		let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
-
-		let schedule = {
-			p1: p1 ? p1.entity : null,
-			p2: p2 ? p2.entity : null,
-			date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
-			matchCode: matchCode ? matchCode.entity : null
-		};
-
-		if (isNaN(schedule.date.getTime())) {
-			session.endDialog(prompts.cantParseDate);
-		}
-		else {
-			controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, function(match) {
-				if(!match.error) {
-					session.endDialog(prompts.scheduleSuccess, match)
-				}
-				else {
-					session.endDialog(match.message, match.args);
-				}
-
-			});
-		}
+	if (config.admins.indexOf(session.userData.id) === -1 ){
+		session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
+		return; // annoyingly endDialog doesn't end the dialog!
 	}
+
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
+	let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
+
+	let schedule = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
+		matchCode: matchCode ? matchCode.entity : null
+	};
+
+	if (isNaN(schedule.date.getTime())) {
+		session.endDialog(prompts.cantParseDate);
+	}
+	else {
+		controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, function(match) {
+			if(!match.error) {
+				session.endDialog(prompts.scheduleSuccess, match)
+			}
+			else {
+				session.endDialog(match.message, match.args);
+			}
+
+		});
+	}
+}
 );
 
 
@@ -202,6 +213,14 @@ function checkForMe(p, result, session) {
 	if (util.isMe(player)) {
 		result[p] = session.userData.id;
 	}
+}
+
+function isItMe(input, session) {
+	let id = null;
+	if(util.isMe(input)) {
+		id = session.userData.id;
+	}
+	return id;
 }
 
 function getIntialAddInputs(session, args, next) {
