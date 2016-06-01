@@ -79,7 +79,7 @@ module.exports = {
         joelmagee: 'Welcome <Perilous> JGMaster!',
         jamiemorris: 'Hey, #1 guardian reader Jamie Morris',
         jarnstein: 'Jack! The octogenarian vegetarian. Welcome.',
-        amjones: 'Safe fam'
+        amjones: 'Safe fam!'
     },
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
