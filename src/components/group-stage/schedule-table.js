@@ -14,18 +14,21 @@ var ScheduleTable = React.createClass({
 			moreCount: 1,
 		}
 	},
-	loadResultsFromServer: function() {
+	loadGamesFromServer: function() {
 		fetch('/bot/schedule', {
 			method: 'post',
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
 			this.setState({today: data.today, overdue: data.overdue, loaded: true});
+			if (this.state.today.length + this.state.overdue.length < 8) {
+				this.loadUpcomingGamesFromServer();
+			}
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
 	},
-	loadUpcomingResultsFromServer: function() {
+	loadUpcomingGamesFromServer: function() {
 		let count = this.state.moreCount;
 		fetch('/bot/future', {
 			method: 'post',
@@ -43,7 +46,7 @@ var ScheduleTable = React.createClass({
 		});
 	},
 	componentDidMount: function() {
-		this.loadResultsFromServer();
+		this.loadGamesFromServer();
 	},
 	render: function() {
 		let spinner = null;
@@ -110,8 +113,8 @@ var ScheduleTable = React.createClass({
 				</div>
 				<div className="section-footer">
 					<div className="load-more"
-						onClick={this.loadUpcomingResultsFromServer} >
-						&bull; &bull; &bull;
+						onClick={this.loadUpcomingGamesFromServer} >
+						Load More
 					</div>
 				</div>
 
