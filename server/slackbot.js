@@ -5,16 +5,18 @@ var builder = require('botbuilder');
 var index = require('./dialogs/index');
 const config = require('./config');
 const getRand = require('./util').getRandomMessage;
+const prompts = require('./prompts');
+const DAO = require('./controller/dao');
 
 var Controller = require('./controller/controller');
 var appController = new Controller();
 
 var botController = Botkit.slackbot({
-	debug: false,
-	log: false
+	debug: true,
+	log: true
 });
 var bot = botController.spawn({
-	token: require('./config').slackBotToken
+	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
 var slackBot = new builder.SlackBot(botController, bot);
@@ -25,6 +27,16 @@ slackBot.add('/say', function(session, message) {
 	session.endDialog();
 });
 
+let createWelcomeMessage = function(name, fname) {
+	let message = `${getRand('hello')} ${fname}!`;
+
+	if (prompts.personalHello.hasOwnProperty(name)) {
+		message = prompts.personalHello[name];
+	}
+
+	return message
+}
+
 slackBot.on('user_channel_join', function(botkit, msg) {
 	// check if the channel being joined is the specific foosball one
 	bot.api.channels.info({channel: msg.channel}, function(err, data) {
@@ -34,11 +46,29 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 		if (data && data.channel.name === config.mainChannel.name) {
 			//check and persist user database
 			let user = [{
-				id:msg.user,
-				name:msg.user_profile.name,
-				fname:msg.user_profile.first_name
+				id: msg.user,
+				name: msg.user_profile.name,
+				fname: msg.user_profile.first_name
 			}];
-			botkit.reply(msg,`${getRand('hello')} ${msg.user_profile.first_name}!`);
+			let message = ``;
+
+			if(!user[0].fname) {
+				DAO.getInstance().getPlayer(user[0].name, function(player, err) {
+					let name = null;
+					let fname = null;
+					if (player) {
+						name = player.slackID;
+						fname = player.fname;
+					}
+
+					message = createWelcomeMessage(name, fname);
+					botkit.reply(msg, message);
+				});
+			} else {
+				message = createWelcomeMessage(user[0].name, user[0].fname);
+				botkit.reply(msg, message);
+			}
+
 			appController.addUsers(user);
 		}
 	});

@@ -1,0 +1,116 @@
+$eleSize: 50px;
+$columnWidth: 190px;
+
+.bracket {
+	height: 900px;
+	width: 800px;
+	display: flex;
+	flex-flow: row nowrap;
+}
+
+.bracket-header {
+
+}
+
+.bracket-body {
+	width: $columnWidth;
+	height: 800px;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-around;
+}
+
+.ele {
+	width: $columnWidth;
+	position: relative;
+	font-size: smaller;
+	&.c8 {
+		height: $eleSize;
+	}
+	&.c4 {
+		height: $eleSize*2;
+	}
+	&.c2 {
+		height: $eleSize*4;
+	}
+	&.c1 {
+		height: $eleSize*8;
+	}
+}
+
+.game-top, .game-bottom {
+	padding: 0 5px;
+	position: absolute;
+}
+
+.game-top {
+	top: -18px;
+}
+
+.game-bottom {
+	bottom: -18px;
+}
+
+.team {
+	width: $columnWidth;
+	display: flex;
+	justify-content: space-between;
+	box-sizing: border-box;
+	.country {
+		text-transform: capitalize;
+	}
+}
+
+.score {
+	width: 20px;
+	text-align: right;
+}
+
+.won-game {
+	font-weight: bold;
+}
+
+.upperLine, .lowerLine {
+	height: 50%;
+	border: 2px black solid;
+	border-left-width: 0;
+}
+
+.upperLine {
+	border-bottom-width: 0;
+}
+
+.lowerLine {
+	border-top-width: 0;
+}
+
+.column-date {
+	text-align: center;
+}
+
+.winner-divider {
+	height: 50%;
+	position: relative;
+	&.winner-line {
+		border-top: 2px black solid;
+	}
+	.winner-name {
+		text-align: center;
+		padding: 0 5px;
+		position: absolute;
+		top: -20px;
+		width: $columnWidth;
+		font-weight: bold;
+		font-size: smaller;
+	}
+	.trophy-container {
+		top: -60px;
+		text-align: center;
+		width: $columnWidth;
+		position: absolute;
+		.trophy {
+			-webkit-filter: opacity(25%);
+			filter: opacity(25%);
+		}
+	}
+}

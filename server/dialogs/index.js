@@ -6,9 +6,10 @@ var config = require('../config');
 const util = require('../util');
 const Controller = require('../controller/controller');
 const slackBot = require('../slackbot');
+const moment = require('moment');
 
 /** Return a LuisDialog that points at our model and then add intent handlers. */
-var model = process.env.model || config.luisToken;
+var model = process.env.LUIS_TOKEN || config.luisToken;
 var dialog = new builder.LuisDialog(model);
 module.exports = dialog;
 
@@ -17,6 +18,18 @@ let controller = new Controller();
 
 /** Return a default message if nothing else is recognised */
 dialog.onDefault(builder.DialogAction.send(prompts.defaultReply));
+
+dialog.on('Greeting', function(session, args) {
+	if (Math.random() > 0.8) {
+		util.getGiphyURL('hello', function(url) {
+			session.endDialog(url);
+		});
+	}
+	else {
+		session.endDialog(util.getRandomMessage('greetingReply'));
+	}
+
+});
 
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
@@ -38,71 +51,176 @@ dialog.on('AddResult', [
 ]);
 
 /** Shows the user a list of Results. */
-dialog.on('ListResults', [
-	function (session, args) {
-		// See if got the tasks title from our LUIS model.
-		let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-		let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-		let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
+dialog.on('ListResults', function (session, args) {
+	// See if got the tasks title from our LUIS model.
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
 
-		let request = {
-			p1: p1 ? p1.entity : null,
-			p2: p2 ? p2.entity : null,
-			limit: util.convertWordToNumber(limit.entity)
-		};
+	let request = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		limit: limit ? util.convertWordToNumber(limit.entity) : null
+	};
 
-		checkForMe('p1', request, session);
-		checkForMe('p2', request, session);
+	checkForMe('p1', request, session);
+	checkForMe('p2', request, session);
 
-		controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
-			//if there was no error
-			if (!err) {
+	controller.getResults(parseInt(request.limit), request.p1, request.p2, function(resultsArray, err) {
+		//if there was no error
+		if (!err) {
 
-				if (resultsArray.length > 0) {
-					let resultsString = '';
-					resultsArray.forEach(function(result) {
-						resultsString = resultsString + util.createResultString(result.winner, result.loser, result.winnerScore, result.loserScore) + '\n';
-					});
+			if (resultsArray.length > 0) {
+				let resultsString = '';
+				resultsArray.forEach(function(result) {
+					resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
+				});
 
-					session.send(prompts.listResultsList, resultsString);
-				} else {
-					session.send(prompts.listNoResult);
-				}
-
+				session.send(prompts.listResultsList, resultsString);
 			} else {
-				session.send(prompts.databaseError);
+				session.send(prompts.listNoResult);
 			}
-		});
 
-		session.endDialog();
-	}
-]);
+		} else {
+			session.send(prompts.databaseError);
+		}
+	});
+
+	session.endDialog();
+});
 
 /**Shows the user who is a country or user. */
 dialog.on('WhoIs', function(session, args) {
-	let user = builder.EntityRecognizer.findEntity(args.entities, 'player');
+	let user = builder.EntityRecognizer.findEntity(args.entities, 'player') ||
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
+	null;
+	let isMe = null;
+
 	if (user) {
-		controller.getPlayer(user.entity, function(player) {
+
+		isMe = isItMe(user.entity, session);
+
+		if (isMe) {
+			user.entity = isMe;
+		}
+
+		controller.getAllPlayers(function(allPlayers) {
+
+			let playersFound = util.getPlayerFromArray(user.entity, allPlayers);
+			let player = playersFound[0];
+
 			if (player) {
 				let slack = player.slackCode ? player.slackCode : player.slackID
-				session.send(`<@${slack}> plays as ${player.country}`);
+				session.send(`<@${slack}> plays as ${util.capitaliseWords(player.country)}`);
 			}
 			else {
-				session.send('No player found');
+				if (isMe) {
+					session.send(prompts.notInLeague);
+				} else {
+					session.send(prompts.playerNotFound);
+				}
 			}
 		});
 	}
 	else {
-		session.send(prompts.error);
+		session.send(prompts.playerNotFound);
 	}
 	session.endDialog()
 });
+
+/**shows upcoming matches to the user. */
+dialog.on('UpcomingMatches', function(session, args) {
+
+	controller.getMyMatches(session.userData.id, function(matches, err) {
+		let matchesString = '';
+
+		if (err) {
+			session.send(err);
+		} else {
+			if(matches.overdue.length > 0) {
+				matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
+
+				matches.overdue.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was ${moment(match.date).format('dddd Do MMMM')}\n`;
+				});
+				matchesString = matchesString + '\n';
+			}
+
+			if (matches.today.length > 0) {
+				matchesString = matchesString + 'Today\'s games:\n';
+
+				matches.today.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
+				});
+				matchesString = matchesString + '\n';
+			}
+
+			if (matches.upcoming.length > 0) {
+				matchesString = matchesString + 'Upcoming games:\n';
+
+				matches.upcoming.forEach(function(match) {
+					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
+				});
+			}
+
+			session.send(matchesString);
+		}
+
+	});
+
+});
+
+dialog.on('Schedule', function(session, args, next) {
+
+	if (config.admins.indexOf(session.userData.id) === -1 ){
+		session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
+		return; // annoyingly endDialog doesn't end the dialog!
+	}
+
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
+	let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
+
+	let schedule = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
+		matchCode: matchCode ? matchCode.entity : null
+	};
+
+	if (isNaN(schedule.date.getTime())) {
+		session.endDialog(prompts.cantParseDate);
+	}
+	else {
+		controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, function(match) {
+			if(!match.error) {
+				session.endDialog(prompts.scheduleSuccess, match)
+			}
+			else {
+				session.endDialog(match.message, match.args);
+			}
+
+		});
+	}
+}
+);
+
 
 function checkForMe(p, result, session) {
 	let player = result[p];
 	if (util.isMe(player)) {
 		result[p] = session.userData.id;
 	}
+}
+
+function isItMe(input, session) {
+	let id = null;
+	if(util.isMe(input)) {
+		id = session.userData.id;
+	}
+	return id;
 }
 
 function getIntialAddInputs(session, args, next) {
@@ -113,6 +231,12 @@ function getIntialAddInputs(session, args, next) {
 	let s2 = builder.EntityRecognizer.findEntity(args.entities, 'score::s2');
 	let win = builder.EntityRecognizer.findEntity(args.entities, 'modifier::win');
 	let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
+	let draw = builder.EntityRecognizer.findEntity(args.entities, 'modifier::draw');
+
+	if (!config.canAddResults) {
+		session.send(prompts.cannotAddResults);
+		return;
+	}
 
 	let result = session.dialogData.result = {
 		p1: p1 ? p1.entity : null,
@@ -120,7 +244,8 @@ function getIntialAddInputs(session, args, next) {
 		s1: s1 ? util.convertWordToNumber(s1.entity) : null,
 		s2: s2 ? util.convertWordToNumber(s2.entity) : null,
 		win: win !== null,
-		loss: loss !== null
+		loss: loss !== null,
+		draw: draw !== null
 	};
 
 	checkForMe('p1', result, session);
@@ -234,9 +359,18 @@ function validatePlayers(session, results, next) {
 
 	//now we have the final player docs, do validation
 	if (session.dialogData.validation.passed) {
-		session.dialogData.validation = controller.validatePlayers(result.p1, result.p2, session.userData.id);
+		controller.getMatches(result.p1, result.p2, function(matches) {
+			let match = controller.getValidMatch(matches);
+			session.dialogData.validation = controller.validatePlayers(result.p1, result.p2, session.userData.id, matches.size, match);
+
+			session.dialogData.match = match;
+
+			next();
+		});
+	} else {
+		next();
 	}
-	next();
+
 }
 
 function askForFirstScore(session, results, next) {
@@ -290,7 +424,7 @@ function validateScores(session, results, next) {
 	//check the re added score is a valid score
 	if (session.dialogData.validation.passed) {
 		let result = session.dialogData.result;
-		session.dialogData.validation = controller.validateScores(result.s1, result.s2);
+		session.dialogData.validation = controller.validateScores(result.s1, result.s2, result.win, result.loss, result.draw);
 	}
 
 	next();
@@ -302,26 +436,37 @@ function respondFinalResult(session, results) {
 
 	if (result.p1 && result.p2 && result.s1 !== null && result.s2 !== null && validation.passed) {
 
-		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, function(message, endResult) {
+		controller.submitResult(result.p1, result.p2, result.s1, result.s2, result.win, result.loss, result.draw, session.dialogData.match, function(message, endResult) {
 			//check it created a result
 			if (endResult) {
 
-				let difference = controller.checkScoreDifference(endResult.winnerScore, endResult.loserScore);
+				let difference = controller.checkScoreDifference(endResult.score1, endResult.score2);
+				let maxDifference = prompts.winMessage.length-1;
+
 				// difference is 1-10 for to get correct messages from array we need (0-9) / 3
 				difference = Math.floor((difference - 1) / 3);
+
+				if (difference > maxDifference) {
+					difference = maxDifference;
+				}
+
+				let resultMessages = controller.calculateResultsMessages(endResult.score1, endResult.score2, difference);
+
 				//tell the winner he won
-				if (endResult.winner.slackCode) {
-					slackBot.sendMessage(endResult.winner.slackCode, prompts.winMessage[difference] , {country: endResult.loser.country});
+				if (endResult.player1.slackCode) {
+					slackBot.sendMessage(endResult.player1.slackCode, resultMessages.player1Message, {country: util.capitaliseWords(endResult.player2.country)});
 				}
 
 				//tell the user he lost
-				if (endResult.loser.slackCode) {
-					slackBot.sendMessage(endResult.loser.slackCode, prompts.loseMessage[difference], {country: endResult.winner.country});
+				if (endResult.player2.slackCode) {
+					slackBot.sendMessage(endResult.player2.slackCode, resultMessages.player2Message, {country: util.capitaliseWords(endResult.player1.country)});
 				}
 
 				//tell the main channel
 				let broadcast = prompts.result;
-				if (difference === 3 ) broadcast = `<!channel> ${broadcast} :clap:`
+				if (difference === maxDifference && (endResult.score1 === 0 || endResult.score2 === 0)) {
+					broadcast = `<!channel> ${broadcast} :clap:`
+				}
 				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
 
 			} else {

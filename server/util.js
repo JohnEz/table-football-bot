@@ -1,5 +1,7 @@
 'use strict';
-const prompts = require('./prompts')
+
+const request = require('request');
+const prompts = require('./prompts');
 
 let numbers = {
     nil: 0,
@@ -13,7 +15,17 @@ let numbers = {
     seven: 7,
     eight: 8,
     nine: 9,
-    ten: 10
+    ten: 10,
+    eleven: 11,
+    twelve: 12,
+    thirteen: 13,
+    fourteen: 14,
+    fifteen: 15,
+    sixteen: 16,
+    seventeen: 17,
+    eighteen: 18,
+    nineteen:19,
+    twenty: 20
 }
 
 let capWords = function(s) {
@@ -33,8 +45,17 @@ module.exports = {
         return capWords(s);
     },
 
-    createResultString: function(winner, loser, winnerScore, loserScore) {
-        return `${winner} beat ${loser} ${winnerScore}-${loserScore}`;
+    createResultString: function(player1, player2, score1, score2) {
+
+        let resultMod = 'beat';
+
+        if (score1 < score2) {
+            resultMod = 'lost to';
+        } else if (score1 === score2) {
+            resultMod = 'drew with';
+        }
+
+        return `${player1} ${resultMod} ${player2} ${score1}-${score2}`;
     },
 
     isMe: function(name) {
@@ -67,5 +88,59 @@ module.exports = {
         else {
             return parseInt(word, 10);
         }
-    }
-};
+    },
+
+    parseLuisDate(date, refDate) {
+        /* remember getMonth returns 0 - 11  */
+
+        let today = refDate || new Date();
+
+        let parts = date.split('-');
+
+        //parse day
+        parts[2] = parseInt(parts[2]);
+
+        // parse month
+        if (parts[1] === 'XX') {
+            if (today.getDate() > parts[2] ) {
+                parts[1] = (today.getMonth() + 1 ) % 12; // to account for December
+            }
+            else {
+                parts[1] = today.getMonth();
+            }
+        }
+        else {
+            parts[1] = parseInt(parts[1]) - 1; // so month is 0 - 11
+        }
+
+        // parse year
+        if (parts[0] === 'XXXX') {
+            if (
+                today.getMonth() > parts[1]  ||
+                today.getMonth() === parts[1]  && today.getDate() > parts[2]) {
+                    parts[0] = today.getFullYear() + 1;
+                }
+                else {
+                    parts[0] = today.getFullYear();
+                }
+            }
+            else {
+                parts[0] = parseInt(parts[0]);
+            }
+
+            return new Date(...parts)
+        },
+
+        getGiphyURL(subject, callback) {
+            let url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${subject.replace(' ', '+')}`;
+            request(url, function(err, resp, body) {
+                if(!err) {
+                    let data = JSON.parse(body).data;
+                    callback(`http://i.giphy.com/${data.id}.${data.type}`)
+                }
+                else (
+                    callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif')
+                )
+            });
+        }
+    };

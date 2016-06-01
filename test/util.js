@@ -42,19 +42,54 @@ describe('Util', function () {
 	});
 
 	it('should change numbers which are words', function() {
-		let numbers = {'nil': 0, 'zero': 0, 'three': 3, 'seven': 7, 'ten': 10};
+		let numbers = {'nil': 0, 'zero': 0, 'three': 3, 'seven': 7, 'ten': 10, 'fifteen': 15, 'nineteen': 19};
 		for (let key in numbers){
 			expect(util.convertWordToNumber(key)).to.equal(numbers[key]);
 		}
 	});
 
-	it('should not match words above 10', function() {
-		expect(util.convertWordToNumber('eleven')).to.equal(null);
+	it('should return null for an unknown number or word', function() {
+		let  words = ['twenty five', 'thirty', 'a jillion', 'one hundred million'];
+		words.forEach(function(word) {
+			expect(util.convertWordToNumber(word)).to.equal(null);
+		})
 	});
 
 	it('should not fail on null or undefined', function() {
 		expect(util.convertWordToNumber(null)).to.equal(null);
 		expect(util.convertWordToNumber()).to.equal(null);
-	})
+	});
+});
+
+describe('Util Date Parse', function () {
+	const today = new Date(2016, 4, 24); // 24th May 2016
+
+	it('should return a correct date object', function() {
+		expect(util.parseLuisDate('2016-05-25', today).getTime()).to.equal(new Date(2016, 4, 25).getTime());
+	});
+
+	it('should return a today date object', function() {
+		expect(util.parseLuisDate('2016-05-24', today).getTime()).to.equal(new Date(2016, 4, 24).getTime());
+	});
+
+	it('should return a correct date object given no year (month later)', function() {
+		expect(util.parseLuisDate('XXXX-08-25', today).getTime()).to.equal(new Date(2016, 7, 25).getTime());
+	});
+
+	it('should return a correct date object given no year (month earlier)', function() {
+		expect(util.parseLuisDate('XXXX-04-25', today).getTime()).to.equal(new Date(2017, 3, 25).getTime());
+	});
+
+	it('should return a correct date object given no year (month same, day earlier)', function() {
+		expect(util.parseLuisDate('XXXX-05-23', today).getTime()).to.equal(new Date(2017, 4, 23).getTime());
+	});
+
+	it('should return a correct date object given no month or year (day later)', function() {
+		expect(util.parseLuisDate('XXXX-XX-28', today).getTime()).to.equal(new Date(2016, 4, 28).getTime());
+	});
+
+	it('should return a correct date object given no month or year (day earlier)', function() {
+		expect(util.parseLuisDate('XXXX-XX-18', today).getTime()).to.equal(new Date(2016, 5, 18).getTime());
+	});
 
 });

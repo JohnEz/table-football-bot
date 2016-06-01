@@ -4,7 +4,8 @@ let url = process.env.DATABASE_URL || require('../config').database_url;
 
 let instance = null;
 const playersCollection = 'players';
-const scoresCollection = 'matches';
+const matchesCollection = 'matches';
+const resultsCollection = 'results';
 
 class DAO {
 	constructor() {
@@ -85,21 +86,34 @@ class DAO {
 		});
 	}
 
-	addResult(winnerID, loserID, winningScore, losingScore, callback) {
-		let collection = this.db.collection(scoresCollection);
+	addResult(player1ID, player2ID, winningScore, losingScore, match, callback) {
+		let results = this.db.collection(resultsCollection);
+		let matches = this.db.collection(matchesCollection);
 		let dateAdded = new Date();
 
-		collection.insertOne( { winner: winnerID, loser: loserID, winnerScore: winningScore, loserScore: losingScore, date: dateAdded }, function(err) {
+		results.insertOne( { player1: player1ID, player2: player2ID, score1: winningScore, score2: losingScore, date: dateAdded }, function(err, result) {
 			if (err) {
 				console.log(err);
+				callback(!err);
+			} else {
+				matches.findAndModify(
+					{ _id: match._id },
+					[['_id', 1]],
+					{$set: { result: result.ops[0]._id } },
+					function(error, foundMatch) {
+						if (error) {
+							console.log(error);
+						}
+						callback(!error);
+					}
+				);
 			}
-			callback(!err);
 		});
 
 	}
 
 	getResults(count, player1Doc, player2Doc, callback) {
-		let collection = this.db.collection(scoresCollection);
+		let collection = this.db.collection(resultsCollection);
 		let resultArray = [];
 		let query = {};
 
@@ -110,20 +124,22 @@ class DAO {
 
 				//create the query
 				if (player1Doc && player2Doc) {
-					query = { $or: [ { winner : player1Doc._id, loser : player2Doc._id }, { winner : player2Doc._id, loser : player1Doc._id } ] };
+					query = { $or: [ { player1 : player1Doc._id, player2 : player2Doc._id }, { player1 : player2Doc._id, player2 : player1Doc._id } ] };
 				} else if (player1Doc) {
-					query = { $or: [ { winner : player1Doc._id }, { loser : player1Doc._id } ] };
+					query = { $or: [ { player1 : player1Doc._id }, { player2 : player1Doc._id } ] };
 				}
 
-				collection.aggregate( [ { $match: query }, {$sort : { date : -1 }}, { $limit : count } ] ).each(function(err, doc) {
+				let aggregate = count ? [ { $match: query }, {$sort : { date : -1 }}, { $limit : count } ] : [ { $match: query }, {$sort : { date : -1 }} ];
+
+				collection.aggregate( aggregate ).each(function(err, doc) {
 					//if there was an error with the database
 					if (err) {
 						callback(null, err)
 						console.log('error', err);
 					} else if (doc) {
 						//if there is a document, add it
-						doc.winner = playersMap.get(JSON.stringify(doc.winner));
-						doc.loser = playersMap.get(JSON.stringify(doc.loser));
+						doc.player1 = playersMap.get(JSON.stringify(doc.player1));
+						doc.player2 = playersMap.get(JSON.stringify(doc.player2));
 
 						resultArray.push(doc);
 					} else {
@@ -137,6 +153,24 @@ class DAO {
 			} else {
 				callback(null, err);
 			}
+		});
+	}
+
+	getResultsMap(callback) {
+		let collection = this.db.collection(resultsCollection);
+		let resultsMap = new Map();
+
+		collection.find().each(function (err, doc) {
+			if (err) {
+				console.log(err);
+			}
+
+			if (doc) {
+				resultsMap.set(JSON.stringify(doc._id), doc);
+			} else {
+				callback(err, resultsMap);
+			}
+
 		});
 	}
 
@@ -159,6 +193,73 @@ class DAO {
 			}
 		);
 	}
+
+	addMatch(team1ID, team2ID, scheduledDate, bracket, match, callback) {
+		let collection = this.db.collection(matchesCollection);
+		let query = {$and: [ {stage: 'group'}, {matchNumber: 'x'} ]};
+
+		if (bracket && match) {
+			query = {$and: [ {stage: bracket}, {matchNumber: match} ]};
+		}
+
+		collection.findAndModify(
+			query,
+			[['match', 1]],
+			{$set : { 'team1': team1ID, 'team2': team2ID, 'date': scheduledDate, 'result': null, stage: bracket, matchNumber: match }},
+			{upsert: true, new: true},
+			function(err, data) {
+				let id = null;
+				if (err) {
+					console.log(err);
+				}
+
+				if (data) {
+					id = data.value._id;
+				}
+
+				callback(err, id);
+			}
+		)
+	}
+
+	getMatches(team1ID, team2ID, callback) {
+		let collection = this.db.collection(matchesCollection);
+		let matchesMap = new Map();
+		let query = {};
+
+		if (team1ID) {
+			if(team2ID) {
+				query = { $or: [ { team1 : team1ID, team2 : team2ID }, { team1 : team2ID, team2 : team1ID } ] };
+			} else {
+				query = { $or: [ { team1 : team1ID }, { team2 : team1ID } ] };
+			}
+		}
+		//get the players
+		this.getAllPlayers(function(playersMap, err) {
+			collection.find(query).each(function(err, doc) {
+
+				if (err) {
+					callback(null, err);
+					console.log('Error in getMatches:', err);
+				} else if (doc) {
+
+					if (playersMap.has(JSON.stringify(doc.team1))) {
+						doc.team1 = playersMap.get(JSON.stringify(doc.team1));
+					}
+
+					if (playersMap.has(JSON.stringify(doc.team2))) {
+						doc.team2 = playersMap.get(JSON.stringify(doc.team2));
+					}
+
+					matchesMap.set(JSON.stringify(doc._id), doc);
+				} else {
+					callback(matchesMap);
+				}
+
+			});
+		});
+	}
+
 }
 
 let _dao = new DAO();
