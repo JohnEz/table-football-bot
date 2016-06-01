@@ -57,6 +57,8 @@ class Controller {
             let todaysGames = [];
             let overdueGames = [];
             let upcomingGames = [];
+            let noGameFound = true;
+            let error = null;
 
             matchesMap.forEach(function(match) {
 
@@ -64,6 +66,10 @@ class Controller {
                 if (match.date && !match.result) {
 
                     let whenToPlay = this.compareMatchDate(date, match);
+
+                    if (noGameFound) {
+                        noGameFound = false;
+                    }
 
                     //check if its meant to be played today
                     if (whenToPlay === 0) {
@@ -78,7 +84,11 @@ class Controller {
 
             }.bind(this));
 
-            callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames } );
+            if (noGameFound) {
+                error = prompts.noGames;
+            }
+
+            callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames }, error );
         }.bind(this));
     }
 
@@ -155,7 +165,11 @@ class Controller {
 
     getMyMatches(id, callback) {
         DAO.getInstance().getPlayer(id, function(player) {
-            this.getMatchesToBePlayed(new Date(), player._id, null, callback);
+            if (player) {
+                this.getMatchesToBePlayed(new Date(), player._id, null, callback);
+            } else {
+                callback(null, prompts.notInLeague);
+            }
         }.bind(this));
     }
 
