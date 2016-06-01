@@ -1,12 +1,21 @@
 // list of messages that can be sent back to the user.
 
 module.exports = {
-    helpMessage: "Here's what I can do:\n\n" +
-    "* Add new results by saying something like 'England beat Germany 10 - 0'\n" +
-    "* List previous results by saying something like 'what where the last results?'\n" +
-    "* Ask who the player or country is by saying 'who is Germany?\n" +
-    "* Ask what your upcoming games are by saying something like 'when am I playing next'\n\n" +
-    "To see the League tables, upcoming matches and results visit http://sl-foosball.herokuapp.com/",
+    helpMessage:
+    `Here's what I can do:\n
+    • Add new results by saying something like:
+       "England 10 Germany 0"
+       "Sweden lost to Italy ten nil"
+       "I beat Northern Ireland 15 1"\n
+    • List previous results by saying something like:
+       "what were the last results?"
+       "show me Croatia's last 2 results"\n
+    • Ask who the player or country is by saying:
+       "who is Germany?"
+       "which country does @someName play as?"\n
+    • Ask what your upcoming games are by saying something like:
+       "when am I playing next?"\n
+    To see the group tables, upcoming matches and results visit http://sl-foosball.herokuapp.com/`,
     error: 'D\'oh, something went wrong, try again.',
     resultCreated: "Added a new result: '%(result)s'",
     listResultsList: 'Results\n%s',
