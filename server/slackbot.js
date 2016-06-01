@@ -19,7 +19,7 @@ var bot = botController.spawn({
 	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
-var slackBot = new builder.SlackBot(botController, bot);
+var slackBot = new builder.SlackBot(botController, bot, {ambientMentionDuration: 120000, minSendDelay: 1000 });
 slackBot.add('/', index);
 
 slackBot.add('/say', function(session, message) {
