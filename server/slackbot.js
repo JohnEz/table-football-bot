@@ -13,13 +13,21 @@ var appController = new Controller();
 
 var botController = Botkit.slackbot({
 	debug: false,
-	log: true
+	log: false
 });
 var bot = botController.spawn({
 	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
-var slackBot = new builder.SlackBot(botController, bot);
+botController.middleware.receive.use(function(bot, message, next) {
+	if (message.type === 'message' && !message.bot_id && message.channel[0] === 'D') {
+
+		console.log(`${message.ts} | From: ${message.user} | Message: ${message.text}`);
+	}
+	next();
+});
+
+var slackBot = new builder.SlackBot(botController, bot, {ambientMentionDuration: 120000, minSendDelay: 1000 });
 slackBot.add('/', index);
 
 slackBot.add('/say', function(session, message) {
