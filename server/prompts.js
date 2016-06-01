@@ -24,6 +24,7 @@ module.exports = {
     confirmPlayer2: 'Did you mean one of these for the second player?',
     player1NotFound: '%(player1)s was not found',
     player2NotFound: '%(player2)s was not found',
+    playerNotFound: 'I can\'t find that person they don\'t seem to be within my sphere of influence!',
     tooManyPlayersFound: 'Please try to be more specific with your player names',
     sameTeamEntered: 'A team can\'t play against itself',
     noMatchFound: 'There are no scheduled matches between these teams',
