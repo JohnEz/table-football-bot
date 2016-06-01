@@ -165,4 +165,11 @@ $tableWidth: 470px;
 
 .load-more {
 	cursor: pointer;
+	font-size: small;
+	color: #FFF;
+	background-color: $tableHeader;
+	border-radius: 7px;
+	padding: 2px 8px;
+	float: right;
+	margin-top: 5px;
 }

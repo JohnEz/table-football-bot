@@ -2,6 +2,7 @@
 
 import React from 'react';
 import MatchDay from '../matches/match-day.js';
+import classnames from 'classnames';
 
 var ResultTable = React.createClass({
 	getInitialState: function() {
@@ -38,11 +39,22 @@ var ResultTable = React.createClass({
 			spinner = <div className="loader">Loading...</div>;
 			}
 
+			let footClass = classnames({
+				"load-more": true,
+				"hidden": this.state.results.length === 0,
+			});
+
+			let body = "";
+			if (this.state.results.length === 0) {
+				body = <div className="no-results" >There are currently no results to show.</div>
+			}
+
 			return (
 				<div className='results'>
 					<div className='section-header'>
 						<h2>Results</h2>
 					</div>
+					{body}
 					<div className="section-body">
 						<div className="table">
 							{
@@ -60,9 +72,9 @@ var ResultTable = React.createClass({
 						</div>
 					</div>
 					<div className="section-footer">
-						<div className="load-more"
+						<div className={footClass}
 							onClick={this.loadResultsFromServer} >
-							&bull; &bull; &bull;
+							Load More
 						</div>
 					</div>
 				</div>
