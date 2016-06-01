@@ -76,6 +76,8 @@ module.exports = {
         sburnstone: 'Ah the Swiss delegate arrives. The money is all safe yeah?',
         mrapolk: 'Mr Polkinghorn , mae mor dda y gallech ymuno â ni!',
         joelmagee: 'Welcome <Perilous> JGMaster!',
+        jamiemorris: 'Hey, #1 guardian reader Jamie Morris',
+        jarnstein: 'Jack! The octogenarian vegetarian. Welcome.',
         amjones: 'Safe fam'
     },
     winMessage: [
