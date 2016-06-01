@@ -39,6 +39,7 @@ module.exports = {
     getSecondTeam: 'Who was the second team?',
     notInLeague: 'Sorry I don\'t know who you are :/',
     noGames: 'erm... you have played all your games',
+    cannotAddResults: 'The football gods have decreed that it is not time for submitting results yet',
     defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
     hello: [
         'Welcome to the Thunderdome',

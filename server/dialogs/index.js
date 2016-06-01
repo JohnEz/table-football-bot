@@ -233,6 +233,11 @@ function getIntialAddInputs(session, args, next) {
 	let loss = builder.EntityRecognizer.findEntity(args.entities, 'modifier::loss');
 	let draw = builder.EntityRecognizer.findEntity(args.entities, 'modifier::draw');
 
+	if (!config.canAddResults) {
+		session.send(prompts.cannotAddResults);
+		return;
+	}
+
 	let result = session.dialogData.result = {
 		p1: p1 ? p1.entity : null,
 		p2: p2 ? p2.entity : null,
