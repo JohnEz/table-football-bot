@@ -108,7 +108,7 @@ dialog.on('WhoIs', function(session, args) {
 				session.send(`<@${slack}> plays as ${util.capitaliseWords(player.country)}`);
 			}
 			else {
-				session.send('No player found');
+				session.send(prompts.playerNotFound);
 			}
 		});
 	}
