@@ -87,7 +87,7 @@ $tableWidth: 470px;
 	flex-flow: row nowrap;
 	justify-content: space-between;
 	padding: 2px 5px 2px 5px;
-	border-bottom: 1px solid #D0D0D0;
+	border-bottom: 1px solid $tableHeaderText;
 	background-color: $tableBody;
 
 	.won, .draw, .lost, .for, .against, .diff, .points, .score {
@@ -133,7 +133,7 @@ $tableWidth: 470px;
 		margin-bottom: 5px;
 		font-weight: bold;
 		background-color: $tableHeader;
-		color: #D0D0D0
+		color: $tableHeaderText;
 	}
 	&.table-group-header {
 		margin-top: 20px;
@@ -166,7 +166,7 @@ $tableWidth: 470px;
 .load-more {
 	cursor: pointer;
 	font-size: small;
-	color: #FFF;
+	color: $tableHeaderText;
 	background-color: $tableHeader;
 	border-radius: 7px;
 	padding: 2px 8px;

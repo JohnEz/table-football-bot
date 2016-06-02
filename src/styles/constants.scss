@@ -1,8 +1,9 @@
 $backgroundColor: rgb(236, 236, 236);
 $background: rgba($backgroundColor, 0.8);
-$tableBody: #B4CCAF;
+$tableBody: rgba(180, 204, 175, 0.8);
 $tableHeader:darken($tableBody, 40%);
 $fadeTo: rgba($tableHeader, 0.9);
+$tableHeaderText: rgb(240, 240, 240);
 $highlighted: #FA1;
 
 $width: 1080px;
