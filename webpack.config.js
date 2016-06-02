@@ -64,10 +64,29 @@ const common = {
 	]
 };
 
+const production = {
+	plugins: [
+		new webpack.DefinePlugin({
+			'process.env': {
+				'NODE_ENV': JSON.stringify('production')
+			}
+		}),
+		new webpack.optimize.UglifyJsPlugin({
+			minimize: true,
+			compress: {
+				warnings: false
+			},
+			output: {
+				comments: false
+			}
+		})
+	],
+};
+
 var config;
 switch(process.env.npm_lifecycle_event) {
 	case 'build':
-	config = merge(common, {});
+	config = merge(common, production);
 	break;
 	default:
 	config = merge(common, {});

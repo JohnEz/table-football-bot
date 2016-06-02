@@ -92,4 +92,5 @@ DAO.getInstance().init(function() {
     console.log('Database setup complete');
     slackbot.startBot();
     controller.setupReminders(slackbot);
+    controller.randomMessageSetup(slackbot);
 });
