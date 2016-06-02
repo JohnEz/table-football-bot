@@ -54,36 +54,30 @@ html, body, #app, wrapper {
 	color: #FFF;
 }
 
+.header {
+	align-items: center;
+}
+
 header {
-	h1 {
-		margin-top: 5px;
-		margin-left: 10px;
-		.sl {
-			font-family: Hoefler Text,Baskerville Old Face,Garamond,Times New Roman,serif;
-			font-weight: bolder;
-		}
-		.logic {
-			font-weight: normal;
-		}
-	}
+	display: flex;
+	align-items: center;
+}
+
+header img:last-child {
+	margin-left: 15px
 }
 .nav {
-	list-style: none;
-	text-align: center;
 	padding: 0;
 	margin: 0 10px;
-
+	line-height: 1em;
 	li {
 		display:inline-flex;
 		font-size: 1em;
-		line-height: 40px;
-		height: 40px;
 		margin: 0 10px;
 		a {
 			color: #FFF;
 			text-decoration: none;
 		}
-
 	}
 	.active {
 		color: #FA1;
@@ -126,14 +120,14 @@ header {
 
 ///////////////// VIDEO ///////////
 #video-background {
-/*  making the video fullscreen  */
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: -100;
-  @include blur(5px);
+	/*  making the video fullscreen  */
+	position: fixed;
+	right: 0;
+	bottom: 0;
+	min-width: 100%;
+	min-height: 100%;
+	width: auto;
+	height: auto;
+	z-index: -100;
+	@include blur(5px);
 }
