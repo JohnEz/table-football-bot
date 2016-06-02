@@ -52,12 +52,18 @@ $columnWidth: 190px;
 }
 
 .team {
+	cursor: default;
 	width: $columnWidth;
 	display: flex;
 	justify-content: space-between;
 	box-sizing: border-box;
+	transition: all .25s linear;
+	-webkit-transition: all .25s linear;
 	.country {
 		text-transform: capitalize;
+		&.highlighted {
+			font-weight: bold;
+		}
 	}
 }
 
@@ -74,14 +80,22 @@ $columnWidth: 190px;
 	height: 50%;
 	border: 2px black solid;
 	border-left-width: 0;
+	transition: all .25s linear;
+	-webkit-transition: all .25s linear;
 }
 
 .upperLine {
 	border-bottom-width: 0;
+	&.highlighted {
+		box-shadow: 3px -3px 4px $highlighted, inset -3px 3px 5px $highlighted;
+	}
 }
 
 .lowerLine {
 	border-top-width: 0;
+	&.highlighted {
+		box-shadow: 3px 3px 4px $highlighted, inset -3px -3px 5px $highlighted;
+	}
 }
 
 .column-date {

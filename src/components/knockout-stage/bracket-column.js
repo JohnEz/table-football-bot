@@ -2,31 +2,56 @@
 
 import React from 'react';
 
+import TeamContainer from './team-container.js';
+
 let bracketColumn = React.createClass({
 
 	render: function() {
 		let elements = [];
 		let count = this.props.matches.length;
 		let date = this.props.date;
+		let highlightedTeam = this.props.highlightedTeam;
+		let highlightFunction = this.props.highlightFunction;
 
 		this.props.matches.map(function(match, index, array) {
 			let team1Winner = '';
 			let team2Winner = '';
+			let upperHighlight = '';
+			let lowerHighlight = '';
+			let team1 = match.team1;
+			let team2 = match.team2;
+
 
 			if (match.winner === 1) {
-				team1Winner = 'won-game';
+				team1Winner = 'won-game ';
 			} else if (match.winner === 2) {
-				team2Winner = 'won-game';
+				team2Winner = 'won-game ';
+			}
+
+			if (team1.country === highlightedTeam) {
+				upperHighlight = 'highlighted ';
+			} else if (team2.country === highlightedTeam){
+				lowerHighlight = 'highlighted ';
 			}
 
 			elements.push(
 				<div className={'ele c'+count+' c'+count+'e'+index} key ={'c'+count+'e'+index}>
-					<div className={'team game-top '+team1Winner}> <div className='country'>{match.team1.country}</div> <div className='score'>{match.result.score1}</div> </div>
-					<div className='upperLine'></div>
-					<div className='lowerLine'></div>
-					<div className={'team game-bottom '+team2Winner}> <div className='country'>{match.team2.country}</div> <div className='score'>{match.result.score2}</div> </div>
+					<TeamContainer
+						containerClass={'team game-top '+team1Winner}
+						countryClass={'country '+upperHighlight}
+						player={team1} score={match.result.score1}
+						highlightFunction={highlightFunction}/>
+					<div className={'upperLine '+upperHighlight}></div>
+					<div className={'lowerLine '+lowerHighlight}></div>
+					<TeamContainer
+						containerClass={'team game-bottom '+team2Winner}
+						countryClass={'country '+lowerHighlight}
+						player={team2}
+						score={match.result.score2}
+						highlightFunction={highlightFunction}/>
 				</div>
 			);
+
 		});
 		return (
 			<div className='bracket-column'>

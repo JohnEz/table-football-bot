@@ -8,7 +8,8 @@ let KnockoutStage = React.createClass({
 	getInitialState: function() {
 		return {
 			matches: {},
-			loaded: false
+			loaded: false,
+			highlightedTeam: ''
 		}
 	},
 	loadResultsFromServer: function() {
@@ -28,6 +29,16 @@ let KnockoutStage = React.createClass({
 	render: function() {
 
 		let spinner = null;
+		let self = this;
+		let highlightedTeam = this.state.highlightedTeam;
+
+		let highlightFunction = function(player) {
+			if (player._id) {
+				self.setState({highlightedTeam: player.country});
+			} else {
+				self.setState({highlightedTeam: ''});
+			}
+		}
 
 		if (!this.state.loaded) {
 			spinner = <div className="loader">Loading...</div>;
@@ -36,10 +47,30 @@ let KnockoutStage = React.createClass({
 		let columns = [];
 
 		if (this.state.matches.prelims) {
-			columns.push(<BracketColumn key={this.state.matches.prelims.length} matches={this.state.matches.prelims} date="25-27TH JUNE"/>);
-			columns.push(<BracketColumn key={this.state.matches.quaterFinals.length} matches={this.state.matches.quaterFinals} date="30-3RD JULY"/>);
-			columns.push(<BracketColumn key={this.state.matches.semiFinals.length} matches={this.state.matches.semiFinals} date="6-7TH JULY"/>);
-			columns.push(<BracketColumn key={this.state.matches.finals.length} matches={this.state.matches.finals} date="10TH JULY"/>);
+			columns.push(<BracketColumn
+				key={this.state.matches.prelims.length}
+				matches={this.state.matches.prelims}
+				date="25-27TH JUNE"
+				highlightedTeam={highlightedTeam}
+				highlightFunction={highlightFunction}/>);
+			columns.push(<BracketColumn
+				key={this.state.matches.quaterFinals.length}
+				matches={this.state.matches.quaterFinals}
+				date="30-3RD JULY"
+				highlightedTeam={highlightedTeam}
+				highlightFunction={highlightFunction}/>);
+			columns.push(<BracketColumn
+				key={this.state.matches.semiFinals.length}
+				matches={this.state.matches.semiFinals}
+				date="6-7TH JULY"
+				highlightedTeam={highlightedTeam}
+				highlightFunction={highlightFunction}/>);
+			columns.push(<BracketColumn
+				key={this.state.matches.finals.length}
+				matches={this.state.matches.finals}
+				date="10TH JULY"
+				highlightedTeam={highlightedTeam}
+				highlightFunction={highlightFunction}/>);
 			columns.push(<WinnerColumn key ='winnerColumn' winner='Winner'/>);
 		}
 
