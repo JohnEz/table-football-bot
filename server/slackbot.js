@@ -47,18 +47,12 @@ let createWelcomeMessage = function(name, fname) {
 
 slackBot.on('user_channel_join', function(botkit, msg) {
 
-	console.log('botkit', botkit);
-	console.log('msg:', msg);
-	console.log('channel:', msg.channel);
-
 	// check if the channel being joined is the specific foosball one
 	bot.api.channels.info({channel: msg.channel}, function(err, data) {
 		if (err) {
 			bot.botkit.log('Failed to find user info ',err);
 			console.log('failed to find user:', err);
 		}
-
-		console.log(`data: ${data} dataChannel: ${data.channel.name} congigName: ${config.mainChannel.name} equals: ${(data.channel.name === config.mainChannel.name)}`);
 
 		if (data && data.channel.name === config.mainChannel.name) {
 			//check and persist user database
