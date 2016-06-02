@@ -12,14 +12,22 @@ var Controller = require('./controller/controller');
 var appController = new Controller();
 
 var botController = Botkit.slackbot({
-	debug: true,
-	log: true
+	debug: false,
+	log: false
 });
 var bot = botController.spawn({
 	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
-var slackBot = new builder.SlackBot(botController, bot);
+botController.middleware.receive.use(function(bot, message, next) {
+	if (message.type === 'message' && !message.bot_id && message.channel[0] === 'D') {
+
+		console.log(`${message.ts} | From: ${message.user} | Message: ${message.text}`);
+	}
+	next();
+});
+
+var slackBot = new builder.SlackBot(botController, bot, {ambientMentionDuration: 120000, minSendDelay: 1000 });
 slackBot.add('/', index);
 
 slackBot.add('/say', function(session, message) {
@@ -38,11 +46,20 @@ let createWelcomeMessage = function(name, fname) {
 }
 
 slackBot.on('user_channel_join', function(botkit, msg) {
+
+	console.log('botkit', botkit);
+	console.log('msg:', msg);
+	console.log('channel:', msg.channel);
+
 	// check if the channel being joined is the specific foosball one
 	bot.api.channels.info({channel: msg.channel}, function(err, data) {
 		if (err) {
 			bot.botkit.log('Failed to find user info ',err);
+			console.log('failed to find user:', err);
 		}
+
+		console.log(`data: ${data} dataChannel: ${data.channel.name} congigName: ${config.mainChannel.name} equals: ${(data.channel.name === config.mainChannel.name)}`);
+
 		if (data && data.channel.name === config.mainChannel.name) {
 			//check and persist user database
 			let user = [{

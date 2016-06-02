@@ -10,7 +10,7 @@ var UserTable = React.createClass({
 	getInitialState: function() {
 		return {
 			users: [],
-			grouped: false,
+			grouped: true,
 			loaded: false
 		}
 	},
@@ -107,7 +107,7 @@ var UserTable = React.createClass({
 					{spinner}
 					</div>
 				</div>
-				
+
 			</div>
 		)
 	}

@@ -1,6 +1,9 @@
 {
   "name": "table-football-bot",
   "version": "1.0.0",
+  "engines": {
+  "node": "5.5.0"
+  },
   "description": "Bot to officiate the Scott Logic table football tournament",
   "main": "server.js",
   "scripts": {
