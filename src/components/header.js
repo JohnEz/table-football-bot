@@ -9,12 +9,10 @@ var Header = React.createClass({
 
 		return (
 			<div className="head">
-				<div className="centre">
+				<div className="centre header">
 					<header>
-						<h1>
-							<span className="sl">Scott <span className="logic">Logic </span></span>
-							Euro 2016 Foosball
-						</h1>
+							<img className="sl" alt="Scott-Logic" src={require("../img/scott-logic.png")} />
+							<img className="sl" alt="Euro 2016" src={require("../img/euro2016.png")} />
 					</header>
 					<ul role="nav" className="nav">
 						<li>
