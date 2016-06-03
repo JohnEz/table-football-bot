@@ -678,7 +678,7 @@ class Controller {
             if (date.getHours() >= 8 && date.getHours() <= 15) {
                 //should I send?
                 if (Math.random() < 0.25) {
-                    let minutes = Math.floor(Math.random() * 30);
+                    let minutes = Math.floor(Math.random() * 30 * 60000 );
                     setTimeout(function() {
                         this.sendRandomMessage(slackBot);
                     }.bind(this), minutes);
