@@ -59,6 +59,21 @@ module.exports = {
         'Hello, I am the v1 BlatterBot, currently powered by Cyberdyne Systems - for a brighter future :wink:',
         'Bonjour'
     ],
+    replyToThank: [
+        'You\'re welcome!',
+        'You are welcome %(player)s.',
+        'No problem at all.',
+        'It was my pleasure.',
+        'Don\'t mention it %(player)s.',
+        'No worries %(player)s.',
+        'It was nothing',
+        'I\'m always happy to help %(player)s, especially after such a generous donation.',
+        'Anytime.',
+        'Il n’y a pas de quoi.',
+        'Bitte schön %(player)s.',
+        'Don\'t mention it, but a nice donation is normally custom.',
+        'It\'s cool brah'
+    ],
     personalHello: {
         dmcavelia: '<@U0TD1CX43>: you must have a foot like a traction engine!',
         jameshill: 'Hi James! You know they wrote me in Delphi? #whatever #bantz #hilarz #delphi #hashtag',
@@ -148,9 +163,10 @@ module.exports = {
     ],
     giphySubjects: [
         "Sepp Blatter",
-        "Football",
-        "Soccer",
-        "Corruption",
+        "Fifa",
+        "Fifa Corrupt",
+        "Soccer Funny",
+        "UEFA",
         "Money",
         "Bribe"
     ]

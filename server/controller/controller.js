@@ -339,6 +339,10 @@ class Controller {
 
     }
 
+    getPlayer (searchTerm, callback) {
+        DAO.getInstance().getPlayer(searchTerm, callback);
+    }
+
     getAllPlayers(callback) {
         DAO.getInstance().getAllPlayers(function(playersMap) {
             callback([...playersMap.values()]);
