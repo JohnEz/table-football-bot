@@ -85,6 +85,10 @@ class Controller {
                 error = prompts.noGames;
             }
 
+            todaysGames.sort(this.sortMatchByDate);
+            overdueGames.sort(this.sortMatchByDate);
+            upcomingGames.sort(this.sortMatchByDate);
+
             callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames }, error );
         }.bind(this));
     }
@@ -121,19 +125,21 @@ class Controller {
 
             }.bind(this));
 
-            let matches = [...upcoming.values()].sort(function(a,b) {
-                let val = 0;
-                if (a.date < b.date) {
-                    val = -1;
-                }
-                else if (a.date > b.date) {
-                    val = 1;
-                }
-                return val;
-            });
+            let matches = [...upcoming.values()].sort(this.sortMatchByDate);
             callback(matches.slice(0, 2*callCount));
 
         }.bind(this));
+    }
+
+    sortMatchByDate(m1, m2) {
+        let val = 0;
+        if (m1.date < m2.date) {
+            val = -1;
+        }
+        else if (m1.date > m2.date) {
+            val = 1;
+        }
+        return val;
     }
 
     getSlackHandle(player) {
@@ -575,8 +581,9 @@ class Controller {
 
     getValidMatch(matches) {
         let validMatch = null;
+        matches = [...matches.values()].sort(this.sortMatchByDate);
         matches.forEach(function (match, id) {
-            if (!match.result) {
+            if (!match.result && !validMatch) {
                 validMatch = match;
             }
         });
