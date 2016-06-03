@@ -31,6 +31,22 @@ dialog.on('Greeting', function(session, args) {
 
 });
 
+dialog.on('Thank', function(session, args) {
+
+	//get the user that thanked blatter
+	let playerID = session.userData.id;
+	let playerName = null;
+
+	controller.getPlayer(playerID, function(player) {
+		if (player) {
+			playerName = player.fname;
+		}
+		//send the reply
+		session.endDialog(util.getRandomMessage('replyToThank'), {player: playerName});
+	})
+
+});
+
 /** Answer users help requests. We can use a DialogAction to send a static message. */
 dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
 
