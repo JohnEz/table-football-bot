@@ -220,9 +220,22 @@ dialog.on('Schedule', function(session, args, next) {
 
 		});
 	}
-}
-);
+});
 
+dialog.on('Announce', function(session, args, next) {
+	if (config.admins.indexOf(session.userData.id) > -1) {
+		let message = session.message.channelData.text;
+		let messageStart = message.indexOf('\"');
+
+		message = message.slice(messageStart+1, message.length-1);
+
+		slackBot.sendMessage(config.mainChannel.code, message);
+
+		session.endDialog(prompts.announcementSent);
+	} else {
+		session.endDialog(prompts.defaultReply);
+	}
+});
 
 function checkForMe(p, result, session) {
 	let player = result[p];
