@@ -85,6 +85,10 @@ class Controller {
                 error = prompts.noGames;
             }
 
+            todaysGames.sort(this.sortMatchByDate);
+            overdueGames.sort(this.sortMatchByDate);
+            upcomingGames.sort(this.sortMatchByDate);
+
             callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames }, error );
         }.bind(this));
     }
@@ -121,19 +125,21 @@ class Controller {
 
             }.bind(this));
 
-            let matches = [...upcoming.values()].sort(function(a,b) {
-                let val = 0;
-                if (a.date < b.date) {
-                    val = -1;
-                }
-                else if (a.date > b.date) {
-                    val = 1;
-                }
-                return val;
-            });
+            let matches = [...upcoming.values()].sort(this.sortMatchByDate);
             callback(matches.slice(0, 2*callCount));
 
         }.bind(this));
+    }
+
+    sortMatchByDate(m1, m2) {
+        let val = 0;
+        if (m1.date < m2.date) {
+            val = -1;
+        }
+        else if (m1.date > m2.date) {
+            val = 1;
+        }
+        return val;
     }
 
     getSlackHandle(player) {
@@ -331,6 +337,10 @@ class Controller {
 
         }.bind(this));
 
+    }
+
+    getPlayer (searchTerm, callback) {
+        DAO.getInstance().getPlayer(searchTerm, callback);
     }
 
     getAllPlayers(callback) {
@@ -575,8 +585,9 @@ class Controller {
 
     getValidMatch(matches) {
         let validMatch = null;
+        matches = [...matches.values()].sort(this.sortMatchByDate);
         matches.forEach(function (match, id) {
-            if (!match.result) {
+            if (!match.result && !validMatch) {
                 validMatch = match;
             }
         });
@@ -678,7 +689,7 @@ class Controller {
             if (date.getHours() >= 8 && date.getHours() <= 15) {
                 //should I send?
                 if (Math.random() < 0.25) {
-                    let minutes = Math.floor(Math.random() * 30);
+                    let minutes = Math.floor(Math.random() * 30 * 60000 );
                     setTimeout(function() {
                         this.sendRandomMessage(slackBot);
                     }.bind(this), minutes);
