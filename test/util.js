@@ -5,7 +5,7 @@ const util = require('../server/util');
 
 describe('Util', function () {
 
-	it('should maltch the "me" synonyms', function () {
+	it('should match the "me" synonyms', function () {
 		let me = ['i', 'me', 'my', 'myself', 'I', 'MYSELF'];
 		me.forEach(function(value) {
 			expect(util.isMe(value)).to.be.true;
@@ -90,6 +90,42 @@ describe('Util Date Parse', function () {
 
 	it('should return a correct date object given no month or year (day earlier)', function() {
 		expect(util.parseLuisDate('XXXX-XX-18', today).getTime()).to.equal(new Date(2016, 5, 18).getTime());
+	});
+
+});
+
+describe('Util work hours', function() {
+
+	it('should return false for Saturday', function() {
+		expect(util.workingHours(new Date(2016, 5, 4))).to.be.false;
+	});
+
+	it('should return false for Sunday', function() {
+		expect(util.workingHours(new Date(2016, 6, 10))).to.be.false;
+	});
+
+	it('should return false for before 8am', function() {
+		expect(util.workingHours(new Date(2016, 5, 8, 7, 59))).to.be.false;
+	});
+
+	it('should return false for after 3pm', function() {
+		expect(util.workingHours(new Date(2016, 5, 8, 16, 0))).to.be.false;
+	});
+
+	it('should return true for a Monday for after 8', function() {
+		expect(util.workingHours(new Date(2016, 5, 6, 8, 0))).to.be.true;
+	});
+
+	it('should return true for a Friday before 4', function() {
+		expect(util.workingHours(new Date(2016, 5, 24, 15, 59 ))).to.be.true
+	});
+
+	it('should return true for a midweek', function() {
+		expect(util.workingHours(new Date(2016, 5, 22, 12, 35 ))).to.be.true
+	});
+
+	it('should return false for a non date', function() {
+		expect(util.workingHours('foobar')).to.be.false;
 	});
 
 });

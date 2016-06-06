@@ -686,7 +686,7 @@ class Controller {
     randomMessageSetup(slackBot) {
         remind.every('30 minutes', function(date) {
             //if within working hours
-            if (date.getHours() >= 8 && date.getHours() <= 15) {
+            if (util.workingHours(date)) {
                 //should I send?
                 if (Math.random() < 0.25) {
                     let minutes = Math.floor(Math.random() * 30 * 60000 );
