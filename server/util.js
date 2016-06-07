@@ -26,19 +26,19 @@ let numbers = {
     eighteen: 18,
     nineteen: 19,
     twenty: 20
-}
+};
 
 let capWords = function(s) {
     return s.toLowerCase().replace(/\b./g, function(a) {
         return a.toUpperCase();
     });
-}
+};
 
 module.exports = {
     getRandomMessage(comment) {
         let msg = prompts[comment];
         if (typeof msg === 'string') {
-            return msg
+            return msg;
         }
         return msg[Math.floor(Math.random() * msg.length)];
     },
@@ -124,7 +124,7 @@ module.exports = {
             parts[0] = parseInt(parts[0]);
         }
 
-        return new Date(...parts)
+        return new Date(...parts);
     },
 
     workingHours(date) {
@@ -144,9 +144,33 @@ module.exports = {
         request(url, function(err, resp, body) {
             if (!err) {
                 let data = JSON.parse(body).data;
-                callback(`http://i.giphy.com/${data.id}.${data.type}`)
+                callback(`http://i.giphy.com/${data.id}.${data.type}`);
             } else
-            (callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif'))
+            (callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif'));
         });
+    },
+
+    getRandomJoke(callback) {
+        let url = `http://www.goodbadjokes.com/jokes/${Math.floor(Math.random()*260)}`;
+
+        request(url, function(err, resp, body) {
+            if (!err) {
+                let main = /<span class="joke-content">(.*?)<\/span>/.exec(body);
+                let joke = '';
+                if (main[1]) {
+                    joke = main[1];
+                    joke = joke.replace(/<br>|<br\/>|<\/.*?><.*?>/g,'\n');
+                    joke = joke.replace(/<.*?>/g,'');
+                }
+                else {
+                    joke = this.getRandomMessage('jokes');
+                }
+
+                callback(joke);
+            }
+            else {
+                callback(this.getRandomMessage('jokes'));
+            }
+        }.bind(this));
     }
 };
