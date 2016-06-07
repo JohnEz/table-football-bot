@@ -700,7 +700,7 @@ class Controller {
 
     sendRandomMessage(slackBot) {
         let message = "";
-        switch(Math.floor(Math.random() *3)) {
+        switch(Math.floor(Math.random() * 4)) {
             case 0:
             // Jokes
             util.getRandomJoke(function(joke) {
@@ -711,15 +711,21 @@ class Controller {
             case 1:
             let subject = util.getRandomMessage('giphySubjects');
             util.getGiphyURL(subject, function(msg) {
-                message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`
+                message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`;
                 slackBot.sendMessage(mainChannel.code, msg);
-            })
+            });
             break;
             case 2:
             message = util.getRandomMessage('quotes');
-            message = `>>>"${message}"`
+            message = `>>>"${message}"`;
             slackBot.sendMessage(mainChannel.code, message);
             break;
+            case 3:
+            util.getNews(function(msg) {
+                if (msg.length > 0) {
+                    slackBot.sendMessage(mainChannel.code, msg);
+                }
+            });
         }
     }
 

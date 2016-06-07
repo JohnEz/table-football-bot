@@ -137,7 +137,7 @@ module.exports = {
         "Say something, ladies. You are always speaking at home, now you can speak here.",
         "They want to get rid of me. All this opposition is coming now, it's unfortunate to say it. It's coming from Nyon, from Uefa. They don't have the courage to come in. So let me go on - be respectful!",
         "Women's football is definitely my baby. I consider myself, a little bit, as the godfather of women's football in Fifa.",
-        "I am a mountain goat that keeps going and going and going, I cannot be stopped, I just keep going.",
+        "I am a mountain goat that keeps going and going and going, I cannot be stopped, I just keep going. :goat:",
         "I'm not going to use the word coincidence, but I do have a small question mark.",
         "I forgive everyone but I don't forget. We cannot live without Uefa and Uefa cannot live without us.",
         "Football is a simple game; 22 men chase a ball for 90 minutes and at the end, the Germans win. [Gary Lineker]",
@@ -181,5 +181,14 @@ module.exports = {
         "UEFA",
         "Money",
         "Bribe"
+    ],
+    newsIntro: [
+        'Hey everyone, check out this news story\n',
+        'I\'ve been reading my favourite paper and I thought this was interesting:\n',
+        'Check this out\n',
+        'This may be of interest to you football fans\n',
+        'I read these newspapers so you don\'t have to but this is worth your time\n',
+        'Have you guys seen this\n',
+        'Look at this\n'
     ]
 };
