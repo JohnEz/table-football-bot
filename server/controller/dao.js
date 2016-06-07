@@ -222,6 +222,27 @@ class DAO {
 		)
 	}
 
+	updateKnockoutMatch(stage, matchNumber, teamID, isFirstTeam, callback) {
+		let collection = this.db.collection(matchesCollection);
+		let set = {$set: { team2: teamID } };
+
+		if (isFirstTeam) {
+			set = {$set: { team1: teamID } };
+		}
+
+		collection.findAndModify(
+			{ stage: stage, matchNumber: matchNumber },
+			[['_id', 1]],
+			set,
+			function(error, foundMatch) {
+				if (error) {
+					console.log(error);
+				}
+				callback(!error);
+			}
+		);
+	}
+
 	getMatches(team1ID, team2ID, callback) {
 		let collection = this.db.collection(matchesCollection);
 		let matchesMap = new Map();

@@ -498,6 +498,7 @@ function respondFinalResult(session, results) {
 				}
 				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
 
+				controller.calculateKnockoutMatch(session.dialogData.match, endResult);
 			} else {
 				session.send(message, {player1: result.p1, player2: result.p2});
 			}
