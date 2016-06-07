@@ -10,5 +10,5 @@ module.exports = {
 		code: 'C1CV4R1L5',
 		name: 'foosball-euros'
 	},
-	canAddResults: false
-}
+	canAddResults: true
+};

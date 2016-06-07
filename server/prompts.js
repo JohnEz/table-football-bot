@@ -139,7 +139,18 @@ module.exports = {
         "Women's football is definitely my baby. I consider myself, a little bit, as the godfather of women's football in Fifa.",
         "I am a mountain goat that keeps going and going and going, I cannot be stopped, I just keep going.",
         "I'm not going to use the word coincidence, but I do have a small question mark.",
-        "I forgive everyone but I don't forget. We cannot live without Uefa and Uefa cannot live without us."
+        "I forgive everyone but I don't forget. We cannot live without Uefa and Uefa cannot live without us.",
+        "Football is a simple game; 22 men chase a ball for 90 minutes and at the end, the Germans win. [Gary Lineker]",
+        "You can’t say my team aren’t winners. They’ve proved that by finishing fourth, third and second in the last three years. [Gerard Houllier]",
+        "Some people believe football is a matter of life and death. I’m very disappointed with that attitude. I can assure you it is much, much more important than that. [Bill Shankly]",
+        "There is no in between - you’re either good or bad. We were in between. [Gary Lineker]",
+        "I would not be bothered if we lost every game as long as we won the league. [Mark Viduka]",
+        "We must have had 99 percent of the game. It was the other three percent that cost us the match. [Ruud Gullit]",
+        "I’m as happy as I can be, but I’ve been happier. [Ugo Ehiogu]",
+        "We didn’t underestimate them. They were just a lot better than we thought. [Bobby Robson]",
+        "I think in England you eat too much sugar and meat and not enough vegetables. [Arsene Wenger]",
+        "Please don’t call me arrogant, but I’m European champion and I think I’m a special one. [Jose Mourinho]",
+        "The rules of soccer are very simple, basically it is this: if it moves, kick it. If it doesn't move, kick it until it does. [Phil Woosnam]"
     ],
     jokes: [
         "Why did the cookie cry? \nBecause his mother was a wafer so long!",
@@ -171,4 +182,4 @@ module.exports = {
         "Money",
         "Bribe"
     ]
-}
+};
