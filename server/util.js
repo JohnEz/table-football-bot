@@ -172,5 +172,33 @@ module.exports = {
                 callback(this.getRandomMessage('jokes'));
             }
         }.bind(this));
+    },
+
+    getNews(callback) {
+        let rss = [
+            'https://www.theguardian.com/football/euro-2016/rss',
+            'http://www.dailymail.co.uk/sport/euro2016/index.rss',
+            'https://www.thesun.co.uk/sport/football/euro-2016/feed/',
+            'http://www.independent.co.uk/sport/football/rss'
+        ];
+        let site = rss[Math.floor(Math.random() * rss.length)];
+        request(site, function(err, resp, body) {
+            if (!err  && resp.statusCode == 200) {
+                let newsURLs = [];
+                let regex = /<item>[\s\S]*?<link>[\s]*?(http.*?euro.*?)[\s]*?<\/link>[\s\S]*?<\/item>/igm;
+                let match;
+                while (newsURLs.length < 6 && (match = regex.exec(body)) !== null) {
+                    newsURLs.push(match[1]);
+                }
+                let message = '';
+                if(newsURLs.length > 0) {
+                    message = this.getRandomMessage('newsIntro') + newsURLs[Math.floor(Math.random() * newsURLs.length)];
+                }
+                callback(message);
+            }
+            else {
+                callback('');
+            }
+        }.bind(this));
     }
 };
