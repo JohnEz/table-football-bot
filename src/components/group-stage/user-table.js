@@ -15,20 +15,20 @@ var UserTable = React.createClass({
 		}
 	},
 	handleGroupToggle: function() {
-		this.setState({grouped: !this.state.grouped})
+		this.setState({
+			grouped: !this.state.grouped
+		})
 	},
 	loadTableFromServer: function() {
-		fetch('/bot/users', {
-			method: 'post',
-		}).then(function(response) {
+		fetch('/bot/users', {method: 'post'}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			data.sort(function(a,b) {
-				let diff = (b.won*3 + b.draw) - (a.won*3 + a.draw);
-				if(diff === 0) {
+			data.sort(function(a, b) {
+				let diff = (b.won * 3 + b.draw) - (a.won * 3 + a.draw);
+				if (diff === 0) {
 					diff = b.won - a.won;
 					if (diff === 0) {
-						diff = (b.for-b.against) - (a.for-a.against);
+						diff = (b.for - b.against) - (a.for - a.against);
 					}
 				}
 				return diff;
@@ -52,66 +52,56 @@ var UserTable = React.createClass({
 
 		return (
 			<div className="user-leagues">
+
 				<div className="section-header">
 					<h2>League Tables</h2>
-					<ToggleSwitch
-						toggle = {this.handleGroupToggle}
-						grouped = {this.state.grouped}
-						/>
-				</div>
-				<div className="section-body">
-				<div className='table'>
-					<UserTableElement
-						rowType = 'header'
-						country = 'Country'
-						slack = 'Slack ID'
-						won = 'W'
-						draw = 'D'
-						lost = 'L'
-						scored = 'F'
-						against = 'A'
-						diff = 'GD'
-						points = 'Pts'
-
-						/>
-					<div className="table-content">
-						{groups.map(function(group) {
-							return (
-								<TableGroupHeader
-									key={`group ${group}`}
-									group = {group}
-									grouped = {this.state.grouped}
-									/>
-							)
-						}.bind(this))}
-						{users.map(function(user) {
-							return (
-								<UserTableElement
-									key={user._id}
-									rowType = 'body'
-									country = {user.country}
-									slack = {'@' + user.slackID}
-									won = {user.won}
-									draw = {user.draw}
-									lost = {user.lost}
-									scored = {user.for}
-									against = {user.against}
-									diff = {user.for - user.against}
-									points = {user.won*3 + user.draw}
-									group = {user.group}
-									grouped = {this.state.grouped}
-									/>
-							)
-						}.bind(this))}
+					<ToggleSwitch toggle={this.handleGroupToggle} grouped={this.state.grouped}/>
+					<div className='table'>
+						<UserTableElement rowType='header' country='Country' slack='Slack ID' won='W' draw='D' lost='L' scored='F' against='A' diff='GD' points='Pts'/>
 					</div>
-					{spinner}
+				</div>
+
+				<div className="section-body">
+					<div className='table'>
+						<div className="table-content">
+							{
+								groups.map(function(group) {
+									return (
+										<TableGroupHeader
+											key={`group ${group}`}
+											group={group}
+											grouped={this.state.grouped} />
+									)
+								}.bind(this))
+							}
+							{
+								users.map(function(user) {
+									return (
+										<UserTableElement
+											key={user._id}
+											rowType='body'
+											country={user.country}
+											slack={'@' + user.slackID}
+											won={user.won}
+											draw={user.draw}
+											lost={user.lost}
+											scored={user.for}
+											against={user.against}
+											diff={user.for - user.against}
+											points={user.won * 3 + user.draw}
+											group={user.group}
+											grouped={this.state.grouped} />
+									)
+							}.bind(this))
+						}
+						</div>
+						{spinner}
 					</div>
 				</div>
 
 			</div>
 		)
 	}
-
 });
 
 export default UserTable;
