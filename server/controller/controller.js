@@ -729,6 +729,34 @@ class Controller {
         }
     }
 
+    calculateKnockoutMatch(match, result) {
+        //find out if it was a knockout game that wasn't the final
+        if (match.stage && match.stage > 2) {
+
+            let winningTeam = match.team1._id;
+            let isFirstTeam = false;
+
+            //work out where the winner goes
+            let targetStage = match.stage / 2;
+            let targetMatchNumber = Math.ceil(match.matchNumber / 2);
+
+            //if it was an odd match, the winner is the first team in the next round
+            if (match.matchNumber % 2 === 1) {
+                isFirstTeam = true;
+            }
+
+            //work out which team won
+            if (result.score1 < result.score2) {
+                winningTeam = match.team2._id;
+            }
+
+            DAO.getInstance().updateKnockoutMatch(targetStage, targetMatchNumber, winningTeam, isFirstTeam, function(updated) {
+
+            });
+
+        }
+    }
+
 }
 
 module.exports = Controller;
