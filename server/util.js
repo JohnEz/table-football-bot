@@ -24,21 +24,23 @@ let numbers = {
     sixteen: 16,
     seventeen: 17,
     eighteen: 18,
-    nineteen:19,
+    nineteen: 19,
     twenty: 20
-}
+};
 
 let capWords = function(s) {
-    return s.toLowerCase().replace( /\b./g, function(a){ return a.toUpperCase(); } );
-}
+    return s.toLowerCase().replace(/\b./g, function(a) {
+        return a.toUpperCase();
+    });
+};
 
 module.exports = {
     getRandomMessage(comment) {
         let msg = prompts[comment];
-        if (typeof msg === 'string'){
-            return msg
+        if (typeof msg === 'string') {
+            return msg;
         }
-        return msg[Math.floor(Math.random()*msg.length)];
+        return msg[Math.floor(Math.random() * msg.length)];
     },
 
     capitaliseWords: function(s) {
@@ -59,7 +61,8 @@ module.exports = {
     },
 
     isMe: function(name) {
-        if (!name) return false;
+        if (!name)
+        return false;
         let me = ['i', 'me', 'my', 'myself'];
         return me.indexOf(name.toLowerCase()) !== -1;
     },
@@ -80,12 +83,11 @@ module.exports = {
 
     convertWordToNumber(word) {
         if (isNaN(parseInt(word, 10))) {
-            if(numbers.hasOwnProperty(word)) {
+            if (numbers.hasOwnProperty(word)) {
                 return numbers[word.toLowerCase()];
             }
             return null;
-        }
-        else {
+        } else {
             return parseInt(word, 10);
         }
     },
@@ -102,45 +104,73 @@ module.exports = {
 
         // parse month
         if (parts[1] === 'XX') {
-            if (today.getDate() > parts[2] ) {
-                parts[1] = (today.getMonth() + 1 ) % 12; // to account for December
-            }
-            else {
+            if (today.getDate() > parts[2]) {
+                parts[1] = (today.getMonth() + 1) % 12; // to account for December
+            } else {
                 parts[1] = today.getMonth();
             }
-        }
-        else {
+        } else {
             parts[1] = parseInt(parts[1]) - 1; // so month is 0 - 11
         }
 
         // parse year
         if (parts[0] === 'XXXX') {
-            if (
-                today.getMonth() > parts[1]  ||
-                today.getMonth() === parts[1]  && today.getDate() > parts[2]) {
-                    parts[0] = today.getFullYear() + 1;
+            if (today.getMonth() > parts[1] || today.getMonth() === parts[1] && today.getDate() > parts[2]) {
+                parts[0] = today.getFullYear() + 1;
+            } else {
+                parts[0] = today.getFullYear();
+            }
+        } else {
+            parts[0] = parseInt(parts[0]);
+        }
+
+        return new Date(...parts);
+    },
+
+    workingHours(date) {
+        let work = false;
+        if (date instanceof Date) {
+            work = (
+                date.getDay() !== 6 && // not saturday
+                date.getDay() !== 0 && // not sunday
+                date.getHours() >= 8 && // between 9 and 4 (server is 1 hour behind)
+                date.getHours() <= 15);
+        }
+        return work;
+    },
+
+    getGiphyURL(subject, callback) {
+        let url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${subject.replace(' ', '+')}`;
+        request(url, function(err, resp, body) {
+            if (!err) {
+                let data = JSON.parse(body).data;
+                callback(`http://i.giphy.com/${data.id}.${data.type}`);
+            } else
+            (callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif'));
+        });
+    },
+
+    getRandomJoke(callback) {
+        let url = `http://www.goodbadjokes.com/jokes/${Math.floor(Math.random()*260)}`;
+
+        request(url, function(err, resp, body) {
+            if (!err) {
+                let main = /<span class="joke-content">(.*?)<\/span>/.exec(body);
+                let joke = '';
+                if (main[1]) {
+                    joke = main[1];
+                    joke = joke.replace(/<br>|<br\/>|<\/.*?><.*?>/g,'\n');
+                    joke = joke.replace(/<.*?>/g,'');
                 }
                 else {
-                    parts[0] = today.getFullYear();
+                    joke = this.getRandomMessage('jokes');
                 }
+
+                callback(joke);
             }
             else {
-                parts[0] = parseInt(parts[0]);
+                callback(this.getRandomMessage('jokes'));
             }
-
-            return new Date(...parts)
-        },
-
-        getGiphyURL(subject, callback) {
-            let url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${subject.replace(' ', '+')}`;
-            request(url, function(err, resp, body) {
-                if(!err) {
-                    let data = JSON.parse(body).data;
-                    callback(`http://i.giphy.com/${data.id}.${data.type}`)
-                }
-                else (
-                    callback('http://giphy.com/gifs/sepp-blatter-kG7hYpTT4ItSU/200_d.gif')
-                )
-            });
-        }
-    };
+        }.bind(this));
+    }
+};
