@@ -366,7 +366,7 @@ function getPlayer(player, failPrompt) {
 
 			let playerDocs = session.dialogData.playerDocs;
 			let result = session.dialogData.result;
-			result[player] = results.response;
+			result[player] = results.response.toLowerCase();
 			result[player] = removeIllegalCharacters(result[player]);
 			checkForMe(player, result, session);
 
