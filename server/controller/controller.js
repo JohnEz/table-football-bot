@@ -457,6 +457,10 @@ class Controller {
         return {player1Message: player1Message, player2Message: player2Message};
     }
 
+    isPlayer(slackID, callback) {
+        DAO.getInstance().isPlayer(slackID, callback);
+    }
+
     addUsers(users) {
         DAO.getInstance().addUsers(users);
     }
