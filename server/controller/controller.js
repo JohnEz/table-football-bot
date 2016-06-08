@@ -54,7 +54,8 @@ class Controller {
             let todaysGames = [];
             let overdueGames = [];
             let upcomingGames = [];
-            let noGameFound = true;
+            let gameFound = false;
+            let playedGameFound = false;
             let error = null;
 
             matchesMap.forEach(function(match) {
@@ -64,8 +65,8 @@ class Controller {
 
                     let whenToPlay = this.compareMatchDate(date, match);
 
-                    if (noGameFound) {
-                        noGameFound = false;
+                    if (gameFound) {
+                        gameFound = true;
                     }
 
                     //check if its meant to be played today
@@ -77,12 +78,18 @@ class Controller {
                     } else {
                         upcomingGames.push(match);
                     }
+                } else {
+                    playedGameFound = true;
                 }
 
             }.bind(this));
 
-            if (noGameFound) {
-                error = prompts.noGames;
+            if (!gameFound) {
+                if (!playedGameFound) {
+                    error = prompts.noGames;
+                } else {
+                    error = prompts.noGamesToPlay;
+                }
             }
 
             todaysGames.sort(this.sortMatchByDate);
@@ -166,14 +173,47 @@ class Controller {
         return outcome;
     }
 
-    getMyMatches(id, callback) {
-        DAO.getInstance().getPlayer(id, function(player) {
-            if (player) {
-                this.getMatchesToBePlayed(new Date(), player._id, null, callback);
+    getMatchesBetween(team1, team2, userId, callback) {
+
+        DAO.getInstance().getAllPlayers(function(players) {
+            let team1Docs = util.getPlayerFromArray(team1, players);
+            let team2Docs = util.getPlayerFromArray(team2, players);
+            let team1Id = null;
+            let team2Id = null;
+            let includesUser = false;
+            let error = null;
+
+            if (team1Docs.length > 1 || team2Docs.length > 1) {
+                error = 'Please be more specific with your teams/player';
             } else {
-                callback(null, prompts.notInLeague);
+                if (team1Docs.length === 1) {
+                    team1 = team1Docs[0];
+                    team1Id = team1._id;
+                }
+                if (team2Docs.length === 1) {
+                    team2 = team2Docs[0];
+                    team2Id = team2._id;
+                }
             }
+
+            if (team1Id && team2Id && team1Id === team2Id) {
+                error = 'Hmm, a team cant play against themself so there isn\'t any scheduled games';
+            }
+
+            if ((team1 && team1.slackCode === userId) || (team2 && team2.slackCode === userId)) {
+                includesUser = true;
+            }
+
+            if (!error) {
+                this.getMatchesToBePlayed(new Date(), team1Id, team2Id, function(matches, err) {
+                    callback(matches, includesUser, err);
+                });
+            } else {
+                callback(null, null, error);
+            }
+
         }.bind(this));
+
     }
 
     validatePlayer(playersFound, notFoundPrompt) {
