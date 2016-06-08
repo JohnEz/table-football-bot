@@ -42,11 +42,10 @@ let createWelcomeMessage = function(name, fname) {
 		message = prompts.personalHello[name];
 	}
 
-	return message
-}
+	return message;
+};
 
 slackBot.on('user_channel_join', function(botkit, msg) {
-
 	// check if the channel being joined is the specific foosball one
 	bot.api.channels.info({channel: msg.channel}, function(err, data) {
 		if (err) {
@@ -71,15 +70,19 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 						name = player.slackID;
 						fname = player.fname;
 					}
-
 					message = createWelcomeMessage(name, fname);
-					botkit.reply(msg, message);
 				});
 			} else {
 				message = createWelcomeMessage(user[0].name, user[0].fname);
-				botkit.reply(msg, message);
 			}
-
+			appController.isPlayer(user[0].name, function(player) {
+				if(player) {
+					botkit.reply(msg, message);
+				}
+				else {
+					botkit.reply(msg, `@${user[0].name} ${getRand('imposter')}`);
+				}
+			});
 			appController.addUsers(user);
 		}
 	});
@@ -110,7 +113,7 @@ module.exports.startBot = function() {
 		});
 		appController.addUsers(users);
 	});
-}
+};
 
 /* To get the user information from Slack
 */
@@ -121,7 +124,7 @@ module.exports.getUser = function (id, callback) {
 		}
 		callback(data);
 	});
-}
+};
 
 /* To send a single messasge
 channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
@@ -129,4 +132,4 @@ message is a string.
 */
 module.exports.sendMessage = function(channel, message, args) {
 	slackBot.beginDialog({ channel: channel }, '/say', {text: message, args: args});
-}
+};

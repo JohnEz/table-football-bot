@@ -96,6 +96,12 @@ module.exports = {
         jarnstein: 'Jack! The octogenarian vegetarian. Welcome.',
         amjones: 'Safe fam!'
     },
+    imposter: [
+        'whilst your voluntary donation was most welcome, it wasn\'t enough to help you qualify. You are welcome to stay in the capacity of an impartial observer though.',
+        'I spy with my little eye an interloper!',
+        'welcome to foosball club. Don\'t break any rules I wouldn\'t.',
+        'you may not be playing in this competition but with the right help you could be the next host! :wink: :moneybag:'
+    ],
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
         'Congratulations, on your win against %(country)s.',

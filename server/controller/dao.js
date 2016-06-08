@@ -174,6 +174,18 @@ class DAO {
 		});
 	}
 
+	isPlayer(slackID, callback) {
+		let collection = this.db.collection(playersCollection);
+
+		collection.count({slackID: slackID}, function(err, count) {
+			if (err) {
+				console.log(err);
+			}
+			callback(count !== 0);
+		});
+	}
+
+
 	addUsers(users) {
 		users.forEach(function(user) {
 			this.addUser(user);
