@@ -366,7 +366,7 @@ function getPlayer(player, failPrompt) {
 
 			let playerDocs = session.dialogData.playerDocs;
 			let result = session.dialogData.result;
-			result[player] = results.response;
+			result[player] = results.response.toLowerCase();
 			result[player] = removeIllegalCharacters(result[player]);
 			checkForMe(player, result, session);
 
@@ -498,6 +498,7 @@ function respondFinalResult(session, results) {
 				}
 				slackBot.sendMessage(config.mainChannel.code, broadcast, {result: endResult.toString});
 
+				controller.calculateKnockoutMatch(session.dialogData.match, endResult);
 			} else {
 				session.send(message, {player1: result.p1, player2: result.p2});
 			}

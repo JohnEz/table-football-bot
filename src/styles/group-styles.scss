@@ -30,18 +30,14 @@ $tableWidth: 470px;
 	width: 50%;
 }
 
-
 .section-header {
-
 	margin: 5px 0 ;
 	h2 {
 		margin-top: 3px;
 		margin-bottom: 5px;
 	}
-	.toggleswitch {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+	.toggleSwitch {
+		margin-bottom: 6px;
 	}
 }
 
@@ -137,6 +133,9 @@ $tableWidth: 470px;
 	}
 	&.table-group-header {
 		margin-top: 20px;
+		&:first-child {
+			margin-top: 0;
+		}
 	}
 
 	&.consolidated {
@@ -144,9 +143,12 @@ $tableWidth: 470px;
 	}
 }
 
-.table-row:last-child {
-	margin-bottom: 10px;
+.schedule, .results {
+	.table-row:last-child {
+		margin-bottom: 10px;
+	}
 }
+
 
 .table-header {
 	font-weight: bolder;

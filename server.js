@@ -16,6 +16,7 @@ const app = express();
 /**
 *   MIDDLEWARE
 */
+app.use('/src/video/', express.static(path.join(__dirname, 'build/src/video'), { maxage: 86400000 }));
 app.use(express.static(path.join(__dirname, 'build')));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -71,7 +72,7 @@ app.post('/bot/brackets', function(req, res) {
     controller.getBracketMatches(function(data) {
         res.json(data);
     });
-})
+});
 
 /**
 *   START SERVER

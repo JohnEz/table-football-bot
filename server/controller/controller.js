@@ -700,7 +700,7 @@ class Controller {
 
     sendRandomMessage(slackBot) {
         let message = "";
-        switch(Math.floor(Math.random() *3)) {
+        switch(Math.floor(Math.random() * 4)) {
             case 0:
             // Jokes
             util.getRandomJoke(function(joke) {
@@ -711,15 +711,49 @@ class Controller {
             case 1:
             let subject = util.getRandomMessage('giphySubjects');
             util.getGiphyURL(subject, function(msg) {
-                message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`
+                message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`;
                 slackBot.sendMessage(mainChannel.code, msg);
-            })
+            });
             break;
             case 2:
             message = util.getRandomMessage('quotes');
-            message = `>>>"${message}"`
+            message = `>>>"${message}"`;
             slackBot.sendMessage(mainChannel.code, message);
             break;
+            case 3:
+            util.getNews(function(msg) {
+                if (msg.length > 0) {
+                    slackBot.sendMessage(mainChannel.code, msg);
+                }
+            });
+        }
+    }
+
+    calculateKnockoutMatch(match, result) {
+        //find out if it was a knockout game that wasn't the final
+        if (match.stage && match.stage > 2) {
+
+            let winningTeam = match.team1._id;
+            let isFirstTeam = false;
+
+            //work out where the winner goes
+            let targetStage = match.stage / 2;
+            let targetMatchNumber = Math.ceil(match.matchNumber / 2);
+
+            //if it was an odd match, the winner is the first team in the next round
+            if (match.matchNumber % 2 === 1) {
+                isFirstTeam = true;
+            }
+
+            //work out which team won
+            if (result.score1 < result.score2) {
+                winningTeam = match.team2._id;
+            }
+
+            DAO.getInstance().updateKnockoutMatch(targetStage, targetMatchNumber, winningTeam, isFirstTeam, function(updated) {
+
+            });
+
         }
     }
 
