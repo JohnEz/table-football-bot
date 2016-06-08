@@ -145,12 +145,7 @@ class DAO {
 					} else {
 						//end of results
 						collection.count(function(err, count) {
-							if (count === resultArray.length) {
-								callback(resultArray, null, true);
-							}
-							else {
-								callback(resultArray, null, false);
-							}
+							callback(resultArray, null, count === resultArray.length);
 						});
 						return;
 					}
@@ -248,6 +243,14 @@ class DAO {
 				callback(!error);
 			}
 		);
+	}
+
+	getMatchesCount(callback) {
+		let collection = this.db.collection(matchesCollection);
+
+		collection.count({date: {$ne: null}, result: null}, function(err, count) {
+			callback(count);
+		});
 	}
 
 	getMatches(team1ID, team2ID, callback) {
