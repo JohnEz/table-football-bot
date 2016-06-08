@@ -54,7 +54,7 @@ app.post('/bot/schedule', function(req, res) {
             console.error(err);
             process.exit(1);
         }
-        res.json({today: data.today, overdue: data.overdue});
+        res.json({today: data.today, overdue: data.overdue, atLimit: data.atLimit});
     });
 });
 

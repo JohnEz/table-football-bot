@@ -88,8 +88,11 @@ class Controller {
             todaysGames.sort(this.sortMatchByDate);
             overdueGames.sort(this.sortMatchByDate);
             upcomingGames.sort(this.sortMatchByDate);
+            DAO.getInstance().getMatchesCount(function(count) {
+                let totalGames = todaysGames.length + overdueGames.length;
+                callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames, atLimit: totalGames === count }, error );
+            });
 
-            callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames }, error );
         }.bind(this));
     }
 
@@ -97,7 +100,7 @@ class Controller {
 
         DAO.getInstance().getMatches(null, null, function(matchesMap) {
 
-            let upcoming = new Map()
+            let upcoming = new Map();
 
             matchesMap.forEach(function(match) {
 
@@ -126,8 +129,8 @@ class Controller {
             }.bind(this));
 
             let matches = [...upcoming.values()].sort(this.sortMatchByDate);
-            callback(matches.slice(0, 2*callCount));
-
+            let payload = matches.slice(0, 2*callCount);
+            callback({matches: payload, atLimit: payload.length === matches.length});
         }.bind(this));
     }
 
@@ -395,7 +398,7 @@ class Controller {
     }
 
     getResultsTable(callCount, callback) {
-        DAO.getInstance().getResults(callCount*10, null, null, function(results, err) {
+        DAO.getInstance().getResults(callCount*10, null, null, function(results, err, atLimit) {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {
@@ -416,9 +419,9 @@ class Controller {
                     }
 
                 });
-                callback([...days.values()]);
+                callback({results: [...days.values()], atLimit: atLimit} , null);
             } else {
-                callback([], err);
+                callback({}, err);
             }
         });
     }

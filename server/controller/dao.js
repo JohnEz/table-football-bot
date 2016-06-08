@@ -134,7 +134,7 @@ class DAO {
 				collection.aggregate( aggregate ).each(function(err, doc) {
 					//if there was an error with the database
 					if (err) {
-						callback(null, err)
+						callback(null, err);
 						console.log('error', err);
 					} else if (doc) {
 						//if there is a document, add it
@@ -144,7 +144,9 @@ class DAO {
 						resultArray.push(doc);
 					} else {
 						//end of results
-						callback(resultArray);
+						collection.count(function(err, count) {
+							callback(resultArray, null, count === resultArray.length);
+						});
 						return;
 					}
 
@@ -253,6 +255,14 @@ class DAO {
 				callback(!error);
 			}
 		);
+	}
+
+	getMatchesCount(callback) {
+		let collection = this.db.collection(matchesCollection);
+
+		collection.count({date: {$ne: null}, result: null}, function(err, count) {
+			callback(count);
+		});
 	}
 
 	getMatches(team1ID, team2ID, callback) {
