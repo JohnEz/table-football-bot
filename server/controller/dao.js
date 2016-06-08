@@ -21,7 +21,7 @@ class DAO {
 
 	//allows a callback function and gives parameters for the database and the error
 	init(callback) {
-		MongoClient.connect(url, function(err, database) {
+		MongoClient.connect(url, { server: { reconnectTries: 100, reconnectInterval: 3000} }, function(err, database) {
 			if(!err && database) {
 				//if there was no error and we got a database
 				this.db = database;
