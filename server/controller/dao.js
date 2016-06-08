@@ -134,7 +134,7 @@ class DAO {
 				collection.aggregate( aggregate ).each(function(err, doc) {
 					//if there was an error with the database
 					if (err) {
-						callback(null, err)
+						callback(null, err);
 						console.log('error', err);
 					} else if (doc) {
 						//if there is a document, add it
@@ -144,7 +144,14 @@ class DAO {
 						resultArray.push(doc);
 					} else {
 						//end of results
-						callback(resultArray);
+						collection.count(function(err, count) {
+							if (count === resultArray.length) {
+								callback(resultArray, null, true);
+							}
+							else {
+								callback(resultArray, null, false);
+							}
+						});
 						return;
 					}
 

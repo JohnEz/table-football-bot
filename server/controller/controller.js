@@ -395,7 +395,7 @@ class Controller {
     }
 
     getResultsTable(callCount, callback) {
-        DAO.getInstance().getResults(callCount*10, null, null, function(results, err) {
+        DAO.getInstance().getResults(callCount*10, null, null, function(results, err, atLimit) {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {
@@ -416,9 +416,9 @@ class Controller {
                     }
 
                 });
-                callback([...days.values()]);
+                callback({results: [...days.values()], atLimit: atLimit} , null);
             } else {
-                callback([], err);
+                callback({}, err);
             }
         });
     }

@@ -9,7 +9,8 @@ var ResultTable = React.createClass({
 		return {
 			results: [],
 			loaded: false,
-			moreCount: 1
+			moreCount: 1,
+			atLimit: true
 		}
 	},
 	loadResultsFromServer: function() {
@@ -24,7 +25,7 @@ var ResultTable = React.createClass({
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({results: data, loaded: true, moreCount: this.state.moreCount + 1});
+			this.setState({results: data.results, loaded: true, moreCount: this.state.moreCount + 1, atLimit: data.atLimit});
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
@@ -41,7 +42,7 @@ var ResultTable = React.createClass({
 
 			let footClass = classnames({
 				"load-more": true,
-				"hidden": this.state.results.length === 0,
+				"hidden": this.state.atLimit
 			});
 
 			let body = "";
