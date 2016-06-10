@@ -65,7 +65,7 @@ class Controller {
 
                     let whenToPlay = this.compareMatchDate(date, match);
 
-                    if (gameFound) {
+                    if (!gameFound) {
                         gameFound = true;
                     }
 
