@@ -21,7 +21,7 @@ class DAO {
 
 	//allows a callback function and gives parameters for the database and the error
 	init(callback) {
-		MongoClient.connect(url, function(err, database) {
+		MongoClient.connect(url, { server: { reconnectTries: 100, reconnectInterval: 3000} }, function(err, database) {
 			if(!err && database) {
 				//if there was no error and we got a database
 				this.db = database;
@@ -134,7 +134,7 @@ class DAO {
 				collection.aggregate( aggregate ).each(function(err, doc) {
 					//if there was an error with the database
 					if (err) {
-						callback(null, err)
+						callback(null, err);
 						console.log('error', err);
 					} else if (doc) {
 						//if there is a document, add it
@@ -144,7 +144,9 @@ class DAO {
 						resultArray.push(doc);
 					} else {
 						//end of results
-						callback(resultArray);
+						collection.count(function(err, count) {
+							callback(resultArray, null, count === resultArray.length);
+						});
 						return;
 					}
 
@@ -173,6 +175,18 @@ class DAO {
 
 		});
 	}
+
+	isPlayer(slackID, callback) {
+		let collection = this.db.collection(playersCollection);
+
+		collection.count({slackID: slackID}, function(err, count) {
+			if (err) {
+				console.log(err);
+			}
+			callback(count !== 0);
+		});
+	}
+
 
 	addUsers(users) {
 		users.forEach(function(user) {
@@ -241,6 +255,14 @@ class DAO {
 				callback(!error);
 			}
 		);
+	}
+
+	getMatchesCount(callback) {
+		let collection = this.db.collection(matchesCollection);
+
+		collection.count({date: {$ne: null}, result: null}, function(err, count) {
+			callback(count);
+		});
 	}
 
 	getMatches(team1ID, team2ID, callback) {

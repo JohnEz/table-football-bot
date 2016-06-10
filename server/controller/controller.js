@@ -54,7 +54,8 @@ class Controller {
             let todaysGames = [];
             let overdueGames = [];
             let upcomingGames = [];
-            let noGameFound = true;
+            let gameFound = false;
+            let playedGameFound = false;
             let error = null;
 
             matchesMap.forEach(function(match) {
@@ -64,8 +65,8 @@ class Controller {
 
                     let whenToPlay = this.compareMatchDate(date, match);
 
-                    if (noGameFound) {
-                        noGameFound = false;
+                    if (!gameFound) {
+                        gameFound = true;
                     }
 
                     //check if its meant to be played today
@@ -77,19 +78,28 @@ class Controller {
                     } else {
                         upcomingGames.push(match);
                     }
+                } else {
+                    playedGameFound = true;
                 }
 
             }.bind(this));
 
-            if (noGameFound) {
-                error = prompts.noGames;
+            if (!gameFound) {
+                if (!playedGameFound) {
+                    error = prompts.noGames;
+                } else {
+                    error = prompts.noGamesToPlay;
+                }
             }
 
             todaysGames.sort(this.sortMatchByDate);
             overdueGames.sort(this.sortMatchByDate);
             upcomingGames.sort(this.sortMatchByDate);
+            DAO.getInstance().getMatchesCount(function(count) {
+                let totalGames = todaysGames.length + overdueGames.length;
+                callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames, atLimit: totalGames === count }, error );
+            });
 
-            callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames }, error );
         }.bind(this));
     }
 
@@ -97,7 +107,7 @@ class Controller {
 
         DAO.getInstance().getMatches(null, null, function(matchesMap) {
 
-            let upcoming = new Map()
+            let upcoming = new Map();
 
             matchesMap.forEach(function(match) {
 
@@ -126,8 +136,8 @@ class Controller {
             }.bind(this));
 
             let matches = [...upcoming.values()].sort(this.sortMatchByDate);
-            callback(matches.slice(0, 2*callCount));
-
+            let payload = matches.slice(0, 2*callCount);
+            callback({matches: payload, atLimit: payload.length === matches.length});
         }.bind(this));
     }
 
@@ -166,14 +176,47 @@ class Controller {
         return outcome;
     }
 
-    getMyMatches(id, callback) {
-        DAO.getInstance().getPlayer(id, function(player) {
-            if (player) {
-                this.getMatchesToBePlayed(new Date(), player._id, null, callback);
+    getMatchesBetween(team1, team2, userId, callback) {
+
+        DAO.getInstance().getAllPlayers(function(players) {
+            let team1Docs = util.getPlayerFromArray(team1, players);
+            let team2Docs = util.getPlayerFromArray(team2, players);
+            let team1Id = null;
+            let team2Id = null;
+            let includesUser = false;
+            let error = null;
+
+            if (team1Docs.length > 1 || team2Docs.length > 1) {
+                error = 'Please be more specific with your teams/player';
             } else {
-                callback(null, prompts.notInLeague);
+                if (team1Docs.length === 1) {
+                    team1 = team1Docs[0];
+                    team1Id = team1._id;
+                }
+                if (team2Docs.length === 1) {
+                    team2 = team2Docs[0];
+                    team2Id = team2._id;
+                }
             }
+
+            if (team1Id && team2Id && team1Id === team2Id) {
+                error = 'Hmm, a team cant play against themself so there isn\'t any scheduled games';
+            }
+
+            if ((team1 && team1.slackCode === userId) || (team2 && team2.slackCode === userId)) {
+                includesUser = true;
+            }
+
+            if (!error) {
+                this.getMatchesToBePlayed(new Date(), team1Id, team2Id, function(matches, err) {
+                    callback(matches, includesUser, err);
+                });
+            } else {
+                callback(null, null, error);
+            }
+
         }.bind(this));
+
     }
 
     validatePlayer(playersFound, notFoundPrompt) {
@@ -395,7 +438,7 @@ class Controller {
     }
 
     getResultsTable(callCount, callback) {
-        DAO.getInstance().getResults(callCount*10, null, null, function(results, err) {
+        DAO.getInstance().getResults(callCount*10, null, null, function(results, err, atLimit) {
             if (!err) {
                 let days = new Map();
                 results.forEach(function(result) {
@@ -416,9 +459,9 @@ class Controller {
                     }
 
                 });
-                callback([...days.values()]);
+                callback({results: [...days.values()], atLimit: atLimit} , null);
             } else {
-                callback([], err);
+                callback({}, err);
             }
         });
     }
@@ -455,6 +498,10 @@ class Controller {
         }
 
         return {player1Message: player1Message, player2Message: player2Message};
+    }
+
+    isPlayer(slackID, callback) {
+        DAO.getInstance().isPlayer(slackID, callback);
     }
 
     addUsers(users) {

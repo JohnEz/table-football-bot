@@ -38,8 +38,21 @@ module.exports = {
     getFirstTeam:'Sorry who was the first team?',
     getSecondTeam: 'Who was the second team?',
     notInLeague: 'Sorry I don\'t know who you are :/',
-    noGames: 'erm... you have played all your games',
+    noGamesToPlay: 'erm... you have played all your games',
+    noGames: 'You haven\'t had a game scheduled.',
     cannotAddResults: 'The football gods have decreed that it is not time for submitting results yet',
+    gameOverdue: [
+        '%(team1)s was meant to play against %(team2)s on %(date)s',
+        'You were meant to play against %(team1)s on %(date)s'
+    ],
+    gameToday: [
+        '%(team1)s should be playing against %(team2)s sometime today!',
+        'You are scheduled to play against %(team1)s today'
+    ],
+    gameUpcoming: [
+        '%(date)s, %(team1)s will face off against %(team2)s',
+        'It\'s on %(date)s against %(team1)s'
+    ],
     defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
     hello: [
         'Welcome to the Thunderdome',
@@ -96,6 +109,12 @@ module.exports = {
         jarnstein: 'Jack! The octogenarian vegetarian. Welcome.',
         amjones: 'Safe fam!'
     },
+    imposter: [
+        'whilst your voluntary donation was most welcome, it wasn\'t enough to help you qualify. You are welcome to stay in the capacity of an impartial observer though.',
+        'I spy with my little eye an interloper!',
+        'welcome to foosball club. Don\'t break any rules I wouldn\'t.',
+        'you may not be playing in this competition but with the right help you could be the next host! :wink: :moneybag:'
+    ],
     winMessage: [
         'Well done beating %(country)s, that was a close game.',
         'Congratulations, on your win against %(country)s.',

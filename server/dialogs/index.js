@@ -148,39 +148,49 @@ dialog.on('WhoIs', function(session, args) {
 /**shows upcoming matches to the user. */
 dialog.on('UpcomingMatches', function(session, args) {
 
-	controller.getMyMatches(session.userData.id, function(matches, err) {
-		let matchesString = '';
+	let team1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let team2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+
+	if (team1) {
+		team1 = team1.entity;
+	}
+
+	if (team2) {
+		team2 = team2.entity;
+	}
+
+	let team1IsMe = isItMe(team1, session);
+	let team2IsMe = isItMe(team2, session);
+
+	if (team1IsMe) {
+		team1 = team1IsMe;
+	}
+
+	if (team2IsMe) {
+		team2 = team2IsMe;
+	}
+
+	controller.getMatchesBetween(team1, team2, session.userData.id, function(matches, includesUser, err) {
 
 		if (err) {
 			session.send(err);
 		} else {
-			if(matches.overdue.length > 0) {
-				matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
+			let numberOfMatches =  matches.overdue.length + matches.today.length + matches.upcoming.length;
 
-				matches.overdue.forEach(function(match) {
-					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was ${moment(match.date).format('dddd Do MMMM')}\n`;
-				});
-				matchesString = matchesString + '\n';
+			if (numberOfMatches > 1) {
+				outputMatches(session, matches, includesUser);
+			} else if (numberOfMatches === 1) {
+				let user = null;
+
+				if (includesUser) {
+					user = session.userData.id;
+				}
+
+				outputMatch(session, matches, user);
+			} else {
+				console.log('No matches m9');
 			}
 
-			if (matches.today.length > 0) {
-				matchesString = matchesString + 'Today\'s games:\n';
-
-				matches.today.forEach(function(match) {
-					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
-				});
-				matchesString = matchesString + '\n';
-			}
-
-			if (matches.upcoming.length > 0) {
-				matchesString = matchesString + 'Upcoming games:\n';
-
-				matches.upcoming.forEach(function(match) {
-					matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
-				});
-			}
-
-			session.send(matchesString);
 		}
 
 	});
@@ -515,4 +525,92 @@ function respondFinalResult(session, results) {
 
 function removeIllegalCharacters(str) {
 	return str.replace(/<|@|>/g, '');
+}
+
+function outputMatch(session, matches, user) {
+	let message = prompts.error;
+	let match = null;
+	let team1 = null;
+	let team2 = null;
+	let messageType = 0; // 0 = multiple, 1 = single
+
+	//if there is a user, we only need to say 1 team
+	if (user) {
+		messageType = 1;
+	}
+
+	if (matches.overdue.length > 0) {
+		match = matches.overdue[0];
+		message = prompts.gameOverdue[messageType];
+	} else if (matches.today.length > 0) {
+		match = matches.today[0];
+		message = prompts.gameToday[messageType];
+	} else if (matches.upcoming.length > 0) {
+		match = matches.upcoming[0];
+		message = prompts.gameUpcoming[messageType];
+	}
+
+	if (user) {
+		if (match.team1.slackCode === user) {
+			team1 = controller.convertPlayerToString(match.team2);
+		} else {
+			team1 = controller.convertPlayerToString(match.team1);
+		}
+	} else {
+		team1 = controller.convertPlayerToString(match.team1);
+		team2 = controller.convertPlayerToString(match.team2);
+	}
+
+	let date = moment(match.date).format('dddd Do MMMM');
+
+	session.send(message, {team1: team1, team2: team2, date: date});
+}
+
+function outputMatches(session, matches, includesUser) {
+	let matchesString = '';
+
+	let remainingResults = config.maxResults;
+
+	if(matches.overdue.length > 0 && remainingResults > 0) {
+
+		if (includesUser) {
+			matchesString = matchesString + ':rage: OVERDUE GAMES:\n';
+		} else {
+			matchesString = matchesString + 'Overdue games:\n';
+		}
+
+		matches.overdue.forEach(function(match) {
+			if (remainingResults > 0) {
+				matchesString = matchesString +
+					`${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} was meant to be played on ${moment(match.date).format('dddd Do MMMM')}\n`;
+				remainingResults--;
+			}
+		});
+		matchesString = matchesString + '\n';
+	}
+
+	if (matches.today.length > 0  && remainingResults > 0) {
+		matchesString = matchesString + 'Today\'s games:\n';
+
+		matches.today.forEach(function(match) {
+			if (remainingResults > 0) {
+				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)}\n`;
+				remainingResults--;
+			}
+		});
+		matchesString = matchesString + '\n';
+	}
+
+	if (matches.upcoming.length > 0  && remainingResults > 0) {
+		matchesString = matchesString + 'Upcoming games:\n';
+
+		matches.upcoming.forEach(function(match) {
+			if (remainingResults > 0) {
+				matchesString = matchesString + `${controller.convertPlayerToString(match.team1)} vs ${controller.convertPlayerToString(match.team2)} on ${moment(match.date).format('dddd Do MMMM')}\n`;
+				remainingResults--;
+			}
+		});
+	}
+
+	session.send(matchesString);
 }

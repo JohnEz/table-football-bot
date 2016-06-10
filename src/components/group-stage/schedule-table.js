@@ -2,7 +2,8 @@
 
 import React from 'react';
 import MatchDay from '../matches/match-day.js';
-import MatchTableElement from '../matches/match-table-element.js'
+import MatchTableElement from '../matches/match-table-element.js';
+import classnames from 'classnames';
 
 var ScheduleTable = React.createClass({
 	getInitialState: function() {
@@ -12,15 +13,16 @@ var ScheduleTable = React.createClass({
 			upcoming: [],
 			loaded: false,
 			moreCount: 1,
+			atLimit: true
 		}
 	},
 	loadGamesFromServer: function() {
 		fetch('/bot/schedule', {
 			method: 'post',
 		}).then(function(response) {
-			return response.json()
+			return response.json();
 		}).then(function(data) {
-			this.setState({today: data.today, overdue: data.overdue, loaded: true});
+			this.setState({today: data.today, overdue: data.overdue, loaded: true, atLimit: data.atLimit });
 			if (this.state.today.length + this.state.overdue.length < 8) {
 				this.loadUpcomingGamesFromServer();
 			}
@@ -40,7 +42,7 @@ var ScheduleTable = React.createClass({
 		}).then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({upcoming: data, moreCount: this.state.moreCount+1});
+			this.setState({upcoming: data.matches, moreCount: this.state.moreCount+1, atLimit: data.atLimit });
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
@@ -54,6 +56,11 @@ var ScheduleTable = React.createClass({
 		if (!this.state.loaded) {
 			spinner = <div className="loader">Loading...</div>;
 		}
+
+		let footClass = classnames({
+			"load-more": true,
+			"hidden": this.state.atLimit
+		});
 
 		return (
 			<div className='schedule'>
@@ -112,7 +119,7 @@ var ScheduleTable = React.createClass({
 
 				</div>
 				<div className="section-footer">
-					<div className="load-more"
+					<div className={footClass}
 						onClick={this.loadUpcomingGamesFromServer} >
 						Load More
 					</div>
