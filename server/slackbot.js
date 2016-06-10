@@ -21,10 +21,19 @@ var bot = botController.spawn({
 
 botController.middleware.receive.use(function(bot, message, next) {
 	if (message.type === 'message' && !message.bot_id && message.channel[0] === 'D') {
-
 		console.log(`${message.ts} | From: ${message.user} | Message: ${message.text}`);
 	}
-	next();
+	if (/bribes?|money|back[\-,\s]?hander|donation|moolah/i.test(message.text)) {
+		if (message.channel[0] === 'C') {
+			bot.say({text: getRand('publicBribe'), channel: message.channel});
+		}
+		else if (message.channel[0] === 'D') {
+			bot.say({text: prompts.privateBribe, channel: message.channel});
+		}
+	}
+	else {
+		next();
+	}
 });
 
 var slackBot = new builder.SlackBot(botController, bot, {ambientMentionDuration: 120000, minSendDelay: 1000 });

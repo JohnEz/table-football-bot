@@ -17,7 +17,9 @@ let controller = new Controller();
 
 
 /** Return a default message if nothing else is recognised */
-dialog.onDefault(builder.DialogAction.send(prompts.defaultReply));
+dialog.onDefault(function(session, args) {
+	session.endDialog(util.getRandomMessage('defaultReply'), {user: session.userData.id, message: session.message.channelData.text});
+});
 
 dialog.on('Greeting', function(session, args) {
 	if (Math.random() > 0.8) {
