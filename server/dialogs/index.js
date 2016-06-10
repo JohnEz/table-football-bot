@@ -124,13 +124,15 @@ dialog.on('WhoIs', function(session, args) {
 		controller.getAllPlayers(function(allPlayers) {
 
 			let playersFound = util.getPlayerFromArray(user.entity, allPlayers);
-			let player = playersFound[0];
 
-			if (player) {
-				let slack = player.slackCode ? player.slackCode : player.slackID
-				session.send(`<@${slack}> plays as ${util.capitaliseWords(player.country)}`);
-			}
-			else {
+			if (playersFound.length > 0) {
+				let outputString = '';
+				playersFound.forEach(function(player) {
+					const slack = player.slackCode ? player.slackCode : player.slackID
+					outputString = outputString + `<@${slack}> plays as ${util.capitaliseWords(player.country)} \n`;
+				});
+				session.send(outputString);
+			} else {
 				if (isMe) {
 					session.send(prompts.notInLeague);
 				} else {
