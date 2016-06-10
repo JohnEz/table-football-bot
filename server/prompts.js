@@ -53,7 +53,18 @@ module.exports = {
         '%(date)s, %(team1)s will face off against %(team2)s',
         'It\'s on %(date)s against %(team1)s'
     ],
-    defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
+    defaultReply: [
+        'You what?',
+        'That\'s currently not possible. However with a substantial donation... ',
+        'I\'m not enough of a crook to act on what you\'re saying!',
+        'I don\'t understand what you want me to do',
+        'Saying that won\'t prompt me into action, sorry.',
+        '<@%(user)s> I don\'t understand what you\'re saying',
+        'Cannot not compute "%(message)s"',
+        '<@%(user)s> remember, when you\'re talking to a foreigner YOU MAY NEED TO TALK LOUDER!',
+        '<@%(user)s>, you haven\'t sufficiently greased my palms for me to allow you to say that!',
+        'No comment'
+    ],
     hello: [
         'Welcome to the Thunderdome',
         'Howdy',
