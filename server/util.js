@@ -157,7 +157,7 @@ module.exports = {
             if (!err) {
                 let main = /<span class="joke-content">(.*?)<\/span>/.exec(body);
                 let joke = '';
-                if (main[1]) {
+                if (main && main.length > 1) {
                     joke = main[1];
                     joke = joke.replace(/<br>|<br\/>|<\/.*?><.*?>/g,'\n');
                     joke = joke.replace(/<.*?>/g,'');
