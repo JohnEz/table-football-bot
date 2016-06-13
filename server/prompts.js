@@ -53,7 +53,26 @@ module.exports = {
         '%(date)s, %(team1)s will face off against %(team2)s',
         'It\'s on %(date)s against %(team1)s'
     ],
-    defaultReply: 'You what? I\'m not going to pass the Turing test at this rate am I!',
+    defaultReply: [
+        'You what?',
+        'That\'s currently not possible. However with a substantial donation... ',
+        'I\'m not enough of a crook to act on what you\'re saying!',
+        'I don\'t understand what you want me to do',
+        'Saying that won\'t prompt me into action, sorry.',
+        '<@%(user)s> I don\'t understand what you\'re saying',
+        'Cannot not compute "%(message)s"',
+        '<@%(user)s> remember, when you\'re talking to a foreigner YOU MAY NEED TO TALK LOUDER!',
+        '<@%(user)s>, you haven\'t sufficiently greased my palms for me to allow you to say that!',
+        'No comment'
+    ],
+    publicBribe: [
+        'I\'m an honest person, we\'ll have none of that talk here',
+        'Lets keep it clean people',
+        'Any more talk like that and someone may call UEFA',
+        'I\'m not one to point fingers but CHEAT! Everyone come and look at the CHEAT!',
+        'Maybe we should talk in private?'
+    ],
+    privateBribe: 'Since we\'re in private I\'ll accept your donation and see what I can do to help',
     hello: [
         'Welcome to the Thunderdome',
         'Howdy',
