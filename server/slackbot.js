@@ -20,15 +20,22 @@ var bot = botController.spawn({
 });
 
 botController.middleware.receive.use(function(bot, message, next) {
-	if (message.type === 'message' && !message.bot_id && message.channel[0] === 'D') {
-		console.log(`${message.ts} | From: ${message.user} | Message: ${message.text}`);
-	}
-	if (/bribes?|money|back[\-,\s]?hander|donation|moolah/i.test(message.text)) {
-		if (message.channel[0] === 'C') {
-			bot.say({text: getRand('publicBribe'), channel: message.channel});
+	if (message.type === 'message' && !message.bot_id && !message.reply_to && !message.hidden) {
+		console.log(`${new Date().toTimeString()} | From: ${message.user} | Message: ${message.text}`);
+
+		if (/bribes?|money|back[\-,\s]?hander|donation|moolah/i.test(message.text)) {
+			if (message.channel[0] === 'C') {
+				bot.reply(message, getRand('publicBribe'));
+			}
+			else if (message.channel[0] === 'D') {
+				bot.reply(message, prompts.privateBribe);
+			}
 		}
-		else if (message.channel[0] === 'D') {
-			bot.say({text: prompts.privateBribe, channel: message.channel});
+		else if (message.text.length > 500 ) {
+			bot.reply(message, 'Stop trying to break me! :face_with_rolling_eyes:');
+		}
+		else {
+			next();
 		}
 	}
 	else {
