@@ -1,6 +1,6 @@
-# Bot for Slack to use the table football app
+# Bot and accompanying website for the Scott Logic Foosball Euros 2016.
 
-Project with:
+Project built using:
 
 - Webpack
 - Sass
@@ -8,19 +8,30 @@ Project with:
 - Single HTML file
 - React
 - Botkit
-- botbuilder
+- Botbuilder
 
 ### Development
-To build the bundle run `npm run dev`
+Whilst in development have variables in the server config file for:
+'slackBotToken' - The unique identifying code provided by Slack for your Bot
+'database_url' - The URI for your mongoDB.
+'luisToken' - The URL to your application on the LUIS natural language service (https://api.projectoxford...)
+
+We've included the exported JSON file containing our LUIS app in server/model which can be used to create a new LUIS app.
+
+To build the bundle and track any changes to the files run `npm run dev`
 
 To start the server run `npm start`
 
-### Production
+Starting the server connects the bot to slack 
 
-`npm run prod`
+### Production
+Remove the links to LUIS, MongoDB and Slackbot and add them as env variables on your host service.
+
+To Webkpack the client side for production run `npm run prod`
+
+To start the server run `npm start`
 
 ### Testing
-To apply unit tests run `mocha`
+To apply unit tests run `mocha`.
 
-To use the textbot to manually test the bot in the console.
-run `node server/textbot.js`
+Further end-to-end testing is currently stored in the botTesting branch and utilises a second Slack bot which talks to the main bot and tests the responses.
