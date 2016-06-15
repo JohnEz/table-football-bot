@@ -15,7 +15,7 @@ class Controller {
     }
 
     setupReminders(slackBot){
-        remind.every('08:59', function(date) {
+        remind.every('07:59', function(date) {
 
             console.log('<-- Sending reminders -->');
             // send reminders for overdue and todays games
@@ -360,7 +360,11 @@ class Controller {
         }
 
         //get the documents for the players
-        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
+        DAO.getInstance().getAllPlayers(function(players) {
+
+            const player1Doc = util.getPlayerFromArray(player1, players)[0];
+            const player2Doc = util.getPlayerFromArray(player2, players)[0];
+
             //get the results between the players
             DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
 

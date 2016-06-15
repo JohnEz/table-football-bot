@@ -60,7 +60,7 @@ module.exports = {
         'I don\'t understand what you want me to do',
         'Saying that won\'t prompt me into action, sorry.',
         '<@%(user)s> I don\'t understand what you\'re saying',
-        'Cannot not compute "%(message)s"',
+        'Can not compute "%(message)s"',
         '<@%(user)s> remember, when you\'re talking to a foreigner YOU MAY NEED TO TALK LOUDER!',
         '<@%(user)s>, you haven\'t sufficiently greased my palms for me to allow you to say that!',
         'No comment'
