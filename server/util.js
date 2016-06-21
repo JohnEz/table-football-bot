@@ -200,5 +200,96 @@ module.exports = {
                 callback('');
             }
         }.bind(this));
+    },
+
+    getStatistics(results) {
+        let highestTotalGoals = {
+            highestGoals: -1,
+            secondHighest: -2,
+            player1: '',
+            player2: '',
+        };
+
+        let lowestTotalGoals = {
+            lowestGoals: -1,
+            player1: '',
+            player2: '',
+        };
+
+        let greatestGoalDifference = {
+            difference: -1,
+            winner: '',
+            loser: ''
+        };
+
+        let highestNilMatch = {
+            score: -1,
+            winner: '',
+            loser: ''
+        };
+
+        let totalGoalsScored = 0;
+        let totalGamesPlayed = 0;
+        results.forEach(function(result) {
+            const combinedScore = result.score1 + result.score2;
+            const difference = Math.abs(result.score1 - result.score2);
+            totalGoalsScored += combinedScore;
+            totalGamesPlayed++;
+
+            //highest goals scored in a single game
+            if (combinedScore > highestTotalGoals.highestGoals) {
+                highestTotalGoals.secondHighest = highestTotalGoals.highestGoals;
+                highestTotalGoals.highestGoals = combinedScore;
+                highestTotalGoals.player1 = result.player1;
+                highestTotalGoals.player2 = result.player2;
+            } else if (combinedScore > highestTotalGoals.secondHighest) {
+                highestTotalGoals.secondHighest = combinedScore;
+            }
+
+            //lowest goals scored in a single game
+            if (lowestTotalGoals.lowestGoals === -1 || combinedScore < lowestTotalGoals.lowestGoals) {
+                lowestTotalGoals.lowestGoals = combinedScore;
+                lowestTotalGoals.player1 = result.player1;
+                lowestTotalGoals.player2 = result.player2;
+            }
+
+            //greatest goal difference
+            if (difference > greatestGoalDifference.difference) {
+                greatestGoalDifference.difference = difference;
+                if (result.score1 > result.score2) {
+                    greatestGoalDifference.winner = result.player1;
+                    greatestGoalDifference.loser = result.player2;
+                } else {
+                    greatestGoalDifference.winner = result.player2;
+                    greatestGoalDifference.loser = result.player1;
+                }
+            }
+
+            // highest nil match
+            if (result.score2 === 0 && result.score1 > highestNilMatch.score) {
+                highestNilMatch.score = result.score1;
+                highestNilMatch.winner = result.player1;
+                highestNilMatch.loser = result.player2;
+            } else if (result.score1 === 0 && result.score2 > highestNilMatch.score) {
+                highestNilMatch.score = result.score2;
+                highestNilMatch.winner = result.player2;
+                highestNilMatch.loser = result.player1;
+            }
+
+        });
+
+        const totalMinutesSpent = totalGamesPlayed * 4;
+        return {
+            highestTotalGoals: highestTotalGoals,
+            lowestTotalGoals: lowestTotalGoals,
+            greatestGoalDifference: greatestGoalDifference,
+            highestNilMatch: highestNilMatch,
+            totals: {
+                goalsScored: totalGoalsScored,
+                gamesPlayed: totalGamesPlayed,
+                minutesSpent: totalMinutesSpent
+            }
+        };
     }
+
 };

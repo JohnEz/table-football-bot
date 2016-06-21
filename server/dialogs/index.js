@@ -251,6 +251,14 @@ dialog.on('Announce', function(session, args, next) {
 	}
 });
 
+dialog.on('Summary', function(session, args, next) {
+	const userId = session.userData.id;
+	controller.getSummary(userId, function(reply, mods) {
+		session.endDialog(reply, mods);
+	});
+
+});
+
 function checkForMe(p, result, session) {
 	let player = result[p];
 	if (util.isMe(player)) {
