@@ -817,13 +817,37 @@ class Controller {
     }
 
     sendRandomMessage(slackBot) {
-        let message = "";
-        switch(Math.floor(Math.random() * 4)) {
+        let message = '';
+        switch(Math.floor(Math.random() * 4 )) {
             case 0:
             // Jokes
             util.getRandomJoke(function(joke) {
                 message = `And now for something completely different...\n\n${joke}`;
-                slackBot.sendMessage(mainChannel.code, message);
+
+                // check it's ok to sendMessage
+                let bot = slackBot.getBot();
+                let ask = admins[Math.floor(Math.random() * admins.length)];
+                bot.startPrivateConversation({user: ask} ,function(err,convo) {
+
+                    convo.ask('Can I say this?\n\n'+joke,[
+                        {
+                            pattern: bot.utterances.yes,
+                            callback: function(response,convo) {
+                                convo.say('Great! I will send it out');
+                                slackBot.sendMessage(mainChannel.code, message);
+                                convo.next();                                
+                            }
+                        },
+                        {
+                            default: true,
+                            pattern: bot.utterances.no,
+                            callback: function(response,convo) {
+                                convo.say('Maybe it\'s a little too racy.');
+                                convo.next();
+                            }
+                        }
+                    ]);
+                });
             });
             break;
             case 1:
@@ -846,6 +870,7 @@ class Controller {
             });
         }
     }
+
 
     calculateKnockoutMatch(match, result) {
         //find out if it was a knockout game that wasn't the final
