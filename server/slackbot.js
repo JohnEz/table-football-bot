@@ -149,3 +149,7 @@ message is a string.
 module.exports.sendMessage = function(channel, message, args) {
 	slackBot.beginDialog({ channel: channel }, '/say', {text: message, args: args});
 };
+
+module.exports.getBot = function() {
+	return bot;
+};

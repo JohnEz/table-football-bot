@@ -15,6 +15,8 @@ module.exports = {
        "which country does @someName play as?"\n
     • Ask what your upcoming games are by saying something like:
        "when am I playing next?"\n
+    • Ask for a brief summary by asking:
+       "What has been going on?"\n
     To see the group tables, upcoming matches and results visit http://sl-foosball.herokuapp.com/`,
     error: 'D\'oh, something went wrong, try again.',
     resultCreated: "Added a new result: '%(result)s'",
@@ -60,7 +62,7 @@ module.exports = {
         'I don\'t understand what you want me to do',
         'Saying that won\'t prompt me into action, sorry.',
         '<@%(user)s> I don\'t understand what you\'re saying',
-        'Cannot not compute "%(message)s"',
+        'Can not compute "%(message)s"',
         '<@%(user)s> remember, when you\'re talking to a foreigner YOU MAY NEED TO TALK LOUDER!',
         '<@%(user)s>, you haven\'t sufficiently greased my palms for me to allow you to say that!',
         'No comment'
@@ -212,11 +214,10 @@ module.exports = {
         "Just for James Walker http://3.bp.blogspot.com/_57kf9wZjVUs/S_GsZvqlNZI/AAAAAAAAAAM/rWg0q_l-rjI/s1600/Pigeon2.jpg"
     ],
     giphySubjects: [
-        "Sepp Blatter",
-        "Fifa",
+        "foosball",
         "Fifa Corrupt",
         "Soccer Funny",
-        "UEFA",
+        "soccer skills",
         "Money",
         "Bribe"
     ],
@@ -228,5 +229,11 @@ module.exports = {
         'I read these newspapers so you don\'t have to but this is worth your time\n',
         'Have you guys seen this\n',
         'Look at this\n'
-    ]
+    ],
+    highestTotalGoals: 'Interestingly, the game between <@%(highestTotalGoals.player1.slackCode)s> and <@%(highestTotalGoals.player2.slackCode)s> contained the most goals, a staggering %(highestTotalGoals.highestGoals)s goals in 4 minutes.',
+    lowestTotalGoals: 'In what can be described as a defensive masterclass, <@%(lowestTotalGoals.player1.slackCode)s> and <@%(lowestTotalGoals.player2.slackCode)s> combined scored a measly %(lowestTotalGoals.lowestGoals)s goal(s) in their game.',
+    greatestGoalDifference: '%(greatestGoalDifference.difference)s, that\'s the greatest goal difference of the tournament so far, when <@%(greatestGoalDifference.winner.slackCode)s> beat <@%(greatestGoalDifference.loser.slackCode)s>',
+    highestNilMatch: 'The biggest shutout of the tournament so far has been by <@%(highestNilMatch.winner.slackCode)s> who scored %(highestNilMatch.score)s goals against <@%(highestNilMatch.loser.slackCode)s> whilst keeping a clean sheet!',
+    totals: 'Over the %(totals.gamesPlayed)s games in the tournament there\'s been a grand total of %(totals.goalsScored)s goals scored. Incidentally that\'s at least %(totals.minutesSpent)s of business time.'
+
 };

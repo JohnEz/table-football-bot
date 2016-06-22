@@ -15,7 +15,7 @@ class Controller {
     }
 
     setupReminders(slackBot){
-        remind.every('08:59', function(date) {
+        remind.every('07:59', function(date) {
 
             console.log('<-- Sending reminders -->');
             // send reminders for overdue and todays games
@@ -360,7 +360,11 @@ class Controller {
         }
 
         //get the documents for the players
-        DAO.getInstance().getPlayers(player1, player2, function(player1Doc, player2Doc) {
+        DAO.getInstance().getAllPlayers(function(players) {
+
+            const player1Doc = util.getPlayerFromArray(player1, players)[0];
+            const player2Doc = util.getPlayerFromArray(player2, players)[0];
+
             //get the results between the players
             DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
 
@@ -381,6 +385,73 @@ class Controller {
         }.bind(this));
 
     }
+
+    getSummary(slackId, callback) {
+        let reply = '';
+        // get players/results
+        DAO.getInstance().getResults(null, null, null, function(resultArray) {
+            // get individual summary eg So far you've played x game and won/lost y of them. In total you've scored z goals and conceded n.
+            let personal = {
+                fname: '',
+                scored: 0,
+                conceded: 0,
+                won: 0,
+                lost: 0,
+                draw: 0
+            };
+            let player = false;
+            resultArray.forEach( function(result) {
+                let game = null;
+                if (result.player1.slackCode === slackId) {
+                    player = true;
+                    personal.fname = result.player1.fname;
+                    game = result;
+                }
+                else if (result.player2.slackCode === slackId) {
+                    player = true;
+                    personal.fname = result.player2.fname;
+                    game = {
+                        player1: result.player2,
+                        player2: result.player1,
+                        score1: result.score2,
+                        score2: result.score1
+                    };
+                }
+                if (game) {
+                    personal.fname = game.player1.fname;
+                    personal.scored += game.score1;
+                    personal.conceded += game.score2;
+
+                    if (game.score1 > game.score2) {
+                        personal.won++;
+                    }
+                    else if (game.score1 < game.score2) {
+                        personal.lost++;
+                    }
+                    else {
+                        personal.draw++;
+                    }
+                }
+
+            });
+            //personal
+            if (player) {
+                reply = `${personal.fname}, so far you've played ${personal.won + personal.lost + personal.draw} games and won ${personal.won || 'none'} of them, scoring ${personal.scored || 'no'} goal(s) and conceding ${personal.conceded || 'none'} in the process.\n`;
+            }
+
+            // general
+            let stats = util.getStatistics(resultArray);
+            reply += prompts.totals;
+
+            let statTypes = ['highestTotalGoals', 'lowestTotalGoals', 'greatestGoalDifference', 'highestNilMatch'];
+            reply += '\n' + prompts[statTypes[Math.floor(Math.random() * statTypes.length)]];
+
+            callback(reply, stats);
+
+        });
+
+    }
+
 
     getPlayer (searchTerm, callback) {
         DAO.getInstance().getPlayer(searchTerm, callback);
@@ -746,13 +817,37 @@ class Controller {
     }
 
     sendRandomMessage(slackBot) {
-        let message = "";
-        switch(Math.floor(Math.random() * 4)) {
+        let message = '';
+        switch(Math.floor(Math.random() * 4 )) {
             case 0:
             // Jokes
             util.getRandomJoke(function(joke) {
                 message = `And now for something completely different...\n\n${joke}`;
-                slackBot.sendMessage(mainChannel.code, message);
+
+                // check it's ok to sendMessage
+                let bot = slackBot.getBot();
+                let ask = admins[Math.floor(Math.random() * admins.length)];
+                bot.startPrivateConversation({user: ask} ,function(err,convo) {
+
+                    convo.ask('Can I say this?\n\n'+joke,[
+                        {
+                            pattern: bot.utterances.yes,
+                            callback: function(response,convo) {
+                                convo.say('Great! I will send it out');
+                                slackBot.sendMessage(mainChannel.code, message);
+                                convo.next();                                
+                            }
+                        },
+                        {
+                            default: true,
+                            pattern: bot.utterances.no,
+                            callback: function(response,convo) {
+                                convo.say('Maybe it\'s a little too racy.');
+                                convo.next();
+                            }
+                        }
+                    ]);
+                });
             });
             break;
             case 1:
@@ -775,6 +870,7 @@ class Controller {
             });
         }
     }
+
 
     calculateKnockoutMatch(match, result) {
         //find out if it was a knockout game that wasn't the final
