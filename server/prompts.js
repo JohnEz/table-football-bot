@@ -230,10 +230,10 @@ module.exports = {
         'Have you guys seen this\n',
         'Look at this\n'
     ],
-    highestTotalGoals: 'Interestingly, the game between <@%(highestTotalGoals.player1.slackCode)s> and <@%(highestTotalGoals.player2.slackCode)s> contained the most goals, a staggering %(highestTotalGoals.highestGoals)s goals over 4 minutes.',
+    highestTotalGoals: 'Interestingly, the game between <@%(highestTotalGoals.player1.slackCode)s> and <@%(highestTotalGoals.player2.slackCode)s> contained the most goals, a staggering %(highestTotalGoals.highestGoals)s goals in 4 minutes.',
     lowestTotalGoals: 'In what can be described as a defensive masterclass, <@%(lowestTotalGoals.player1.slackCode)s> and <@%(lowestTotalGoals.player2.slackCode)s> combined scored a measly %(lowestTotalGoals.lowestGoals)s goal(s) in their game.',
-    greatestGoalDifference: '%(greatestGoalDifference.difference)s, that\'s the greatest goal difference of the tournament so far when <@%(greatestGoalDifference.winner.slackCode)s> beat <@%(greatestGoalDifference.loser.slackCode)s>',
+    greatestGoalDifference: '%(greatestGoalDifference.difference)s, that\'s the greatest goal difference of the tournament so far, when <@%(greatestGoalDifference.winner.slackCode)s> beat <@%(greatestGoalDifference.loser.slackCode)s>',
     highestNilMatch: 'The biggest shutout of the tournament so far has been by <@%(highestNilMatch.winner.slackCode)s> who scored %(highestNilMatch.score)s goals against <@%(highestNilMatch.loser.slackCode)s> whilst keeping a clean sheet!',
-    totals: 'Over the %(totals.gamesPlayed)s games in the tournament there\'s been a grand total of %(totals.goalsScored)s goals scored. Incidentally that\'s at least %(totals.minutesSpent)s minutes of business time.'
+    totals: 'Over the %(totals.gamesPlayed)s games in the tournament there\'s been a grand total of %(totals.goalsScored)s goals scored. Incidentally that\'s at least %(totals.minutesSpent)s of business time.'
 
 };

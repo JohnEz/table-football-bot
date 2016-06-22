@@ -2,6 +2,7 @@
 
 const request = require('request');
 const prompts = require('./prompts');
+const moment = require('moment');
 
 let numbers = {
     nil: 0,
@@ -287,7 +288,7 @@ module.exports = {
             totals: {
                 goalsScored: totalGoalsScored,
                 gamesPlayed: totalGamesPlayed,
-                minutesSpent: totalMinutesSpent
+                minutesSpent: moment.duration(totalMinutesSpent, 'minutes').humanize()
             }
         };
     }
