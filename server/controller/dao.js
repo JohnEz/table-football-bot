@@ -90,8 +90,13 @@ class DAO {
 		let results = this.db.collection(resultsCollection);
 		let matches = this.db.collection(matchesCollection);
 		let dateAdded = new Date();
+		let resultToAdd = { player1: player1ID, player2: player2ID, score1: winningScore, score2: losingScore, date: dateAdded };
 
-		results.insertOne( { player1: player1ID, player2: player2ID, score1: winningScore, score2: losingScore, date: dateAdded }, function(err, result) {
+		if (match.stage) {
+			resultToAdd = Object.assign({}, resultToAdd, {knockout: true});
+		}
+
+		results.insertOne(resultToAdd, function(err, result) {
 			if (err) {
 				console.log(err);
 				callback(!err);
