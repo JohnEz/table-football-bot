@@ -29,6 +29,9 @@ var UserTable = React.createClass({
 					diff = b.won - a.won;
 					if (diff === 0) {
 						diff = (b.for - b.against) - (a.for - a.against);
+						if (diff === 0) {
+							diff = b.for - a.for;
+						}
 					}
 				}
 				return diff;
