@@ -482,25 +482,27 @@ class Controller {
             DAO.getInstance().getResults(null, null, null, function(results) {
 
                 results.forEach(function(result) {
-                    let player1 = allPlayers.get(JSON.stringify(result.player1._id));
-                    let player2 = allPlayers.get(JSON.stringify(result.player2._id));
-                    if (result.score1 > result.score2) {
-                        player1.won++;
-                        player2.lost++;
-                    }
-                    else if (result.score1 < result.score2) {
-                        player2.won++;
-                        player1.lost++;
-                    }
-                    else {
-                        player1.draw++;
-                        player2.draw++;
-                    }
+                    if (!result.knockout) {
+                        let player1 = allPlayers.get(JSON.stringify(result.player1._id));
+                        let player2 = allPlayers.get(JSON.stringify(result.player2._id));
+                        if (result.score1 > result.score2) {
+                            player1.won++;
+                            player2.lost++;
+                        }
+                        else if (result.score1 < result.score2) {
+                            player2.won++;
+                            player1.lost++;
+                        }
+                        else {
+                            player1.draw++;
+                            player2.draw++;
+                        }
 
-                    player1.for += result.score1;
-                    player1.against += result.score2;
-                    player2.for += result.score2;
-                    player2.against += result.score1;
+                        player1.for += result.score1;
+                        player1.against += result.score2;
+                        player2.for += result.score2;
+                        player2.against += result.score1;
+                    }
 
                 });
                 callback([...allPlayers.values()]);
@@ -835,7 +837,7 @@ class Controller {
                             callback: function(response,convo) {
                                 convo.say('Great! I will send it out');
                                 slackBot.sendMessage(mainChannel.code, message);
-                                convo.next();                                
+                                convo.next();
                             }
                         },
                         {
