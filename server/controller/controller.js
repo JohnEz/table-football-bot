@@ -16,34 +16,36 @@ class Controller {
 
     setupReminders(slackBot){
         remind.every('07:59', function(date) {
+            //if its not a weekend
+            if (date.getDay() !== 6 && date.getDay() !== 0) {
+                console.log('<-- Sending reminders -->');
+                // send reminders for overdue and todays games
+                this.getMatchesToBePlayed(date, null, null, function(matches) {
 
-            console.log('<-- Sending reminders -->');
-            // send reminders for overdue and todays games
-            this.getMatchesToBePlayed(date, null, null, function(matches) {
+                    matches.today.forEach(function(match) {
+                        if (match.team1.slackCode) {
+                            slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
+                        }
 
-                matches.today.forEach(function(match) {
-                    if (match.team1.slackCode) {
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
-                    }
+                        if (match.team2.slackCode) {
+                            slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
+                        }
+                    }.bind(this));
 
-                    if (match.team2.slackCode) {
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
-                    }
+                    matches.overdue.forEach(function(match) {
+                        if (match.team1.slackCode) {
+                            slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
+                        }
+
+                        if (match.team2.slackCode) {
+                            slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
+                        }
+                    }.bind(this));
+
+                    console.log('<-- Reminders sent -->');
+
                 }.bind(this));
-
-                matches.overdue.forEach(function(match) {
-                    if (match.team1.slackCode) {
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
-                    }
-
-                    if (match.team2.slackCode) {
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
-                    }
-                }.bind(this));
-
-                console.log('<-- Reminders sent -->');
-
-            }.bind(this));
+            }
         }.bind(this));
     }
 
