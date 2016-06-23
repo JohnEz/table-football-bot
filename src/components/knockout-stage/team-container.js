@@ -17,7 +17,7 @@ let TeamContainer = React.createClass({
 		let score = this.props.score;
 
 		return (
-			<div className={containerClass} onMouseEnter={this.mouseOver} onMouseLeave={this.mouseOut}>
+			<div className={containerClass} title={player.slackID} onMouseEnter={this.mouseOver} onMouseLeave={this.mouseOut}>
 				<div className={countryClass}>{player.country}</div>
 				<div className='score'>{score}</div>
 			</div>
