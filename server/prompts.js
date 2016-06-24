@@ -214,10 +214,9 @@ module.exports = {
         "Just for James Walker http://3.bp.blogspot.com/_57kf9wZjVUs/S_GsZvqlNZI/AAAAAAAAAAM/rWg0q_l-rjI/s1600/Pigeon2.jpg"
     ],
     giphySubjects: [
-        "foosball",
-        "Fifa Corrupt",
+        "Foosball",
         "Soccer Funny",
-        "soccer skills",
+        "Soccer Skills",
         "Money",
         "Bribe"
     ],
@@ -230,10 +229,16 @@ module.exports = {
         'Have you guys seen this\n',
         'Look at this\n'
     ],
-    highestTotalGoals: 'Interestingly, the game between <@%(highestTotalGoals.player1.slackCode)s> and <@%(highestTotalGoals.player2.slackCode)s> contained the most goals, a staggering %(highestTotalGoals.highestGoals)s goals in 4 minutes.',
-    lowestTotalGoals: 'In what can be described as a defensive masterclass, <@%(lowestTotalGoals.player1.slackCode)s> and <@%(lowestTotalGoals.player2.slackCode)s> combined scored a measly %(lowestTotalGoals.lowestGoals)s goal(s) in their game.',
-    greatestGoalDifference: '%(greatestGoalDifference.difference)s, that\'s the greatest goal difference of the tournament so far, when <@%(greatestGoalDifference.winner.slackCode)s> beat <@%(greatestGoalDifference.loser.slackCode)s>',
-    highestNilMatch: 'The biggest shutout of the tournament so far has been by <@%(highestNilMatch.winner.slackCode)s> who scored %(highestNilMatch.score)s goals against <@%(highestNilMatch.loser.slackCode)s> whilst keeping a clean sheet!',
-    totals: 'Over the %(totals.gamesPlayed)s games in the tournament there\'s been a grand total of %(totals.goalsScored)s goals scored. Incidentally that\'s at least %(totals.minutesSpent)s of business time.'
+    stats : [
+        'My favourite match so far was between <@%(highestTotalGoals.player1.slackCode)s> and <@%(highestTotalGoals.player2.slackCode)s> which had a whopping %(highestTotalGoals.highestGoals)s goals scored.\n',
+        'In what can be described as a defensive masterclass, <@%(lowestTotalGoals.player1.slackCode)s> and <@%(lowestTotalGoals.player2.slackCode)s> combined scored a measly %(lowestTotalGoals.lowestGoals)s goals in their game. This is the smallest number of goals in a single game so far.\n',
+        '<@%(greatestGoalDifference.winner.slackCode)s> crushed <@%(greatestGoalDifference.loser.slackCode)s> in the tournaments biggest mismatch, winning by an impressive %(greatestGoalDifference.difference)s goals!\n',
+        'Also did you catch the match between <@%(highestNilMatch.winner.slackCode)s> and <@%(highestNilMatch.loser.slackCode)s>? It was the biggest shutout of the tournament so far! <@%(highestNilMatch.winner.slackCode)s> scored %(highestNilMatch.score)s goals whilst keeping a clean sheet!\n',
+    ],
+    totals: 'Over the %(totals.gamesPlayed)s games in the tournament there\'s been a grand total of %(totals.goalsScored)s goals scored. Incidentally that\'s at least %(totals.minutesSpent)s of business time :stuck_out_tongue:\n',
+    summaryIntro: [
+        'Certainly %(personal.fname)s! It\'s been a great tournament so far, which has really lived up to the hype, with some high scoring matches and the odd suprising result. :slightly_smiling_face:\n',
+        'Sure thing. I\'m confident in saying that everyone has really been enjoying the tournament so far! There have been some very close groups and some suprising results.\n',
+    ]
 
 };
