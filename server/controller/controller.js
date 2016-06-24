@@ -16,34 +16,36 @@ class Controller {
 
     setupReminders(slackBot){
         remind.every('07:59', function(date) {
+            //if its not a weekend
+            if (date.getDay() !== 6 && date.getDay() !== 0) {
+                console.log('<-- Sending reminders -->');
+                // send reminders for overdue and todays games
+                this.getMatchesToBePlayed(date, null, null, function(matches) {
 
-            console.log('<-- Sending reminders -->');
-            // send reminders for overdue and todays games
-            this.getMatchesToBePlayed(date, null, null, function(matches) {
+                    matches.today.forEach(function(match) {
+                        if (match.team1.slackCode) {
+                            slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
+                        }
 
-                matches.today.forEach(function(match) {
-                    if (match.team1.slackCode) {
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
-                    }
+                        if (match.team2.slackCode) {
+                            slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
+                        }
+                    }.bind(this));
 
-                    if (match.team2.slackCode) {
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
-                    }
+                    matches.overdue.forEach(function(match) {
+                        if (match.team1.slackCode) {
+                            slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
+                        }
+
+                        if (match.team2.slackCode) {
+                            slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
+                        }
+                    }.bind(this));
+
+                    console.log('<-- Reminders sent -->');
+
                 }.bind(this));
-
-                matches.overdue.forEach(function(match) {
-                    if (match.team1.slackCode) {
-                        slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
-                    }
-
-                    if (match.team2.slackCode) {
-                        slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
-                    }
-                }.bind(this));
-
-                console.log('<-- Reminders sent -->');
-
-            }.bind(this));
+            }
         }.bind(this));
     }
 
@@ -397,19 +399,16 @@ class Controller {
                 conceded: 0,
                 won: 0,
                 lost: 0,
-                draw: 0
+                draw: 0,
+                total: 0
             };
             let player = false;
             resultArray.forEach( function(result) {
                 let game = null;
                 if (result.player1.slackCode === slackId) {
-                    player = true;
-                    personal.fname = result.player1.fname;
                     game = result;
                 }
                 else if (result.player2.slackCode === slackId) {
-                    player = true;
-                    personal.fname = result.player2.fname;
                     game = {
                         player1: result.player2,
                         player2: result.player1,
@@ -418,6 +417,7 @@ class Controller {
                     };
                 }
                 if (game) {
+                    player = true;
                     personal.fname = game.player1.fname;
                     personal.scored += game.score1;
                     personal.conceded += game.score2;
@@ -434,17 +434,50 @@ class Controller {
                 }
 
             });
-            //personal
-            if (player) {
-                reply = `${personal.fname}, so far you've played ${personal.won + personal.lost + personal.draw} games and won ${personal.won || 'none'} of them, scoring ${personal.scored || 'no'} goal(s) and conceding ${personal.conceded || 'none'} in the process.\n`;
-            }
+
+            personal.total = personal.won + personal.lost + personal.draw;
+            const pointsPerGame = ((personal.won * 3) + personal.draw) / personal.total;
+            const goalDifference = (personal.scored - personal.conceded) / personal.total;
+            personal.won = personal.won || 'none';
+            personal.scored = personal.scored || 'no';
+            personal.conceded = personal.conceded || 'none';
 
             // general
-            let stats = util.getStatistics(resultArray);
+            let stats = Object.assign({}, util.getStatistics(resultArray), {personal: personal});
+
+            reply = util.getRandomMessage('summaryIntro');
             reply += prompts.totals;
 
-            let statTypes = ['highestTotalGoals', 'lowestTotalGoals', 'greatestGoalDifference', 'highestNilMatch'];
-            reply += '\n' + prompts[statTypes[Math.floor(Math.random() * statTypes.length)]];
+            reply += util.getRandomMessage('stats');
+
+            //personal
+            if (player) {
+
+                let statementOne = '';
+                let statementTwo = '';
+
+                if (pointsPerGame >= 3) {
+                    statementOne = 'you\'ve excelled';
+                } else if (pointsPerGame >=2) {
+                    statementOne = 'you\'ve done very well';
+                } else if (pointsPerGame >=1) {
+                    statementOne = 'you\'ve not done too bad';
+                } else {
+                    statementOne = 'you probably could have done with more practice';
+                }
+
+                console.log(goalDifference);
+
+                if (goalDifference >= 4) {
+                    statementTwo = 'showed great skill';
+                } else if (goalDifference <= -4) {
+                    statementTwo = 'were outclassed';
+                } else {
+                    statementTwo = 'were competitive';
+                }
+
+                reply += `\nAs for you, having played ${personal.total} matches, ${statementOne}, winning ${personal.won} of them. You ${statementTwo}, scoring ${personal.scored} goals and conceding ${personal.conceded}`;
+            }
 
             callback(reply, stats);
 
@@ -482,25 +515,27 @@ class Controller {
             DAO.getInstance().getResults(null, null, null, function(results) {
 
                 results.forEach(function(result) {
-                    let player1 = allPlayers.get(JSON.stringify(result.player1._id));
-                    let player2 = allPlayers.get(JSON.stringify(result.player2._id));
-                    if (result.score1 > result.score2) {
-                        player1.won++;
-                        player2.lost++;
-                    }
-                    else if (result.score1 < result.score2) {
-                        player2.won++;
-                        player1.lost++;
-                    }
-                    else {
-                        player1.draw++;
-                        player2.draw++;
-                    }
+                    if (!result.knockout) {
+                        let player1 = allPlayers.get(JSON.stringify(result.player1._id));
+                        let player2 = allPlayers.get(JSON.stringify(result.player2._id));
+                        if (result.score1 > result.score2) {
+                            player1.won++;
+                            player2.lost++;
+                        }
+                        else if (result.score1 < result.score2) {
+                            player2.won++;
+                            player1.lost++;
+                        }
+                        else {
+                            player1.draw++;
+                            player2.draw++;
+                        }
 
-                    player1.for += result.score1;
-                    player1.against += result.score2;
-                    player2.for += result.score2;
-                    player2.against += result.score1;
+                        player1.for += result.score1;
+                        player1.against += result.score2;
+                        player2.for += result.score2;
+                        player2.against += result.score1;
+                    }
 
                 });
                 callback([...allPlayers.values()]);
@@ -713,34 +748,6 @@ class Controller {
     }
 
     getBracketMatches(callback) {
-        let testData = {
-            prelims: [
-                { team1:{country:'Sweden'}, team2:{country:'Italy'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
-                { team1:{country:'Belgium'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
-                { team1:{country:'France'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
-                { team1:{country:'Sealand'}, team2:{country:'Russia'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
-                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'Italy'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 },
-                { team1:{country:'Belgium'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
-                { team1:{country:'France'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 10 }, winner: 2 },
-                { team1:{country:'Sealand'}, team2:{country:'Russia'}, date: new Date(), result: {score1: 10, score2: 0 }, winner: 1 }
-            ],
-
-            quaterFinals: [
-                { team1:{country:'Sweden'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 6, score2: 2 }, winner: 1 },
-                { team1:{country:'England'}, team2:{country:'Sealand'}, date: new Date(), result: {score1: 4, score2: 3 }, winner: 1 },
-                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'Republic Of Ireland'}, date: new Date(), result: {score1: 60, score2: 2 }, winner: 1 },
-                { team1:{country:'England'}, team2:{country:'Sealand'}, date: new Date(), result: {score1: 4, score2: 3 }, winner: 1 },
-            ],
-
-            semiFinals: [
-                { team1:{country:'Sweden'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
-                { team1:{country:'Sovereign State Of Forvik'}, team2:{country:'England'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
-            ],
-
-            finals: [
-                { team1:{country:'Sweden'}, team2:{country:'Sovereign State Of Forvik'}, date: new Date(), result: {score1: 0, score2: 0 }, winner: 0 },
-            ]
-        };
 
         DAO.getInstance().getMatches(null, null, function(matches, err) {
 
@@ -835,7 +842,7 @@ class Controller {
                             callback: function(response,convo) {
                                 convo.say('Great! I will send it out');
                                 slackBot.sendMessage(mainChannel.code, message);
-                                convo.next();                                
+                                convo.next();
                             }
                         },
                         {

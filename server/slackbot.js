@@ -23,7 +23,7 @@ botController.middleware.receive.use(function(bot, message, next) {
 	if (message.type === 'message' && !message.bot_id && !message.reply_to && !message.hidden) {
 		console.log(`${new Date().toTimeString()} | From: ${message.user} | Message: ${message.text}`);
 
-		if (/bribes?|money|back[\-,\s]?hander|donation|moolah/i.test(message.text)) {
+		if (/bribes?|money|back[\-,\s]?handers?|donations?|moolah|cash/i.test(message.text)) {
 			if (message.channel[0] === 'C') {
 				bot.reply(message, getRand('publicBribe'));
 			}

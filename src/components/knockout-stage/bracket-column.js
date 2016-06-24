@@ -13,6 +13,10 @@ let bracketColumn = React.createClass({
 		let highlightedTeam = this.props.highlightedTeam;
 		let highlightFunction = this.props.highlightFunction;
 
+		this.props.matches.sort(function(a, b) {
+			return a.matchNumber - b.matchNumber;
+		});
+
 		this.props.matches.map(function(match, index, array) {
 			let team1Winner = '';
 			let team2Winner = '';

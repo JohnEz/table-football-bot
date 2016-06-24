@@ -254,7 +254,9 @@ dialog.on('Announce', function(session, args, next) {
 dialog.on('Summary', function(session, args, next) {
 	const userId = session.userData.id;
 	controller.getSummary(userId, function(reply, mods) {
+
 		session.endDialog(reply, mods);
+
 	});
 
 });
