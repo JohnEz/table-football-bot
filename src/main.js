@@ -13,7 +13,7 @@ require('./styles/styles.scss');
 render((
 	<Router history={browserHistory}>
 		<Route path="/" component={App}>
-            <IndexRedirect to= '/group' />
+            <IndexRedirect to= '/knockout' />
 			<Route path="group" component={GroupStage}/>
 			<Route path="knockout" component={KnockoutStage}/>
 			<Route path="*" component={PageNotFound} />
