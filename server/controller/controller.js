@@ -99,47 +99,9 @@ class Controller {
             upcomingGames.sort(this.sortMatchByDate);
             DAO.getInstance().getMatchesCount(function(count) {
                 let totalGames = todaysGames.length + overdueGames.length;
-                callback( { today: todaysGames, overdue: overdueGames, upcoming: upcomingGames, atLimit: totalGames === count }, error );
+                callback( { today: todaysGames, overdue: overdueGames, atLimit: totalGames === count }, error );
             });
 
-        }.bind(this));
-    }
-
-    getUpcomingMatches(callCount, callback) {
-
-        DAO.getInstance().getMatches(null, null, function(matchesMap) {
-
-            let upcoming = new Map();
-
-            matchesMap.forEach(function(match) {
-
-                if (match.date && !match.result) {
-                    let whenToPlay = this.compareMatchDate(new Date(), match);
-                    //check if its meant to be played in the future
-                    if (whenToPlay === 1) {
-                        let day = moment(match.date).format('YYYY-MM-DD');
-                        let game = {
-                            id: match._id,
-                            player1: match.team1.country,
-                            player2:  match.team2.country,
-                            score1: 'vs',
-                            score2: '',
-                        };
-
-                        if(upcoming.has(day)){
-                            upcoming.get(day).matches.push(game);
-                        }
-                        else {
-                            upcoming.set(day, {date: day, matches: [game]});
-                        }
-                    }
-                }
-
-            }.bind(this));
-
-            let matches = [...upcoming.values()].sort(this.sortMatchByDate);
-            let payload = matches.slice(0, 2*callCount);
-            callback({matches: payload, atLimit: payload.length === matches.length});
         }.bind(this));
     }
 
@@ -496,82 +458,6 @@ class Controller {
         });
     }
 
-    getLeagueTable(callback) {
-        var table = [];
-        DAO.getInstance().getAllPlayers(function(players) {
-            let allPlayers = players;
-            allPlayers.forEach(function(player) {
-                Object.assign(
-                    player,
-                    {
-                        won: 0,
-                        lost: 0,
-                        draw: 0,
-                        for: 0,
-                        against: 0
-                    }
-                );
-            });
-            DAO.getInstance().getResults(null, null, null, function(results) {
-
-                results.forEach(function(result) {
-                    if (!result.knockout) {
-                        let player1 = allPlayers.get(JSON.stringify(result.player1._id));
-                        let player2 = allPlayers.get(JSON.stringify(result.player2._id));
-                        if (result.score1 > result.score2) {
-                            player1.won++;
-                            player2.lost++;
-                        }
-                        else if (result.score1 < result.score2) {
-                            player2.won++;
-                            player1.lost++;
-                        }
-                        else {
-                            player1.draw++;
-                            player2.draw++;
-                        }
-
-                        player1.for += result.score1;
-                        player1.against += result.score2;
-                        player2.for += result.score2;
-                        player2.against += result.score1;
-                    }
-
-                });
-                callback([...allPlayers.values()]);
-            });
-        });
-    }
-
-    getResultsTable(callCount, callback) {
-        DAO.getInstance().getResults(callCount*10, null, null, function(results, err, atLimit) {
-            if (!err) {
-                let days = new Map();
-                results.forEach(function(result) {
-                    let day = moment(result.date).format('YYYY-MM-DD');
-                    let res = {
-                        id: result._id,
-                        player1: result.player1.country,
-                        player2:  result.player2.country,
-                        score1: result.score1,
-                        score2: result.score2,
-                    };
-
-                    if(days.has(day)){
-                        days.get(day).results.push(res);
-                    }
-                    else {
-                        days.set(day, {date: day, results: [res]});
-                    }
-
-                });
-                callback({results: [...days.values()], atLimit: atLimit} , null);
-            } else {
-                callback({}, err);
-            }
-        });
-    }
-
     convertPlayerToString(player) {
         let playerName = 'No player found';
         let slackName = `@${player.slackID}`;
@@ -618,72 +504,6 @@ class Controller {
         let difference = Math.abs(score1 - score2);
 
         return difference;
-    }
-
-    addMatches() {
-        //group A
-        this.addMatch('france', 'albania', new Date('2016-06-15'));
-        this.addMatch('romania', 'albania', new Date('2016-06-19'));
-        this.addMatch('albania', 'switzerland', new Date('2016-06-11'));
-        this.addMatch('france', 'romania', new Date('2016-06-10'));
-        this.addMatch('switzerland', 'france', new Date('2016-06-19'));
-        this.addMatch('romania', 'switzerland', new Date('2016-06-15'));
-
-        //group B
-        this.addMatch('england', 'russia', new Date('2016-06-11'));
-        this.addMatch('slovakia', 'england', new Date('2016-06-20'));
-        this.addMatch('england', 'wales', new Date('2016-06-16'));
-        this.addMatch('russia', 'slovakia', new Date('2016-06-15'));
-        this.addMatch('russia', 'wales', new Date('2016-06-20'));
-        this.addMatch('wales', 'slovakia', new Date('2016-06-11'));
-
-        //group C
-        this.addMatch('northern ireland', 'germany', new Date('2016-06-21'));
-        this.addMatch('germany', 'poland', new Date('2016-06-16'));
-        this.addMatch('germany', 'ukraine', new Date('2016-06-12'));
-        this.addMatch('poland', 'northern ireland', new Date('2016-06-12'));
-        this.addMatch('ukraine', 'northern ireland', new Date('2016-06-16'));
-        this.addMatch('ukraine', 'poland', new Date('2016-06-21'));
-
-        //group D
-        this.addMatch('czech', 'croatia', new Date('2016-06-17'));
-        this.addMatch('croatia', 'spain', new Date('2016-06-21'));
-        this.addMatch('turkey', 'croatia', new Date('2016-06-12'));
-        this.addMatch('spain', 'czech', new Date('2016-06-13'));
-        this.addMatch('czech', 'turkey', new Date('2016-06-21'));
-        this.addMatch('spain', 'turkey', new Date('2016-06-17'));
-
-        //group E
-        this.addMatch('belgium', 'italy', new Date('2016-06-13'));
-        this.addMatch('belgium', 'republic of ireland', new Date('2016-06-18'));
-        this.addMatch('sweden', 'belgium', new Date('2016-06-22'));
-        this.addMatch('italy', 'republic of ireland', new Date('2016-06-22'));
-        this.addMatch('italy', 'sweden', new Date('2016-06-17'));
-        this.addMatch('republic of ireland', 'sweden', new Date('2016-06-13'));
-
-        //group F
-        this.addMatch('austria', 'hungary', new Date('2016-06-14'));
-        this.addMatch('iceland', 'austria', new Date('2016-06-22'));
-        this.addMatch('portugal', 'austria', new Date('2016-06-18'));
-        this.addMatch('iceland', 'hungary', new Date('2016-06-18'));
-        this.addMatch('hungary', 'portugal', new Date('2016-06-22'));
-        this.addMatch('portugal', 'iceland', new Date('2016-06-14'));
-
-        //group G
-        this.addMatch('copeman', 'enclava', new Date('2016-06-15'));
-        this.addMatch('copeman', 'sealand', new Date('2016-06-19'));
-        this.addMatch('copeman', 'forvik', new Date('2016-06-11'));
-        this.addMatch('enclava', 'sealand', new Date('2016-06-10'));
-        this.addMatch('enclava', 'forvik', new Date('2016-06-19'));
-        this.addMatch('sealand', 'forvik', new Date('2016-06-15'));
-
-        //group H
-        this.addMatch('austenasia', 'perloja', new Date('2016-06-11'));
-        this.addMatch('austenasia', 'elleore', new Date('2016-06-20'));
-        this.addMatch('austenasia', 'frestonia', new Date('2016-06-16'));
-        this.addMatch('perloja', 'elleore', new Date('2016-06-15'));
-        this.addMatch('perloja', 'frestonia', new Date('2016-06-20'));
-        this.addMatch('elleore', 'frestonia', new Date('2016-06-11'));
     }
 
     //temp method to add scheduled matches
@@ -745,67 +565,6 @@ class Controller {
             }
         });
         return validMatch;
-    }
-
-    getBracketMatches(callback) {
-
-        DAO.getInstance().getMatches(null, null, function(matches, err) {
-
-            let brackets = {
-                prelims: [],
-                quaterFinals: [],
-                semiFinals: [],
-                finals: []
-            }
-
-            if (!err) {
-
-                DAO.getInstance().getResultsMap(function(err, results) {
-
-                    if (!err) {
-
-                        matches.forEach(function(match) {
-
-                            if (!match.team1) {
-                                match.team1 = {country: 'ERROR'};
-                            }
-
-                            if (!match.team2) {
-                                match.team2 = {country: 'ERROR'};
-                            }
-
-                            if (!match.result) {
-                                match.result = {score1: null, score2: null};
-                            } else {
-                                match.result = results.get(JSON.stringify(match.result));
-                                let winner = 0;
-                                if (match.result.score1 > match.result.score2) {
-                                    winner = 1;
-                                } else if (match.result.score1 < match.result.score2) {
-                                    winner = 2;
-                                }
-                                match.winner = winner;
-                            }
-
-                            switch(match.stage) {
-                                case 16: brackets.prelims.push(match);
-                                break;
-                                case 8: brackets.quaterFinals.push(match);
-                                break;
-                                case 4: brackets.semiFinals.push(match);
-                                break;
-                                case 2: brackets.finals.push(match);
-                                break;
-                            };
-
-                        });
-
-                        callback(brackets);
-                    };
-                });
-            }
-
-        });
     }
 
     randomMessageSetup(slackBot) {

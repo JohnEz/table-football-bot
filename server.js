@@ -22,59 +22,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 /**
-*   ROUTES
-*/
-app.get('/*', function(req, res) {
-    res.sendFile(path.join(__dirname + '/build/index.html'));
-});
-
-app.post('/bot/results', function(req, res) {
-    controller.getResultsTable(req.body.count, function(data, err) {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-        res.json(data);
-    });
-});
-
-app.post('/bot/users', function(req, res) {
-    controller.getLeagueTable(function(data, err) {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-        res.json(data);
-    });
-});
-
-app.post('/bot/schedule', function(req, res) {
-    controller.getMatchesToBePlayed(new Date(), null, null, function(data, err) {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-        res.json({today: data.today, overdue: data.overdue, atLimit: data.atLimit});
-    });
-});
-
-app.post('/bot/future', function(req, res) {
-    controller.getUpcomingMatches(req.body.count, function(data, err) {
-        if (err) {
-            console.error(err);
-            process.exit(1);
-        }
-        res.json(data);
-    });
-});
-
-app.post('/bot/brackets', function(req, res) {
-    controller.getBracketMatches(function(data) {
-        res.json(data);
-    });
-});
-
-/**
 *   START SERVER
 */
 app.listen(PORT, function(error) {
