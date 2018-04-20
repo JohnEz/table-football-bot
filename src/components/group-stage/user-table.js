@@ -20,7 +20,7 @@ var UserTable = React.createClass({
 		})
 	},
 	loadTableFromServer: function() {
-		fetch('/bot/users', {method: 'post'}).then(function(response) {
+		fetch('http://localhost:53167/api/players/leaderboard').then(function(response) {
 			return response.json()
 		}).then(function(data) {
 			data.sort(function(a, b) {

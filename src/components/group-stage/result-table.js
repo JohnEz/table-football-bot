@@ -15,14 +15,8 @@ var ResultTable = React.createClass({
 	},
 	loadResultsFromServer: function() {
 		let count = this.state.moreCount;
-		fetch('/bot/results', {
-			method: 'POST',
-			headers: {
-	          'Accept': 'application/json',
-	          'Content-Type': 'application/json'
-	        },
-			body: JSON.stringify({count: count})
-		}).then(function(response) {
+		fetch(`http://localhost:53167/api/results/table/${count}`)
+		.then(function(response) {
 			return response.json()
 		}).then(function(data) {
 			this.setState({results: data.results, loaded: true, moreCount: this.state.moreCount + 1, atLimit: data.atLimit});

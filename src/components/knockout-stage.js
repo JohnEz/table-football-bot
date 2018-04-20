@@ -13,9 +13,8 @@ let KnockoutStage = React.createClass({
 		}
 	},
 	loadResultsFromServer: function() {
-		fetch('/bot/brackets', {
-			method: 'post',
-		}).then(function(response) {
+		fetch('http://localhost:53167/api/matches/knockouts')
+		.then(function(response) {
 			return response.json()
 		}).then(function(data) {
 			this.setState({matches: data, loaded: true});
@@ -27,7 +26,6 @@ let KnockoutStage = React.createClass({
 		this.loadResultsFromServer();
 	},
 	render: function() {
-
 		let spinner = null;
 		let self = this;
 		let highlightedTeam = this.state.highlightedTeam;
@@ -54,8 +52,8 @@ let KnockoutStage = React.createClass({
 				highlightedTeam={highlightedTeam}
 				highlightFunction={highlightFunction}/>);
 			columns.push(<BracketColumn
-				key={this.state.matches.quaterFinals.length}
-				matches={this.state.matches.quaterFinals}
+				key={this.state.matches.quarterFinals.length}
+				matches={this.state.matches.quarterFinals}
 				date="30-3RD JULY"
 				highlightedTeam={highlightedTeam}
 				highlightFunction={highlightFunction}/>);
