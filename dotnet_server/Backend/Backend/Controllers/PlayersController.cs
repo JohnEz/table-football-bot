@@ -41,6 +41,13 @@ namespace Backend.Controllers
             return _playersManager.GetPlayerById(id);
         }
 
+        // GET api/players/search/searchTerm
+        [HttpGet("{searchTerm}")]
+        public Task<string> GetPlayerBySearchTerm(string searchTerm)
+        {
+            return _playersManager.GetPlayerBySearchTerm(searchTerm);
+        }
+
         // POST api/players
         [HttpPost]
         public void Post([FromBody]Player value)

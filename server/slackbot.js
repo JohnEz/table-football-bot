@@ -6,10 +6,7 @@ var index = require('./dialogs/index');
 const config = require('./config');
 const getRand = require('./util').getRandomMessage;
 const prompts = require('./prompts');
-const DAO = require('./controller/dao');
-
-var Controller = require('./controller/controller');
-var appController = new Controller();
+var fetch = require('node-fetch');
 
 var botController = Botkit.slackbot({
 	debug: false,
@@ -79,7 +76,7 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 			let message = ``;
 
 			if(!user[0].fname) {
-				DAO.getInstance().getPlayer(user[0].name, function(player, err) {
+				fetch(`http://localhost:53167/api/players/search/${user[0].name}`).then(function(player, err) {
 					let name = null;
 					let fname = null;
 					if (player) {
@@ -91,15 +88,11 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 			} else {
 				message = createWelcomeMessage(user[0].name, user[0].fname);
 			}
-			appController.isPlayer(user[0].name, function(player) {
-				if(player) {
-					botkit.reply(msg, message);
-				}
-				else {
-					botkit.reply(msg, `@${user[0].name} ${getRand('imposter')}`);
-				}
+			botkit.reply(msg, message);
+			fetch('http://localhost:53167/api/players', {
+				method: 'POST',
+				body: user
 			});
-			appController.addUsers(user);
 		}
 	});
 });
@@ -127,7 +120,12 @@ module.exports.startBot = function() {
 				);
 			}
 		});
-		appController.addUsers(users);
+		users.forEach(function(user) {
+			fetch('http://localhost:53167/api/players', {
+				method: 'POST',
+				body: user
+			});
+		})
 	});
 };
 

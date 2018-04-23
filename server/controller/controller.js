@@ -1,5 +1,4 @@
 'use strict';
-const DAO = require('./dao.js');
 const prompts = require('../prompts.js');
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
@@ -20,7 +19,7 @@ class Controller {
             if (date.getDay() !== 6 && date.getDay() !== 0) {
                 console.log('<-- Sending reminders -->');
                 // send reminders for overdue and todays games
-                this.getMatchesToBePlayed(date, null, null, function(matches) {
+                fetch('http://localhost:53167/api/matches/schedule').then( function(matches) {
 
                     matches.today.forEach(function(match) {
                         if (match.team1.slackCode) {
@@ -46,62 +45,6 @@ class Controller {
 
                 }.bind(this));
             }
-        }.bind(this));
-    }
-
-    getMatchesToBePlayed(date, team1, team2, callback) {
-
-        DAO.getInstance().getMatches(team1, team2, function(matchesMap) {
-
-            let todaysGames = [];
-            let overdueGames = [];
-            let upcomingGames = [];
-            let gameFound = false;
-            let playedGameFound = false;
-            let error = null;
-
-            matchesMap.forEach(function(match) {
-
-                //if it has a date set, and no results given
-                if (match.date && !match.result) {
-
-                    let whenToPlay = this.compareMatchDate(date, match);
-
-                    if (!gameFound) {
-                        gameFound = true;
-                    }
-
-                    //check if its meant to be played today
-                    if (whenToPlay === 0) {
-                        todaysGames.push(match);
-                    } else if ( whenToPlay === -1 ) {
-                        // if its not meant to be played today, check if it was last month or earlier this month
-                        overdueGames.push(match);
-                    } else {
-                        upcomingGames.push(match);
-                    }
-                } else {
-                    playedGameFound = true;
-                }
-
-            }.bind(this));
-
-            if (!gameFound) {
-                if (!playedGameFound) {
-                    error = prompts.noGames;
-                } else {
-                    error = prompts.noGamesToPlay;
-                }
-            }
-
-            todaysGames.sort(this.sortMatchByDate);
-            overdueGames.sort(this.sortMatchByDate);
-            upcomingGames.sort(this.sortMatchByDate);
-            DAO.getInstance().getMatchesCount(function(count) {
-                let totalGames = todaysGames.length + overdueGames.length;
-                callback( { today: todaysGames, overdue: overdueGames, atLimit: totalGames === count }, error );
-            });
-
         }.bind(this));
     }
 
@@ -142,7 +85,7 @@ class Controller {
 
     getMatchesBetween(team1, team2, userId, callback) {
 
-        DAO.getInstance().getAllPlayers(function(players) {
+        fetch('http://localhost:53167/api/players').then(function(players) {
             let team1Docs = util.getPlayerFromArray(team1, players);
             let team2Docs = util.getPlayerFromArray(team2, players);
             let team1Id = null;
@@ -172,7 +115,10 @@ class Controller {
             }
 
             if (!error) {
-                this.getMatchesToBePlayed(new Date(), team1Id, team2Id, function(matches, err) {
+                fetch('http://localhost:53167/api/matches/teams', {
+                    method: 'POST',
+                    body: {team1Id, team2Id}
+                }).then(function(matches, err) {
                     callback(matches, includesUser, err);
                 });
             } else {
@@ -292,7 +238,16 @@ class Controller {
         }
 
         //atempt to add the results
-        DAO.getInstance().addResult(player1._id, player2._id, intScoreLeft, intScoreRight, match, function(added) {
+        fetch('http://localhost:53167/api/matches/teams', {
+                    method: 'POST',
+                    body: {
+                        player1Id: player1._id,
+                        player2Id: player2._id,
+                        score1: intScoreLeft,
+                        score2: intScoreRight,
+                        match
+                    }
+                }).then(function(added) {
             //if the results were added successfully
             if (added) {
                 let player1String = this.convertPlayerToString(player1);
@@ -318,19 +273,11 @@ class Controller {
     }
 
     getResults(count, player1, player2, callback) {
-
-        if (!count || count > MAXRESULTS || count < 1) {
-            count = MAXRESULTS;
-        }
-
         //get the documents for the players
-        DAO.getInstance().getAllPlayers(function(players) {
-
-            const player1Doc = util.getPlayerFromArray(player1, players)[0];
-            const player2Doc = util.getPlayerFromArray(player2, players)[0];
+        fetch('http://localhost:53167/api/players').then(function(players) {
 
             //get the results between the players
-            DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
+            fetch('http://localhost:53167/api/results').then(function(results, err) {
 
                 if (!err) {
 
@@ -353,7 +300,7 @@ class Controller {
     getSummary(slackId, callback) {
         let reply = '';
         // get players/results
-        DAO.getInstance().getResults(null, null, null, function(resultArray) {
+        fetch('http://localhost:53167/api/results').then(function(resultArray) {
             // get individual summary eg So far you've played x game and won/lost y of them. In total you've scored z goals and conceded n.
             let personal = {
                 fname: '',
@@ -447,17 +394,6 @@ class Controller {
 
     }
 
-
-    getPlayer (searchTerm, callback) {
-        DAO.getInstance().getPlayer(searchTerm, callback);
-    }
-
-    getAllPlayers(callback) {
-        DAO.getInstance().getAllPlayers(function(playersMap) {
-            callback([...playersMap.values()]);
-        });
-    }
-
     convertPlayerToString(player) {
         let playerName = 'No player found';
         let slackName = `@${player.slackID}`;
@@ -492,14 +428,6 @@ class Controller {
         return {player1Message: player1Message, player2Message: player2Message};
     }
 
-    isPlayer(slackID, callback) {
-        DAO.getInstance().isPlayer(slackID, callback);
-    }
-
-    addUsers(users) {
-        DAO.getInstance().addUsers(users);
-    }
-
     checkScoreDifference(score1, score2) {
         let difference = Math.abs(score1 - score2);
 
@@ -518,7 +446,7 @@ class Controller {
             match = parseInt(matchCode[2]);
         }
 
-        this.getAllPlayers(function(playerDocs) {
+        fetch('http://localhost:53167/api/players').then(function(playerDocs) {
 
             //add one match
             let team1Doc = util.getPlayerFromArray(team1, playerDocs);
@@ -530,7 +458,16 @@ class Controller {
                 callback({error: true, message: prompts.player2NotFound, args:{player2: team2}})
             }
             else {
-                DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, bracket, match, function(err, added) {
+                fetch('http://localhost:53167/api/matches', {
+                    method: 'POST',
+                    body: {
+                        team1Id: team1Doc[0]._id,
+                        team2Id: team2Doc[0]._id,
+                        date,
+                        bracket,
+                        match
+                    }
+                }).then(function(err, added) {
                     let match = {error: true, message: prompts.databaseError};
                     if (!err) {
                         match = {
@@ -550,10 +487,6 @@ class Controller {
 
         });
 
-    }
-
-    getMatches(team1, team2, callback) {
-        DAO.getInstance().getMatches(team1._id, team2._id, callback);
     }
 
     getValidMatch(matches) {
@@ -658,11 +591,15 @@ class Controller {
             if (result.score1 < result.score2) {
                 winningTeam = match.team2._id;
             }
-
-            DAO.getInstance().updateKnockoutMatch(targetStage, targetMatchNumber, winningTeam, isFirstTeam, function(updated) {
-
-            });
-
+            fetch('http://localhost:53167/api/matches', {
+                method: 'PUT',
+                body: {
+                    targetMatchNumber,
+                    targetStage,
+                    winningTeam,
+                    isFirstTeam
+                }
+            })
         }
     }
 

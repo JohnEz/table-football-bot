@@ -12,12 +12,12 @@ namespace Backend.Managers
     public class MatchesManager
     {
         private readonly IResultsRepository<Result> _resultsRepository;
-        private readonly IRepository<Player> _playersRepository;
+        private readonly IPlayersRepository<Player> _playersRepository;
         private readonly IMatchesRepository<Match> _matchesRepository;
         private readonly PlayersManager _playersManager;
         private readonly ResultsManager _resultsManager;
 
-        public MatchesManager(IResultsRepository<Result> resultsRepository, IRepository<Player> playersRepository, IMatchesRepository<Match> matchesRepository, PlayersManager playersManager, ResultsManager resultsManager)
+        public MatchesManager(IResultsRepository<Result> resultsRepository, IPlayersRepository<Player> playersRepository, IMatchesRepository<Match> matchesRepository, PlayersManager playersManager, ResultsManager resultsManager)
         {
             _resultsRepository = resultsRepository;
             _playersRepository = playersRepository;
@@ -70,6 +70,29 @@ namespace Backend.Managers
         public async Task<string> GetScheduledMatches()
         {
             return await ConstructScheduledMatches();
+        }
+
+        public async Task<string> GetMatchesBetweenTeams(string team1Id, string team2Id)
+        { 
+            var matches = await _matchesRepository.GetAll();
+            var enrichedMatches = await EnrichMatchesFromDatabase(matches);
+            IEnumerable<Match> filteredMatches = enrichedMatches.Where(match => match.Team1Id.ToString() == team1Id || 
+                match.Team2Id.ToString() == team1Id || 
+                match.Team1Id.ToString() == team2Id || 
+                match.Team2Id.ToString() == team2Id);
+            return JsonConvert.SerializeObject(filteredMatches);
+        }
+
+        public async void UpdateKnockoutMatch(MatchUpdate matchUpdate)
+        {
+            Match matchToUpdate = await _matchesRepository.GetMatchByMatchNumber(matchUpdate.TaregtMatchNumber);
+            if(matchToUpdate.Stage != matchUpdate.TargetStage)
+            {
+                throw new Exception("match stages don't match");
+            }
+            matchToUpdate.Winner = matchUpdate.Winner;
+            // TODO why need IsFirstTeam?
+            _matchesRepository.Update(matchToUpdate, matchUpdate.TaregtMatchNumber);
         }
 
         public async Task<IEnumerable<Match>> EnrichMatchesFromDatabase(IEnumerable<Match> matches)

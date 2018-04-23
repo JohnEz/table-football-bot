@@ -38,6 +38,23 @@ namespace Backend.Repository
             return (int)_context.Matches.Count(_ => true);
         }
 
+        public async Task<Match> GetMatchByMatchNumber(Int32 matchNumber)
+        {
+            var filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
+
+            try
+            {
+                return await _context.Matches
+                                .Find(filter)
+                                .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                // log or manage the exception
+                throw ex;
+            }
+        }
+
         public async Task<IEnumerable<Match>> GetAll()
         {
             try
@@ -74,6 +91,26 @@ namespace Backend.Repository
             try
             {
                 await _context.Matches.InsertOneAsync(match);
+            }
+            catch (Exception ex)
+            {
+                // log or manage the exception
+                throw ex;
+            }
+        }
+
+        public void Update(Match match, Int32 matchNumber)
+        {
+            var filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
+            var update = Builders<Match>.Update.Set("Winner", match.Winner);
+            var updateOptions = new UpdateOptions
+            {
+                IsUpsert = true
+            };
+
+            try
+            {
+                _context.Matches.UpdateOne(filter, update, updateOptions);
             }
             catch (Exception ex)
             {

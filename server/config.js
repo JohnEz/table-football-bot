@@ -10,5 +10,6 @@ module.exports = {
 		code: 'C1CV4R1L5',
 		name: 'foosball-euros'
 	},
+	slackBotToken: 'xoxb-40442133441-8xDsMH2Eng0EW0BbDvZmaEjc',
 	canAddResults: true
 };

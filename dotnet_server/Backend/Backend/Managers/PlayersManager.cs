@@ -12,10 +12,10 @@ namespace Backend.Managers
     public class PlayersManager
     {
         private readonly IResultsRepository<Result> _resultsRepository;
-        private readonly IRepository<Player> _playersRepository;
+        private readonly IPlayersRepository<Player> _playersRepository;
         private readonly ResultsManager _resultsManager;
 
-        public PlayersManager(IResultsRepository<Result> resultsRepository, IRepository<Player> playersRepository, ResultsManager resultsManager)
+        public PlayersManager(IResultsRepository<Result> resultsRepository, IPlayersRepository<Player> playersRepository, ResultsManager resultsManager)
         {
             _resultsRepository = resultsRepository;
             _resultsManager = resultsManager;
@@ -44,6 +44,12 @@ namespace Backend.Managers
                 SlackId = value.SlackId,
                 Country = value.Country
             });
+        }
+
+        public async Task<string> GetPlayerBySearchTerm(string searchTerm)
+        {
+            Player player = EnrichPlayerFromDatabase(await _playersRepository.GetPlayerWithSearchTerm(searchTerm));
+            return JsonConvert.SerializeObject(player);
         }
 
         public async Task<string> GetLeaderboard()

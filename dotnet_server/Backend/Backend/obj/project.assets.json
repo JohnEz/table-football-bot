@@ -13073,11 +13073,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Dev\\table-football-bot\\dotnet_server_new\\Backend\\Backend\\Backend.csproj",
+      "projectUniqueName": "C:\\Dev\\table-football-bot\\dotnet_server\\Backend\\Backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "C:\\Dev\\table-football-bot\\dotnet_server_new\\Backend\\Backend\\Backend.csproj",
+      "projectPath": "C:\\Dev\\table-football-bot\\dotnet_server\\Backend\\Backend\\Backend.csproj",
       "packagesPath": "C:\\Users\\phands\\.nuget\\packages\\",
-      "outputPath": "C:\\Dev\\table-football-bot\\dotnet_server_new\\Backend\\Backend\\obj\\",
+      "outputPath": "C:\\Dev\\table-football-bot\\dotnet_server\\Backend\\Backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

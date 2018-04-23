@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Backend.Repository
 {
-    public class PlayerRepository : IRepository<Player>
+    public class PlayerRepository : IPlayersRepository<Player>
     {
         private readonly PlayersContext _context;
 
@@ -53,6 +53,27 @@ namespace Backend.Repository
             }
         }
 
+        public async Task<Player> GetPlayerWithSearchTerm(string searchTerm)
+        {
+            var countryFilter = Builders<Player>.Filter.Eq("Country", searchTerm);
+            var slackIdFilter = Builders<Player>.Filter.Eq("SlackId", searchTerm);
+            var slackCodeFilter = Builders<Player>.Filter.Eq("SlackCode", searchTerm.ToUpper());
+
+            var filter = Builders<Player>.Filter.Or(countryFilter, slackIdFilter, slackCodeFilter);
+
+            try
+            {
+                return await _context.Players
+                                .Find(filter)
+                                .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                // log or manage the exception
+                throw ex;
+            }
+        }
+
         public async Task AddNew(Player player)
         {
             try
@@ -64,6 +85,11 @@ namespace Backend.Repository
                 // log or manage the exception
                 throw ex;
             }
+        }
+
+        public void Update(Player player, Int32 playerId)
+        {
+            // TODO
         }
     }
 }

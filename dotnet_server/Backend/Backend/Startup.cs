@@ -45,7 +45,7 @@ namespace Backend
                 options.Database
                     = Configuration.GetSection("MongoConnection:Database").Value;
             });
-            services.AddTransient<IRepository<Player>, PlayerRepository>();
+            services.AddTransient<IPlayersRepository<Player>, PlayerRepository>();
             services.AddTransient<IMatchesRepository<Match>, MatchesRepository>();
             services.AddTransient<IResultsRepository<Result>, ResultsRepository>();
             services.AddTransient<MatchesManager>();

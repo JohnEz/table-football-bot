@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Backend.Managers;
 using Microsoft.AspNetCore.Cors;
 using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json.Linq;
 
 namespace Backend.Controllers
 {
@@ -64,11 +65,18 @@ namespace Backend.Controllers
             _matchesManager.AddMatch(value);
         }
 
-        // PUT api/matches/id
-        // TO DO
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]Match value)
+        // POST api/matches/teams
+        [HttpPost("teams")]
+        public async void GetMatchesForTeams([FromBody]JObject data)
         {
+            await _matchesManager.GetMatchesBetweenTeams(data["team1Id"].ToString(), data["team2Id"].ToString());
+        }
+
+        // PUT api/matches
+        [HttpPut()]
+        public void Put(MatchUpdate value)
+        {
+            _matchesManager.UpdateKnockoutMatch(value);
         }
 
         // DELETE api/matches/id

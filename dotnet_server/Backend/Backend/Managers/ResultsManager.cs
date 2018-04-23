@@ -11,10 +11,10 @@ namespace Backend.Managers
 {
     public class ResultsManager
     {
-        private readonly IRepository<Player> _playersRepository;
+        private readonly IPlayersRepository<Player> _playersRepository;
         private readonly IResultsRepository<Result> _resultsRepository;
 
-        public ResultsManager(IRepository<Player> playersRepository, IResultsRepository<Result> resultsRepository)
+        public ResultsManager(IPlayersRepository<Player> playersRepository, IResultsRepository<Result> resultsRepository)
         {
             _playersRepository = playersRepository;
             _resultsRepository = resultsRepository;

@@ -123,7 +123,7 @@ dialog.on('WhoIs', function(session, args) {
 			user.entity = isMe;
 		}
 
-		controller.getAllPlayers(function(allPlayers) {
+		fetch('http://localhost:53167/api/players').then(function(allPlayers) {
 
 			let playersFound = util.getPlayerFromArray(user.entity, allPlayers);
 
@@ -310,7 +310,7 @@ function getIntialAddInputs(session, args, next) {
 	};
 
 	//get all players from the database
-	controller.getAllPlayers(function(playersArray) {
+	fetch('http://localhost:53167/api/players').then(function(playersArray) {
 		session.dialogData.playerDocs = playersArray;
 		next();
 	});

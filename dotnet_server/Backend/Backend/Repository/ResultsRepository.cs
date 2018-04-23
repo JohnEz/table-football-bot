@@ -83,5 +83,10 @@ namespace Backend.Repository
                 throw ex;
             }
         }
+
+        public void Update(Result result, Int32 playerId)
+        {
+            // TODO
+        }
     }
 }
