@@ -38,7 +38,7 @@ namespace Backend.Repository
 
         public async Task<Player> GetById(string id)
         {
-            var filter = Builders<Player>.Filter.Eq("Id", id);
+            FilterDefinition<Player> filter = Builders<Player>.Filter.Eq("Id", id);
 
             try
             {
@@ -55,11 +55,11 @@ namespace Backend.Repository
 
         public async Task<Player> GetPlayerWithSearchTerm(string searchTerm)
         {
-            var countryFilter = Builders<Player>.Filter.Eq("Country", searchTerm);
-            var slackIdFilter = Builders<Player>.Filter.Eq("SlackId", searchTerm);
-            var slackCodeFilter = Builders<Player>.Filter.Eq("SlackCode", searchTerm.ToUpper());
+            FilterDefinition<Player> countryFilter = Builders<Player>.Filter.Eq("Country", searchTerm);
+            FilterDefinition<Player> slackIdFilter = Builders<Player>.Filter.Eq("SlackId", searchTerm);
+            FilterDefinition<Player> slackCodeFilter = Builders<Player>.Filter.Eq("SlackCode", searchTerm.ToUpper());
 
-            var filter = Builders<Player>.Filter.Or(countryFilter, slackIdFilter, slackCodeFilter);
+            FilterDefinition<Player> filter = Builders<Player>.Filter.Or(countryFilter, slackIdFilter, slackCodeFilter);
 
             try
             {

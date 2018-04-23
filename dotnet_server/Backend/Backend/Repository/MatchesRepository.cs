@@ -40,7 +40,7 @@ namespace Backend.Repository
 
         public async Task<Match> GetMatchByMatchNumber(Int32 matchNumber)
         {
-            var filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
+            FilterDefinition<Match> filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
 
             try
             {
@@ -71,7 +71,7 @@ namespace Backend.Repository
 
         public async Task<Match> GetById(string id)
         {
-            var filter = Builders<Match>.Filter.Eq("Id", id);
+            FilterDefinition<Match> filter = Builders<Match>.Filter.Eq("Id", id);
 
             try
             {
@@ -101,9 +101,9 @@ namespace Backend.Repository
 
         public void Update(Match match, Int32 matchNumber)
         {
-            var filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
-            var update = Builders<Match>.Update.Set("Winner", match.Winner);
-            var updateOptions = new UpdateOptions
+            FilterDefinition<Match> filter = Builders<Match>.Filter.Eq("MatchNumber", matchNumber);
+            UpdateDefinition<Match> update = Builders<Match>.Update.Set("Winner", match.Winner);
+            UpdateOptions updateOptions = new UpdateOptions
             {
                 IsUpsert = true
             };

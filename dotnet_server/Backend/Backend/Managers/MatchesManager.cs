@@ -3,7 +3,6 @@ using Backend.Repository;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -28,14 +27,14 @@ namespace Backend.Managers
 
         public async Task<string> GetAllMatchess()
         {
-            var players = await _matchesRepository.GetAll();
-            return JsonConvert.SerializeObject(players);
+            IEnumerable<Match> matches = await _matchesRepository.GetAll();
+            return JsonConvert.SerializeObject(matches);
         }
 
         public async Task<string> GetMatchById(string id)
         {
-            var player = await _matchesRepository.GetById(id) ?? new Match();
-            return JsonConvert.SerializeObject(player);
+            Match match = await _matchesRepository.GetById(id) ?? new Match();
+            return JsonConvert.SerializeObject(match);
         }
 
         public void AddMatch(Match value)
@@ -53,14 +52,13 @@ namespace Backend.Managers
 
         public async Task<string> GetKnockoutMatches ()
         {
-            var knockoutMatches = await GetBracketMatches();
+            Knockout knockoutMatches = await GetBracketMatches();
             return JsonConvert.SerializeObject(knockoutMatches);
         }
 
         public async Task<string> GetUpcomingMatches (string countString)
         {
-            Int32 count = 0;
-            if (Int32.TryParse(countString, out count))
+            if (Int32.TryParse(countString, out Int32 count))
             {
                 return await ConstructUpcomingMatches(count);
             }
@@ -74,8 +72,8 @@ namespace Backend.Managers
 
         public async Task<string> GetMatchesBetweenTeams(string team1Id, string team2Id)
         { 
-            var matches = await _matchesRepository.GetAll();
-            var enrichedMatches = await EnrichMatchesFromDatabase(matches);
+            IEnumerable<Match> matches = await _matchesRepository.GetAll();
+            IEnumerable<Match> enrichedMatches = await EnrichMatchesFromDatabase(matches);
             IEnumerable<Match> filteredMatches = enrichedMatches.Where(match => match.Team1Id.ToString() == team1Id || 
                 match.Team2Id.ToString() == team1Id || 
                 match.Team1Id.ToString() == team2Id || 
@@ -97,9 +95,9 @@ namespace Backend.Managers
 
         public async Task<IEnumerable<Match>> EnrichMatchesFromDatabase(IEnumerable<Match> matches)
         {
-            var results = await _resultsRepository.GetAll();
-            var enrichedResults = await _resultsManager.EnrichResultsFromDatabase(results);
-            var players = await _playersRepository.GetAll();
+            IEnumerable<Result> results = await _resultsRepository.GetAll();
+            IEnumerable<Result> enrichedResults = await _resultsManager.EnrichResultsFromDatabase(results);
+            IEnumerable<Player> players = await _playersRepository.GetAll();
             foreach (Match match in matches)
             {
                 match.Id = match.MatchId.ToString();
@@ -115,9 +113,9 @@ namespace Backend.Managers
 
         private async Task<Knockout> GetBracketMatches()
         {
-            var matches = await _matchesRepository.GetAll();
-            var enrichedMatches = await EnrichMatchesFromDatabase(matches);
-            var knockout = new Knockout
+            IEnumerable<Match> matches = await _matchesRepository.GetAll();
+            IEnumerable<Match> enrichedMatches = await EnrichMatchesFromDatabase(matches);
+            Knockout knockout = new Knockout
             {
                 Prelims = new List<Match> { },
                 SemiFinals = new List<Match> { },
@@ -127,7 +125,7 @@ namespace Backend.Managers
 
             foreach(Match match in matches)
             {
-                var winner = 0;
+                Int32 winner = 0;
                 if (match.Result.Score1 > match.Result.Score2)
                 {
                     winner = 1;
@@ -211,7 +209,7 @@ namespace Backend.Managers
                 overdueList.Add(match);
             }
 
-            var matchesList = new MatchesList()
+            MatchesList matchesList = new MatchesList()
             {
                 AtLimit = orderedMatches.Count() == (enrichedTodaysMatches.Count() + enrichedOverdueMatches.Count()),
                 Upcoming = upcomingList,

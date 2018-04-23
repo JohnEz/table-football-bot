@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MongoDB.Bson;
 
 namespace Backend.Repository
 {
@@ -56,7 +55,7 @@ namespace Backend.Repository
 
         public async Task<Result> GetById(string id)
         {
-            var filter = Builders<Result>.Filter.Eq("Id", id);
+            FilterDefinition<Result> filter = Builders<Result>.Filter.Eq("Id", id);
 
             try
             {

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Backend.Repository;
 using Backend.Models;
-using Newtonsoft.Json;
 using Backend.Managers;
 
 namespace Backend.Controllers
