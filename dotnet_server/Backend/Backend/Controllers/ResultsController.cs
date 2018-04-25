@@ -9,16 +9,19 @@ namespace Backend.Controllers
     public class ResultsController : Controller
     {
         private readonly ResultsManager _resultsManager;
+        private readonly SlackManager _slackManager;
 
-        public ResultsController(ResultsManager resultsManager)
+        public ResultsController(ResultsManager resultsManager, SlackManager slackManager)
         {
             _resultsManager = resultsManager;
+            _slackManager = slackManager;
         }
 
         // GET: api/results
         [HttpGet]
         public Task<string> Get()
         {
+            _slackManager.SendMessageToMe("test 123");
             return _resultsManager.GetAllResults();
         }
 

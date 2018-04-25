@@ -47,6 +47,7 @@ namespace Backend
             services.AddTransient<MatchesManager>();
             services.AddTransient<PlayersManager>();
             services.AddTransient<ResultsManager>();
+            services.AddTransient<SlackManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
