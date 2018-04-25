@@ -6,7 +6,7 @@ var index = require('./dialogs/index');
 const config = require('./config');
 const getRand = require('./util').getRandomMessage;
 const prompts = require('./prompts');
-var fetch = require('node-fetch');
+const fetch = require('node-fetch');
 
 var botController = Botkit.slackbot({
 	debug: false,
@@ -16,7 +16,7 @@ var bot = botController.spawn({
 	token: process.env.SLACKBOT_TOKEN || require('./config').slackBotToken
 });
 
-botController.middleware.receive.use(function(bot, message, next) {
+botController.middleware.receive.use((bot, message, next) => {
 	if (message.type === 'message' && !message.bot_id && !message.reply_to && !message.hidden) {
 		console.log(`${new Date().toTimeString()} | From: ${message.user} | Message: ${message.text}`);
 
@@ -43,12 +43,12 @@ botController.middleware.receive.use(function(bot, message, next) {
 var slackBot = new builder.SlackBot(botController, bot, {ambientMentionDuration: 120000, minSendDelay: 1000 });
 slackBot.add('/', index);
 
-slackBot.add('/say', function(session, message) {
+slackBot.add('/say', (session, message) => {
 	session.send(message.text, message.args);
 	session.endDialog();
 });
 
-let createWelcomeMessage = function(name, fname) {
+let createWelcomeMessage = (name, fname) => {
 	let message = `${getRand('hello')} ${fname}!`;
 
 	if (prompts.personalHello.hasOwnProperty(name)) {
@@ -58,9 +58,9 @@ let createWelcomeMessage = function(name, fname) {
 	return message;
 };
 
-slackBot.on('user_channel_join', function(botkit, msg) {
+slackBot.on('user_channel_join', (botkit, msg) => {
 	// check if the channel being joined is the specific foosball one
-	bot.api.channels.info({channel: msg.channel}, function(err, data) {
+	bot.api.channels.info({channel: msg.channel}, (err, data) => {
 		if (err) {
 			bot.botkit.log('Failed to find user info ',err);
 			console.log('failed to find user:', err);
@@ -76,7 +76,7 @@ slackBot.on('user_channel_join', function(botkit, msg) {
 			let message = ``;
 
 			if(!user[0].fname) {
-				fetch(`http://localhost:53167/api/players/search/${user[0].name}`).then(function(player, err) {
+				fetch(`http://localhost:53167/api/players/search/${user[0].name}`).then((player, err) => {
 					let name = null;
 					let fname = null;
 					if (player) {
@@ -103,13 +103,13 @@ slackBot.listenForMentions();
 /* Wrap this in a function and run it once the database is setup
 this is to avoid a race condition
 */
-module.exports.startBot = function() {
-	bot.startRTM(function(err,bot,payload) {
+module.exports.startBot = ()  =>{
+	bot.startRTM((err,bot,payload) => {
 		if (err) {
 			throw new Error('Could not connect to Slack');
 		}
 		let users = [];
-		payload.users.forEach(function(user) {
+		payload.users.forEach((user) => {
 			if (!user.is_bot && user.name !== 'slackbot') {
 				users.push(
 					{
@@ -120,7 +120,7 @@ module.exports.startBot = function() {
 				);
 			}
 		});
-		users.forEach(function(user) {
+		users.forEach(user => {
 			fetch('http://localhost:53167/api/players', {
 				method: 'POST',
 				body: user
@@ -131,8 +131,8 @@ module.exports.startBot = function() {
 
 /* To get the user information from Slack
 */
-module.exports.getUser = function (id, callback) {
-	bot.api.users.info({user: id}, function(err, data) {
+module.exports.getUser = (id, callback) => {
+	bot.api.users.info({user: id}, (err, data) => {
 		if (err) {
 			bot.botkit.log('Failed to find user info :(',err);
 		}
@@ -144,10 +144,10 @@ module.exports.getUser = function (id, callback) {
 channel is of the form 'D16BDMBGB' or 'C16CH0SNQ' and
 message is a string.
 */
-module.exports.sendMessage = function(channel, message, args) {
+module.exports.sendMessage = (channel, message, args) => {
 	slackBot.beginDialog({ channel: channel }, '/say', {text: message, args: args});
 };
 
-module.exports.getBot = function() {
+module.exports.getBot = () => {
 	return bot;
 };

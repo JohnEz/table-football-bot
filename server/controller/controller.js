@@ -14,14 +14,14 @@ class Controller {
     }
 
     setupReminders(slackBot){
-        remind.every('07:59', function(date) {
+        remind.every('07:59', date => {
             //if its not a weekend
             if (date.getDay() !== 6 && date.getDay() !== 0) {
                 console.log('<-- Sending reminders -->');
                 // send reminders for overdue and todays games
-                fetch('http://localhost:53167/api/matches/schedule').then( function(matches) {
+                fetch('http://localhost:53167/api/matches/schedule').then( matches => {
 
-                    matches.today.forEach(function(match) {
+                    matches.today.forEach( match => {
                         if (match.team1.slackCode) {
                             slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
                         }
@@ -29,9 +29,9 @@ class Controller {
                         if (match.team2.slackCode) {
                             slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
                         }
-                    }.bind(this));
+                    });
 
-                    matches.overdue.forEach(function(match) {
+                    matches.overdue.forEach( match => {
                         if (match.team1.slackCode) {
                             slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
                         }
@@ -39,13 +39,13 @@ class Controller {
                         if (match.team2.slackCode) {
                             slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
                         }
-                    }.bind(this));
+                    });
 
                     console.log('<-- Reminders sent -->');
 
-                }.bind(this));
+                });
             }
-        }.bind(this));
+        });
     }
 
     sortMatchByDate(m1, m2) {
@@ -85,7 +85,7 @@ class Controller {
 
     getMatchesBetween(team1, team2, userId, callback) {
 
-        fetch('http://localhost:53167/api/players').then(function(players) {
+        fetch('http://localhost:53167/api/players').then(players => {
             let team1Docs = util.getPlayerFromArray(team1, players);
             let team2Docs = util.getPlayerFromArray(team2, players);
             let team1Id = null;
@@ -118,14 +118,14 @@ class Controller {
                 fetch('http://localhost:53167/api/matches/teams', {
                     method: 'POST',
                     body: {team1Id, team2Id}
-                }).then(function(matches, err) {
+                }).then((matches, err) => {
                     callback(matches, includesUser, err);
                 });
             } else {
                 callback(null, null, error);
             }
 
-        }.bind(this));
+        });
 
     }
 
@@ -237,7 +237,7 @@ class Controller {
             intScoreLeft = storeScore;
         }
 
-        //atempt to add the results
+        //attempt to add the results
         fetch('http://localhost:53167/api/matches/teams', {
                     method: 'POST',
                     body: {
@@ -247,7 +247,7 @@ class Controller {
                         score2: intScoreRight,
                         match
                     }
-                }).then(function(added) {
+                }).then(added => {
             //if the results were added successfully
             if (added) {
                 let player1String = this.convertPlayerToString(player1);
@@ -268,39 +268,32 @@ class Controller {
                 //return the defualt database error message
                 callback(prompts.databaseError);
             }
-        }.bind(this));
+        });
 
     }
 
     getResults(count, player1, player2, callback) {
         //get the documents for the players
-        fetch('http://localhost:53167/api/players').then(function(players) {
-
+        fetch('http://localhost:53167/api/players').then(players => {
             //get the results between the players
-            fetch('http://localhost:53167/api/results').then(function(results, err) {
-
+            fetch('http://localhost:53167/api/results').then((results, err) => {
                 if (!err) {
-
-                    results.forEach(function(result) {
+                    results.forEach(result => {
                         result.player1 = this.convertPlayerToString(result.player1);
                         result.player2 = this.convertPlayerToString(result.player2);
-                    }.bind(this));
-
+                    });
                     callback(results, null);
                 } else {
                     callback(null, err);
                 }
-
-            }.bind(this));
-
-        }.bind(this));
-
+            });
+        });
     }
 
     getSummary(slackId, callback) {
         let reply = '';
         // get players/results
-        fetch('http://localhost:53167/api/results').then(function(resultArray) {
+        fetch('http://localhost:53167/api/results').then(results => {
             // get individual summary eg So far you've played x game and won/lost y of them. In total you've scored z goals and conceded n.
             let personal = {
                 fname: '',
@@ -312,7 +305,7 @@ class Controller {
                 total: 0
             };
             let player = false;
-            resultArray.forEach( function(result) {
+            results.forEach( result => {
                 let game = null;
                 if (result.player1.slackCode === slackId) {
                     game = result;
@@ -330,7 +323,6 @@ class Controller {
                     personal.fname = game.player1.fname;
                     personal.scored += game.score1;
                     personal.conceded += game.score2;
-
                     if (game.score1 > game.score2) {
                         personal.won++;
                     }
@@ -341,7 +333,6 @@ class Controller {
                         personal.draw++;
                     }
                 }
-
             });
 
             personal.total = personal.won + personal.lost + personal.draw;
@@ -352,7 +343,7 @@ class Controller {
             personal.conceded = personal.conceded || 'none';
 
             // general
-            let stats = Object.assign({}, util.getStatistics(resultArray), {personal: personal});
+            let stats = Object.assign({}, util.getStatistics(results), {personal: personal});
 
             reply = util.getRandomMessage('summaryIntro');
             reply += prompts.totals;
@@ -401,7 +392,6 @@ class Controller {
         if (player.slackCode) {
             slackName = `<@${player.slackCode}>`;
         }
-
         if (player) {
             playerName = `${util.capitaliseWords(player.country)} (${slackName})`;
         }
@@ -430,7 +420,6 @@ class Controller {
 
     checkScoreDifference(score1, score2) {
         let difference = Math.abs(score1 - score2);
-
         return difference;
     }
 
@@ -441,16 +430,15 @@ class Controller {
 
         if (matchCode) {
             matchCode = matchCode.split(/[rm]/i);
-
             bracket = parseInt(matchCode[1]);
             match = parseInt(matchCode[2]);
         }
 
-        fetch('http://localhost:53167/api/players').then(function(playerDocs) {
+        fetch('http://localhost:53167/api/players').then(players => {
 
             //add one match
-            let team1Doc = util.getPlayerFromArray(team1, playerDocs);
-            let team2Doc = util.getPlayerFromArray(team2, playerDocs);
+            let team1Doc = util.getPlayerFromArray(team1, players);
+            let team2Doc = util.getPlayerFromArray(team2, players);
             if (team1Doc.length === 0 ) {
                 callback({error: true, message: prompts.player1NotFound, args:{player1: team1}})
             }
@@ -467,7 +455,7 @@ class Controller {
                         bracket,
                         match
                     }
-                }).then(function(err, added) {
+                }).then((err, added) => {
                     let match = {error: true, message: prompts.databaseError};
                     if (!err) {
                         match = {
@@ -481,18 +469,15 @@ class Controller {
                         }
                     }
                     callback(match);
-
                 });
             }
-
         });
-
     }
 
     getValidMatch(matches) {
         let validMatch = null;
         matches = [...matches.values()].sort(this.sortMatchByDate);
-        matches.forEach(function (match, id) {
+        matches.forEach((match, id) => {
             if (!match.result && !validMatch) {
                 validMatch = match;
             }
@@ -501,18 +486,18 @@ class Controller {
     }
 
     randomMessageSetup(slackBot) {
-        remind.every('30 minutes', function(date) {
+        remind.every('30 minutes', date => {
             //if within working hours
             if (util.workingHours(date)) {
                 //should I send?
                 if (Math.random() < 0.25) {
                     let minutes = Math.floor(Math.random() * 30 * 60000 );
-                    setTimeout(function() {
+                    setTimeout(() => {
                         this.sendRandomMessage(slackBot);
-                    }.bind(this), minutes);
+                    }, minutes);
                 }
             }
-        }.bind(this))
+        })
     }
 
     sendRandomMessage(slackBot) {
@@ -520,18 +505,18 @@ class Controller {
         switch(Math.floor(Math.random() * 4 )) {
             case 0:
             // Jokes
-            util.getRandomJoke(function(joke) {
+            util.getRandomJoke(joke => {
                 message = `And now for something completely different...\n\n${joke}`;
 
                 // check it's ok to sendMessage
                 let bot = slackBot.getBot();
                 let ask = admins[Math.floor(Math.random() * admins.length)];
-                bot.startPrivateConversation({user: ask} ,function(err,convo) {
+                bot.startPrivateConversation({user: ask} ,(err,convo) => {
 
                     convo.ask('Can I say this?\n\n'+joke,[
                         {
                             pattern: bot.utterances.yes,
-                            callback: function(response,convo) {
+                            callback: (response,convo) => {
                                 convo.say('Great! I will send it out');
                                 slackBot.sendMessage(mainChannel.code, message);
                                 convo.next();
@@ -540,7 +525,7 @@ class Controller {
                         {
                             default: true,
                             pattern: bot.utterances.no,
-                            callback: function(response,convo) {
+                            callback: (response,convo) => {
                                 convo.say('Maybe it\'s a little too racy.');
                                 convo.next();
                             }
@@ -551,7 +536,7 @@ class Controller {
             break;
             case 1:
             let subject = util.getRandomMessage('giphySubjects');
-            util.getGiphyURL(subject, function(msg) {
+            util.getGiphyURL(subject, msg => {
                 message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`;
                 slackBot.sendMessage(mainChannel.code, msg);
             });
@@ -562,7 +547,7 @@ class Controller {
             slackBot.sendMessage(mainChannel.code, message);
             break;
             case 3:
-            util.getNews(function(msg) {
+            util.getNews(msg => {
                 if (msg.length > 0) {
                     slackBot.sendMessage(mainChannel.code, msg);
                 }

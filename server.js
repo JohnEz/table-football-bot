@@ -25,14 +25,14 @@ app.use(bodyParser.json());
  * APP ROUTE
  */
 
-app.get('/*', function(req, res) {
+app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname + '/build/index.html'));
 });
 
 /**
 *   START SERVER
 */
-app.listen(PORT, function(error) {
+app.listen(PORT, error => {
     if (error) {
         console.error(error);
     } else {
@@ -43,6 +43,6 @@ app.listen(PORT, function(error) {
 /**
 *   INITIALISE THE DATABASE
 */
-slackbot.startBot();
+// slackbot.startBot();
 controller.setupReminders(slackbot);
 controller.randomMessageSetup(slackbot);
