@@ -11,7 +11,7 @@ namespace Backend.Models
 
         public Int32 TargetStage { get; set; }
 
-        public Int32 TaregtMatchNumber { get; set; }
+        public Int32 TargetMatchNumber { get; set; }
 
         public bool IsFirstTeam { get; set; }
     }

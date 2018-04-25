@@ -83,14 +83,14 @@ namespace Backend.Managers
 
         public async void UpdateKnockoutMatch(MatchUpdate matchUpdate)
         {
-            Match matchToUpdate = await _matchesRepository.GetMatchByMatchNumber(matchUpdate.TaregtMatchNumber);
+            Match matchToUpdate = await _matchesRepository.GetMatchByMatchNumber(matchUpdate.TargetMatchNumber);
             if(matchToUpdate.Stage != matchUpdate.TargetStage)
             {
                 throw new Exception("match stages don't match");
             }
             matchToUpdate.Winner = matchUpdate.Winner;
             // TODO why need IsFirstTeam?
-            _matchesRepository.Update(matchToUpdate, matchUpdate.TaregtMatchNumber);
+            _matchesRepository.Update(matchToUpdate, matchUpdate.TargetMatchNumber);
         }
 
         public async Task<IEnumerable<Match>> EnrichMatchesFromDatabase(IEnumerable<Match> matches)
