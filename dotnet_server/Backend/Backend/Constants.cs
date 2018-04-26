@@ -9,9 +9,9 @@ namespace Backend
     {
         public static class SlackDetails
         {
-            public const string token = "xoxp-3623867403-86532060947-352516004436-19e3c5cbd02890ee55d82876ad7847ee";
-            public const string user = "U2JFN1STV";
-            public const string channel = "D2JH4JVE2";
+            public const string token = "";
+            public const string user = "";
+            public const string channel = "";
         }
 
         public static class Prompts
