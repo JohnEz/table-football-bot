@@ -17,11 +17,13 @@ var ScheduleTable = React.createClass({
 		}
 	},
 	loadGamesFromServer: function() {
-		fetch('/bot/schedule', {
-			method: 'post',
-		}).then(function(response) {
+		fetch('http://localhost:53167/api/matches/schedule')
+		.then(function(response) {
 			return response.json();
 		}).then(function(data) {
+			if(data.message) {
+				console.error(data.message);
+			}
 			this.setState({today: data.today, overdue: data.overdue, loaded: true, atLimit: data.atLimit });
 			if (this.state.today.length + this.state.overdue.length < 8) {
 				this.loadUpcomingGamesFromServer();
@@ -32,17 +34,11 @@ var ScheduleTable = React.createClass({
 	},
 	loadUpcomingGamesFromServer: function() {
 		let count = this.state.moreCount;
-		fetch('/bot/future', {
-			method: 'post',
-			headers: {
-	          'Accept': 'application/json',
-	          'Content-Type': 'application/json'
-	        },
-			body: JSON.stringify({count: count})
-		}).then(function(response) {
+		fetch(`http://localhost:53167/api/matches/upcoming/${count}`)
+		.then(function(response) {
 			return response.json()
 		}).then(function(data) {
-			this.setState({upcoming: data.matches, moreCount: this.state.moreCount+1, atLimit: data.atLimit });
+			this.setState({upcoming: data.upcoming, moreCount: this.state.moreCount+1, atLimit: data.atLimit });
 		}.bind(this)).catch(function(ex) {
 			console.log('json parse failed', ex);
 		});
