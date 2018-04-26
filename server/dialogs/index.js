@@ -15,230 +15,6 @@ module.exports = dialog;
 
 let controller = new Controller();
 
-/** Return a default message if nothing else is recognised */
-dialog.onDefault((session, args) => {
-	session.endDialog(util.getRandomMessage('defaultReply'), {user: session.userData.id, message: session.message.channelData.text});
-});
-
-dialog.on('Greeting', (session, args) => {
-	if (Math.random() > 0.8) {
-		util.getGiphyURL('hello', url => {
-			session.endDialog(url);
-		});
-	}
-	else {
-		session.endDialog(util.getRandomMessage('greetingReply'));
-	}
-});
-
-dialog.on('Thank', (session, args) => {
-	//get the user that thanked blatter
-	let playerID = session.userData.id;
-	let playerName = null;
-	controller.getPlayer(playerID, player => {
-		if (player) {
-			playerName = player.fname;
-		}
-		//send the reply
-		session.endDialog(util.getRandomMessage('replyToThank'), {player: playerName});
-	})
-});
-
-/** Answer users help requests. We can use a DialogAction to send a static message. */
-dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
-
-/** Prompts a user for the two teams and their scores and saves it.  */
-dialog.on('AddResult', [
-	getIntialAddInputs,
-	askForPlayerOne,
-	getPlayer('p1', prompts.player1NotFound),
-	askForPlayerTwo,
-	getPlayer('p2', prompts.player2NotFound),
-	validatePlayers,
-	askForFirstScore,
-	getScore('s1'),
-	askForSecondScore,
-	getScore('s2'),
-	validateScores,
-	respondFinalResult
-]);
-
-/** Shows the user a list of Results. */
-dialog.on('ListResults', (session, args) => {
-	// See if got the tasks title from our LUIS model.
-	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-	let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
-
-	let request = {
-		p1: p1 ? p1.entity : null,
-		p2: p2 ? p2.entity : null,
-		limit: limit ? util.convertWordToNumber(limit.entity) : null
-	};
-
-	checkForMe('p1', request, session);
-	checkForMe('p2', request, session);
-
-	controller.getResults(parseInt(request.limit), request.p1, request.p2, (resultsArray, err) => {
-		//if there was no error
-		if (!err) {
-			if (resultsArray.length > 0) {
-				let resultsString = '';
-				resultsArray.forEach( result => {
-					resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
-				});
-				session.send(prompts.listResultsList, resultsString);
-			} else {
-				session.send(prompts.listNoResult);
-			}
-		} else {
-			session.send(prompts.databaseError);
-		}
-	});
-	session.endDialog();
-});
-
-/**Shows the user who is a country or user. */
-dialog.on('WhoIs', (session, args) => {
-	let user = builder.EntityRecognizer.findEntity(args.entities, 'player') ||
-	builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
-	builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
-	null;
-	let isMe = null;
-	if (user) {
-		isMe = isItMe(user.entity, session);
-		if (isMe) {
-			user.entity = isMe;
-		}
-		fetch('http://localhost:53167/api/players').then(players => {
-			let playersFound = util.getPlayerFromArray(user.entity, players);
-			if (playersFound.length > 0) {
-				let outputString = '';
-				playersFound.forEach( player => {
-					const slack = player.slackCode ? player.slackCode : player.slackID
-					outputString = outputString + `<@${slack}> plays as ${util.capitaliseWords(player.country)} \n`;
-				});
-				session.send(outputString);
-			} else {
-				if (isMe) {
-					session.send(prompts.notInLeague);
-				} else {
-					session.send(prompts.playerNotFound);
-				}
-			}
-		});
-	}
-	else {
-		session.send(prompts.playerNotFound);
-	}
-	session.endDialog()
-});
-
-/**shows upcoming matches to the user. */
-dialog.on('UpcomingMatches', (session, args) => {
-	let team1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-	let team2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-	if (team1) {
-		team1 = team1.entity;
-	}
-	if (team2) {
-		team2 = team2.entity;
-	}
-
-	let team1IsMe = isItMe(team1, session);
-	let team2IsMe = isItMe(team2, session);
-
-	if (team1IsMe) {
-		team1 = team1IsMe;
-	}
-	if (team2IsMe) {
-		team2 = team2IsMe;
-	}
-
-	controller.getMatchesBetween(team1, team2, session.userData.id, (matches, includesUser, err) => {
-		if (err) {
-			session.send(err);
-		} else {
-			let numberOfMatches =  matches.overdue.length + matches.today.length + matches.upcoming.length;
-			if (numberOfMatches > 1) {
-				outputMatches(session, matches, includesUser);
-			} else if (numberOfMatches === 1) {
-				let user = null;
-				if (includesUser) {
-					user = session.userData.id;
-				}
-				outputMatch(session, matches, user);
-			} else {
-				console.log('No matches m9');
-			}
-		}
-	});
-});
-
-dialog.on('Schedule', (session, args, next) => {
-	if (config.admins.indexOf(session.userData.id) === -1 ){
-		session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
-		return; // annoyingly endDialog doesn't end the dialog!
-	}
-	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
-	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
-	let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
-	let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
-	let schedule = {
-		p1: p1 ? p1.entity : null,
-		p2: p2 ? p2.entity : null,
-		date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
-		matchCode: matchCode ? matchCode.entity : null
-	};
-	if (isNaN(schedule.date.getTime())) {
-		session.endDialog(prompts.cantParseDate);
-	}
-	else {
-		controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, match => {
-			if(!match.error) {
-				session.endDialog(prompts.scheduleSuccess, match)
-			}
-			else {
-				session.endDialog(match.message, match.args);
-			}
-		});
-	}
-});
-
-dialog.on('Announce', (session, args, next) => {
-	if (config.admins.indexOf(session.userData.id) > -1) {
-		let message = session.message.channelData.text;
-		let messageStart = message.indexOf('\"');
-		message = message.slice(messageStart+1, message.length-1);
-		slackBot.sendMessage(config.mainChannel.code, message);
-		session.endDialog(prompts.announcementSent);
-	} else {
-		session.endDialog(prompts.defaultReply);
-	}
-});
-
-dialog.on('Summary', (session, args, next) => {
-	const userId = session.userData.id;
-	controller.getSummary(userId, (reply, mods) => {
-		session.endDialog(reply, mods);
-	});
-});
-
-const checkForMe = (p, result, session) => {
-	let player = result[p];
-	if (util.isMe(player)) {
-		result[p] = session.userData.id;
-	}
-}
-
-const isItMe = (input, session) => {
-	let id = null;
-	if(util.isMe(input)) {
-		id = session.userData.id;
-	}
-	return id;
-}
-
 const getIntialAddInputs = (session, args, next) => {
 	// See if got the tasks title from our LUIS model.
 	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
@@ -538,4 +314,228 @@ const outputMatches = (session, matches, includesUser) => {
 		});
 	}
 	session.send(matchesString);
+}
+
+/** Return a default message if nothing else is recognised */
+dialog.onDefault((session, args) => {
+	session.endDialog(util.getRandomMessage('defaultReply'), {user: session.userData.id, message: session.message.channelData.text});
+});
+
+dialog.on('Greeting', (session, args) => {
+	if (Math.random() > 0.8) {
+		util.getGiphyURL('hello', url => {
+			session.endDialog(url);
+		});
+	}
+	else {
+		session.endDialog(util.getRandomMessage('greetingReply'));
+	}
+});
+
+dialog.on('Thank', (session, args) => {
+	//get the user that thanked blatter
+	let playerID = session.userData.id;
+	let playerName = null;
+	controller.getPlayer(playerID, player => {
+		if (player) {
+			playerName = player.fname;
+		}
+		//send the reply
+		session.endDialog(util.getRandomMessage('replyToThank'), {player: playerName});
+	})
+});
+
+/** Answer users help requests. We can use a DialogAction to send a static message. */
+dialog.on('Help', builder.DialogAction.send(prompts.helpMessage));
+
+/** Prompts a user for the two teams and their scores and saves it.  */
+dialog.on('AddResult', [
+	getIntialAddInputs,
+	askForPlayerOne,
+	getPlayer('p1', prompts.player1NotFound),
+	askForPlayerTwo,
+	getPlayer('p2', prompts.player2NotFound),
+	validatePlayers,
+	askForFirstScore,
+	getScore('s1'),
+	askForSecondScore,
+	getScore('s2'),
+	validateScores,
+	respondFinalResult
+]);
+
+/** Shows the user a list of Results. */
+dialog.on('ListResults', (session, args) => {
+	// See if got the tasks title from our LUIS model.
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let limit = builder.EntityRecognizer.findEntity(args.entities, 'limit');
+
+	let request = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		limit: limit ? util.convertWordToNumber(limit.entity) : null
+	};
+
+	checkForMe('p1', request, session);
+	checkForMe('p2', request, session);
+
+	controller.getResults(parseInt(request.limit), request.p1, request.p2, (resultsArray, err) => {
+		//if there was no error
+		if (!err) {
+			if (resultsArray.length > 0) {
+				let resultsString = '';
+				resultsArray.forEach( result => {
+					resultsString = resultsString + util.createResultString(result.player1, result.player2, result.score1, result.score2) + '\n';
+				});
+				session.send(prompts.listResultsList, resultsString);
+			} else {
+				session.send(prompts.listNoResult);
+			}
+		} else {
+			session.send(prompts.databaseError);
+		}
+	});
+	session.endDialog();
+});
+
+/**Shows the user who is a country or user. */
+dialog.on('WhoIs', (session, args) => {
+	let user = builder.EntityRecognizer.findEntity(args.entities, 'player') ||
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p2') ||
+	builder.EntityRecognizer.findEntity(args.entities, 'player::p1') ||
+	null;
+	let isMe = null;
+	if (user) {
+		isMe = isItMe(user.entity, session);
+		if (isMe) {
+			user.entity = isMe;
+		}
+		fetch('http://localhost:53167/api/players').then(players => {
+			let playersFound = util.getPlayerFromArray(user.entity, players);
+			if (playersFound.length > 0) {
+				let outputString = '';
+				playersFound.forEach( player => {
+					const slack = player.slackCode ? player.slackCode : player.slackID
+					outputString = outputString + `<@${slack}> plays as ${util.capitaliseWords(player.country)} \n`;
+				});
+				session.send(outputString);
+			} else {
+				if (isMe) {
+					session.send(prompts.notInLeague);
+				} else {
+					session.send(prompts.playerNotFound);
+				}
+			}
+		});
+	}
+	else {
+		session.send(prompts.playerNotFound);
+	}
+	session.endDialog()
+});
+
+/**shows upcoming matches to the user. */
+dialog.on('UpcomingMatches', (session, args) => {
+	let team1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let team2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	if (team1) {
+		team1 = team1.entity;
+	}
+	if (team2) {
+		team2 = team2.entity;
+	}
+
+	let team1IsMe = isItMe(team1, session);
+	let team2IsMe = isItMe(team2, session);
+
+	if (team1IsMe) {
+		team1 = team1IsMe;
+	}
+	if (team2IsMe) {
+		team2 = team2IsMe;
+	}
+
+	controller.getMatchesBetween(team1, team2, session.userData.id, (matches, includesUser, err) => {
+		if (err) {
+			session.send(err);
+		} else {
+			let numberOfMatches =  matches.overdue.length + matches.today.length + matches.upcoming.length;
+			if (numberOfMatches > 1) {
+				outputMatches(session, matches, includesUser);
+			} else if (numberOfMatches === 1) {
+				let user = null;
+				if (includesUser) {
+					user = session.userData.id;
+				}
+				outputMatch(session, matches, user);
+			} else {
+				console.log('No matches m9');
+			}
+		}
+	});
+});
+
+dialog.on('Schedule', (session, args, next) => {
+	if (config.admins.indexOf(session.userData.id) === -1 ){
+		session.endDialog(prompts.notAdmin, {intent: 'schedule games', url: 'http://www.abc.net.au/cm/lb/6516842/data/sepp-blatter-at-2014-fifa-congress-data.jpg'});
+		return; // annoyingly endDialog doesn't end the dialog!
+	}
+	let p1 = builder.EntityRecognizer.findEntity(args.entities, 'player::p1');
+	let p2 = builder.EntityRecognizer.findEntity(args.entities, 'player::p2');
+	let date = builder.EntityRecognizer.findEntity(args.entities, 'builtin.datetime.date');
+	let matchCode = builder.EntityRecognizer.findEntity(args.entities, 'matchCode');
+	let schedule = {
+		p1: p1 ? p1.entity : null,
+		p2: p2 ? p2.entity : null,
+		date: date && date.resolution ? date = util.parseLuisDate(date.resolution.date) : null,
+		matchCode: matchCode ? matchCode.entity : null
+	};
+	if (isNaN(schedule.date.getTime())) {
+		session.endDialog(prompts.cantParseDate);
+	}
+	else {
+		controller.addMatch(schedule.p1, schedule.p2, schedule.date, schedule.matchCode, match => {
+			if(!match.error) {
+				session.endDialog(prompts.scheduleSuccess, match)
+			}
+			else {
+				session.endDialog(match.message, match.args);
+			}
+		});
+	}
+});
+
+dialog.on('Announce', (session, args, next) => {
+	if (config.admins.indexOf(session.userData.id) > -1) {
+		let message = session.message.channelData.text;
+		let messageStart = message.indexOf('\"');
+		message = message.slice(messageStart+1, message.length-1);
+		slackBot.sendMessage(config.mainChannel.code, message);
+		session.endDialog(prompts.announcementSent);
+	} else {
+		session.endDialog(prompts.defaultReply);
+	}
+});
+
+dialog.on('Summary', (session, args, next) => {
+	const userId = session.userData.id;
+	controller.getSummary(userId, (reply, mods) => {
+		session.endDialog(reply, mods);
+	});
+});
+
+const checkForMe = (p, result, session) => {
+	let player = result[p];
+	if (util.isMe(player)) {
+		result[p] = session.userData.id;
+	}
+}
+
+const isItMe = (input, session) => {
+	let id = null;
+	if(util.isMe(input)) {
+		id = session.userData.id;
+	}
+	return id;
 }
