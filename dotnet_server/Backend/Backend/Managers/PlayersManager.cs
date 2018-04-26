@@ -1,9 +1,7 @@
 ﻿using Backend.Models;
 using Backend.Repository;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,10 +10,10 @@ namespace Backend.Managers
     public class PlayersManager
     {
         private readonly IResultsRepository<Result> _resultsRepository;
-        private readonly IRepository<Player> _playersRepository;
+        private readonly IPlayersRepository<Player> _playersRepository;
         private readonly ResultsManager _resultsManager;
 
-        public PlayersManager(IResultsRepository<Result> resultsRepository, IRepository<Player> playersRepository, ResultsManager resultsManager)
+        public PlayersManager(IResultsRepository<Result> resultsRepository, IPlayersRepository<Player> playersRepository, ResultsManager resultsManager)
         {
             _resultsRepository = resultsRepository;
             _resultsManager = resultsManager;
@@ -24,13 +22,13 @@ namespace Backend.Managers
 
         public async Task<string> GetAllPlayers()
         {
-            var players = await _playersRepository.GetAll();
+            IEnumerable<Player> players = await _playersRepository.GetAll();
             return JsonConvert.SerializeObject(players);
         }
 
         public async Task<string> GetPlayerById(string id)
         {
-            var player = await _playersRepository.GetById(id) ?? new Player();
+            Player player = await _playersRepository.GetById(id) ?? new Player();
             return JsonConvert.SerializeObject(player);
         }
 
@@ -46,9 +44,15 @@ namespace Backend.Managers
             });
         }
 
+        public async Task<string> GetPlayerBySearchTerm(string searchTerm)
+        {
+            Player player = EnrichPlayerFromDatabase(await _playersRepository.GetPlayerWithSearchTerm(searchTerm));
+            return JsonConvert.SerializeObject(player);
+        }
+
         public async Task<string> GetLeaderboard()
         {
-            var leaderboard = await GetPlayersForTables();
+            IEnumerable<Player> leaderboard = await GetPlayersForTables();
             return JsonConvert.SerializeObject(leaderboard);
         }
 
@@ -66,9 +70,9 @@ namespace Backend.Managers
 
         private async Task<IEnumerable<Player>> GetPlayersForTables()
         {
-            var players = await _playersRepository.GetAll();
-            var results = await _resultsRepository.GetAll();
-            var enrichedResults = await _resultsManager.EnrichResultsFromDatabase(results);
+            IEnumerable<Player> players = await _playersRepository.GetAll();
+            IEnumerable<Result> results = await _resultsRepository.GetAll();
+            IEnumerable<Result> enrichedResults = await _resultsManager.EnrichResultsFromDatabase(results);
             List<Player> leagueList = new List<Player>();
             foreach(Player player in players)
             {

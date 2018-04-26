@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Backend.Repository;
 using Backend.Models;
-using Newtonsoft.Json;
 using Backend.Managers;
 
 namespace Backend.Controllers
@@ -39,6 +34,13 @@ namespace Backend.Controllers
         public Task<string> Get(string id)
         {
             return _playersManager.GetPlayerById(id);
+        }
+
+        // GET api/players/search/searchTerm
+        [HttpGet("{searchTerm}")]
+        public Task<string> GetPlayerBySearchTerm(string searchTerm)
+        {
+            return _playersManager.GetPlayerBySearchTerm(searchTerm);
         }
 
         // POST api/players

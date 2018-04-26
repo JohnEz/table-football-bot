@@ -2,7 +2,7 @@
   "name": "table-football-bot",
   "version": "1.0.0",
   "engines": {
-  "node": "5.5.0"
+    "node": "5.5.0"
   },
   "description": "Bot to officiate the Scott Logic table football tournament",
   "main": "server.js",
@@ -38,6 +38,7 @@
     "imports-loader": "^0.6.5",
     "moment": "^2.13.0",
     "mongodb": "^2.1.18",
+    "node-fetch": "^2.1.2",
     "node-sass": "^3.4.2",
     "react": "^15.0.2",
     "react-dom": "^15.0.2",

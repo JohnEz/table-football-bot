@@ -29,8 +29,8 @@ let numbers = {
     twenty: 20
 };
 
-let capWords = function(s) {
-    return s.toLowerCase().replace(/\b./g, function(a) {
+let capWords = s => {
+    return s.toLowerCase().replace(/\b./g, a => {
         return a.toUpperCase();
     });
 };
@@ -44,11 +44,11 @@ module.exports = {
         return msg[Math.floor(Math.random() * msg.length)];
     },
 
-    capitaliseWords: function(s) {
+    capitaliseWords: s => {
         return capWords(s);
     },
 
-    createResultString: function(player1, player2, score1, score2) {
+    createResultString: (player1, player2, score1, score2) => {
 
         let resultMod = 'beat';
 
@@ -61,18 +61,18 @@ module.exports = {
         return `${player1} ${resultMod} ${player2} ${score1}-${score2}`;
     },
 
-    isMe: function(name) {
+    isMe: name => {
         if (!name)
         return false;
         let me = ['i', 'me', 'my', 'myself'];
         return me.indexOf(name.toLowerCase()) !== -1;
     },
 
-    getPlayerFromArray: function(searchTerm, array) {
+    getPlayerFromArray: (searchTerm, array) => {
         let playersFound = [];
 
         if (searchTerm && searchTerm !== '') {
-            array.forEach(function(document) {
+            array.forEach(document => {
                 if (document.country.indexOf(searchTerm) > -1 || document.slackID === searchTerm || document.slackCode === searchTerm.toUpperCase()) {
                     playersFound.push(document);
                 }
@@ -142,7 +142,7 @@ module.exports = {
 
     getGiphyURL(subject, callback) {
         let url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${subject.replace(' ', '+')}`;
-        request(url, function(err, resp, body) {
+        request(url, (err, resp, body) => {
             if (!err) {
                 let data = JSON.parse(body).data;
                 callback(`http://i.giphy.com/${data.id}.${data.type}`);
@@ -154,7 +154,7 @@ module.exports = {
     getRandomJoke(callback) {
         let url = `http://www.goodbadjokes.com/jokes/${Math.floor(Math.random()*260)}`;
 
-        request(url, function(err, resp, body) {
+        request(url, (err, resp, body) => {
             if (!err) {
                 let main = /<span class="joke-content">(.*?)<\/span>/.exec(body);
                 let joke = '';
@@ -172,7 +172,7 @@ module.exports = {
             else {
                 callback(this.getRandomMessage('jokes'));
             }
-        }.bind(this));
+        });
     },
 
     getNews(callback) {
@@ -183,7 +183,7 @@ module.exports = {
             'http://www.independent.co.uk/sport/football/rss'
         ];
         let site = rss[Math.floor(Math.random() * rss.length)];
-        request(site, function(err, resp, body) {
+        request(site, (err, resp, body) => {
             if (!err  && resp.statusCode == 200) {
                 let newsURLs = [];
                 let regex = /<item>[\s\S]*?<link>[\s]*?(http.*?euro.*?)[\s]*?<\/link>[\s\S]*?<\/item>/igm;
@@ -200,7 +200,7 @@ module.exports = {
             else {
                 callback('');
             }
-        }.bind(this));
+        });
     },
 
     getStatistics(results) {
@@ -231,7 +231,7 @@ module.exports = {
 
         let totalGoalsScored = 0;
         let totalGamesPlayed = 0;
-        results.forEach(function(result) {
+        results.forEach(result => {
             const combinedScore = result.score1 + result.score2;
             const difference = Math.abs(result.score1 - result.score2);
             totalGoalsScored += combinedScore;

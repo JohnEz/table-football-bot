@@ -1,5 +1,4 @@
 'use strict';
-const DAO = require('./dao.js');
 const prompts = require('../prompts.js');
 const MAXRESULTS = require('../config').maxResults;
 const admins = require('../config').admins;
@@ -15,14 +14,14 @@ class Controller {
     }
 
     setupReminders(slackBot){
-        remind.every('07:59', function(date) {
+        remind.every('07:59', date => {
             //if its not a weekend
             if (date.getDay() !== 6 && date.getDay() !== 0) {
                 console.log('<-- Sending reminders -->');
                 // send reminders for overdue and todays games
-                this.getMatchesToBePlayed(date, null, null, function(matches) {
+                fetch('http://localhost:53167/api/matches/schedule').then( matches => {
 
-                    matches.today.forEach(function(match) {
+                    matches.today.forEach( match => {
                         if (match.team1.slackCode) {
                             slackBot.sendMessage(match.team1.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team2) });
                         }
@@ -30,9 +29,9 @@ class Controller {
                         if (match.team2.slackCode) {
                             slackBot.sendMessage(match.team2.slackCode, prompts.matchToday, { opponent: this.convertPlayerToString(match.team1) });
                         }
-                    }.bind(this));
+                    });
 
-                    matches.overdue.forEach(function(match) {
+                    matches.overdue.forEach( match => {
                         if (match.team1.slackCode) {
                             slackBot.sendMessage(match.team1.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team2) });
                         }
@@ -40,69 +39,13 @@ class Controller {
                         if (match.team2.slackCode) {
                             slackBot.sendMessage(match.team2.slackCode, prompts.matchOverdue, { opponent: this.convertPlayerToString(match.team1) });
                         }
-                    }.bind(this));
+                    });
 
                     console.log('<-- Reminders sent -->');
 
-                }.bind(this));
+                });
             }
-        }.bind(this));
-    }
-
-    getMatchesToBePlayed(date, team1, team2, callback) {
-
-        DAO.getInstance().getMatches(team1, team2, function(matchesMap) {
-
-            let todaysGames = [];
-            let overdueGames = [];
-            let upcomingGames = [];
-            let gameFound = false;
-            let playedGameFound = false;
-            let error = null;
-
-            matchesMap.forEach(function(match) {
-
-                //if it has a date set, and no results given
-                if (match.date && !match.result) {
-
-                    let whenToPlay = this.compareMatchDate(date, match);
-
-                    if (!gameFound) {
-                        gameFound = true;
-                    }
-
-                    //check if its meant to be played today
-                    if (whenToPlay === 0) {
-                        todaysGames.push(match);
-                    } else if ( whenToPlay === -1 ) {
-                        // if its not meant to be played today, check if it was last month or earlier this month
-                        overdueGames.push(match);
-                    } else {
-                        upcomingGames.push(match);
-                    }
-                } else {
-                    playedGameFound = true;
-                }
-
-            }.bind(this));
-
-            if (!gameFound) {
-                if (!playedGameFound) {
-                    error = prompts.noGames;
-                } else {
-                    error = prompts.noGamesToPlay;
-                }
-            }
-
-            todaysGames.sort(this.sortMatchByDate);
-            overdueGames.sort(this.sortMatchByDate);
-            upcomingGames.sort(this.sortMatchByDate);
-            DAO.getInstance().getMatchesCount(function(count) {
-                let totalGames = todaysGames.length + overdueGames.length;
-                callback( { today: todaysGames, overdue: overdueGames, atLimit: totalGames === count }, error );
-            });
-
-        }.bind(this));
+        });
     }
 
     sortMatchByDate(m1, m2) {
@@ -142,7 +85,7 @@ class Controller {
 
     getMatchesBetween(team1, team2, userId, callback) {
 
-        DAO.getInstance().getAllPlayers(function(players) {
+        fetch('http://localhost:53167/api/players').then(players => {
             let team1Docs = util.getPlayerFromArray(team1, players);
             let team2Docs = util.getPlayerFromArray(team2, players);
             let team1Id = null;
@@ -172,14 +115,17 @@ class Controller {
             }
 
             if (!error) {
-                this.getMatchesToBePlayed(new Date(), team1Id, team2Id, function(matches, err) {
+                fetch('http://localhost:53167/api/matches/teams', {
+                    method: 'POST',
+                    body: {team1Id, team2Id}
+                }).then((matches, err) => {
                     callback(matches, includesUser, err);
                 });
             } else {
                 callback(null, null, error);
             }
 
-        }.bind(this));
+        });
 
     }
 
@@ -291,8 +237,17 @@ class Controller {
             intScoreLeft = storeScore;
         }
 
-        //atempt to add the results
-        DAO.getInstance().addResult(player1._id, player2._id, intScoreLeft, intScoreRight, match, function(added) {
+        //attempt to add the results
+        fetch('http://localhost:53167/api/matches/teams', {
+                    method: 'POST',
+                    body: {
+                        player1Id: player1._id,
+                        player2Id: player2._id,
+                        score1: intScoreLeft,
+                        score2: intScoreRight,
+                        match
+                    }
+                }).then(added => {
             //if the results were added successfully
             if (added) {
                 let player1String = this.convertPlayerToString(player1);
@@ -313,47 +268,32 @@ class Controller {
                 //return the defualt database error message
                 callback(prompts.databaseError);
             }
-        }.bind(this));
+        });
 
     }
 
     getResults(count, player1, player2, callback) {
-
-        if (!count || count > MAXRESULTS || count < 1) {
-            count = MAXRESULTS;
-        }
-
         //get the documents for the players
-        DAO.getInstance().getAllPlayers(function(players) {
-
-            const player1Doc = util.getPlayerFromArray(player1, players)[0];
-            const player2Doc = util.getPlayerFromArray(player2, players)[0];
-
+        fetch('http://localhost:53167/api/players').then(players => {
             //get the results between the players
-            DAO.getInstance().getResults(count, player1Doc, player2Doc, function(results, err) {
-
+            fetch('http://localhost:53167/api/results').then((results, err) => {
                 if (!err) {
-
-                    results.forEach(function(result) {
+                    results.forEach(result => {
                         result.player1 = this.convertPlayerToString(result.player1);
                         result.player2 = this.convertPlayerToString(result.player2);
-                    }.bind(this));
-
+                    });
                     callback(results, null);
                 } else {
                     callback(null, err);
                 }
-
-            }.bind(this));
-
-        }.bind(this));
-
+            });
+        });
     }
 
     getSummary(slackId, callback) {
         let reply = '';
         // get players/results
-        DAO.getInstance().getResults(null, null, null, function(resultArray) {
+        fetch('http://localhost:53167/api/results').then(results => {
             // get individual summary eg So far you've played x game and won/lost y of them. In total you've scored z goals and conceded n.
             let personal = {
                 fname: '',
@@ -365,7 +305,7 @@ class Controller {
                 total: 0
             };
             let player = false;
-            resultArray.forEach( function(result) {
+            results.forEach( result => {
                 let game = null;
                 if (result.player1.slackCode === slackId) {
                     game = result;
@@ -383,7 +323,6 @@ class Controller {
                     personal.fname = game.player1.fname;
                     personal.scored += game.score1;
                     personal.conceded += game.score2;
-
                     if (game.score1 > game.score2) {
                         personal.won++;
                     }
@@ -394,7 +333,6 @@ class Controller {
                         personal.draw++;
                     }
                 }
-
             });
 
             personal.total = personal.won + personal.lost + personal.draw;
@@ -405,7 +343,7 @@ class Controller {
             personal.conceded = personal.conceded || 'none';
 
             // general
-            let stats = Object.assign({}, util.getStatistics(resultArray), {personal: personal});
+            let stats = Object.assign({}, util.getStatistics(results), {personal: personal});
 
             reply = util.getRandomMessage('summaryIntro');
             reply += prompts.totals;
@@ -447,17 +385,6 @@ class Controller {
 
     }
 
-
-    getPlayer (searchTerm, callback) {
-        DAO.getInstance().getPlayer(searchTerm, callback);
-    }
-
-    getAllPlayers(callback) {
-        DAO.getInstance().getAllPlayers(function(playersMap) {
-            callback([...playersMap.values()]);
-        });
-    }
-
     convertPlayerToString(player) {
         let playerName = 'No player found';
         let slackName = `@${player.slackID}`;
@@ -465,7 +392,6 @@ class Controller {
         if (player.slackCode) {
             slackName = `<@${player.slackCode}>`;
         }
-
         if (player) {
             playerName = `${util.capitaliseWords(player.country)} (${slackName})`;
         }
@@ -492,17 +418,8 @@ class Controller {
         return {player1Message: player1Message, player2Message: player2Message};
     }
 
-    isPlayer(slackID, callback) {
-        DAO.getInstance().isPlayer(slackID, callback);
-    }
-
-    addUsers(users) {
-        DAO.getInstance().addUsers(users);
-    }
-
     checkScoreDifference(score1, score2) {
         let difference = Math.abs(score1 - score2);
-
         return difference;
     }
 
@@ -513,16 +430,15 @@ class Controller {
 
         if (matchCode) {
             matchCode = matchCode.split(/[rm]/i);
-
             bracket = parseInt(matchCode[1]);
             match = parseInt(matchCode[2]);
         }
 
-        this.getAllPlayers(function(playerDocs) {
+        fetch('http://localhost:53167/api/players').then(players => {
 
             //add one match
-            let team1Doc = util.getPlayerFromArray(team1, playerDocs);
-            let team2Doc = util.getPlayerFromArray(team2, playerDocs);
+            let team1Doc = util.getPlayerFromArray(team1, players);
+            let team2Doc = util.getPlayerFromArray(team2, players);
             if (team1Doc.length === 0 ) {
                 callback({error: true, message: prompts.player1NotFound, args:{player1: team1}})
             }
@@ -530,7 +446,16 @@ class Controller {
                 callback({error: true, message: prompts.player2NotFound, args:{player2: team2}})
             }
             else {
-                DAO.getInstance().addMatch(team1Doc[0]._id, team2Doc[0]._id, date, bracket, match, function(err, added) {
+                fetch('http://localhost:53167/api/matches', {
+                    method: 'POST',
+                    body: {
+                        team1Id: team1Doc[0]._id,
+                        team2Id: team2Doc[0]._id,
+                        date,
+                        bracket,
+                        match
+                    }
+                }).then((err, added) => {
                     let match = {error: true, message: prompts.databaseError};
                     if (!err) {
                         match = {
@@ -544,22 +469,15 @@ class Controller {
                         }
                     }
                     callback(match);
-
                 });
             }
-
         });
-
-    }
-
-    getMatches(team1, team2, callback) {
-        DAO.getInstance().getMatches(team1._id, team2._id, callback);
     }
 
     getValidMatch(matches) {
         let validMatch = null;
         matches = [...matches.values()].sort(this.sortMatchByDate);
-        matches.forEach(function (match, id) {
+        matches.forEach((match, id) => {
             if (!match.result && !validMatch) {
                 validMatch = match;
             }
@@ -568,18 +486,18 @@ class Controller {
     }
 
     randomMessageSetup(slackBot) {
-        remind.every('30 minutes', function(date) {
+        remind.every('30 minutes', date => {
             //if within working hours
             if (util.workingHours(date)) {
                 //should I send?
                 if (Math.random() < 0.25) {
                     let minutes = Math.floor(Math.random() * 30 * 60000 );
-                    setTimeout(function() {
+                    setTimeout(() => {
                         this.sendRandomMessage(slackBot);
-                    }.bind(this), minutes);
+                    }, minutes);
                 }
             }
-        }.bind(this))
+        })
     }
 
     sendRandomMessage(slackBot) {
@@ -587,18 +505,18 @@ class Controller {
         switch(Math.floor(Math.random() * 4 )) {
             case 0:
             // Jokes
-            util.getRandomJoke(function(joke) {
+            util.getRandomJoke(joke => {
                 message = `And now for something completely different...\n\n${joke}`;
 
                 // check it's ok to sendMessage
                 let bot = slackBot.getBot();
                 let ask = admins[Math.floor(Math.random() * admins.length)];
-                bot.startPrivateConversation({user: ask} ,function(err,convo) {
+                bot.startPrivateConversation({user: ask} ,(err,convo) => {
 
                     convo.ask('Can I say this?\n\n'+joke,[
                         {
                             pattern: bot.utterances.yes,
-                            callback: function(response,convo) {
+                            callback: (response,convo) => {
                                 convo.say('Great! I will send it out');
                                 slackBot.sendMessage(mainChannel.code, message);
                                 convo.next();
@@ -607,7 +525,7 @@ class Controller {
                         {
                             default: true,
                             pattern: bot.utterances.no,
-                            callback: function(response,convo) {
+                            callback: (response,convo) => {
                                 convo.say('Maybe it\'s a little too racy.');
                                 convo.next();
                             }
@@ -618,7 +536,7 @@ class Controller {
             break;
             case 1:
             let subject = util.getRandomMessage('giphySubjects');
-            util.getGiphyURL(subject, function(msg) {
+            util.getGiphyURL(subject, msg => {
                 message = `I've spent ages scouring the internet and I think you'll all like this: \n\n${msg}`;
                 slackBot.sendMessage(mainChannel.code, msg);
             });
@@ -629,7 +547,7 @@ class Controller {
             slackBot.sendMessage(mainChannel.code, message);
             break;
             case 3:
-            util.getNews(function(msg) {
+            util.getNews(msg => {
                 if (msg.length > 0) {
                     slackBot.sendMessage(mainChannel.code, msg);
                 }
@@ -658,11 +576,15 @@ class Controller {
             if (result.score1 < result.score2) {
                 winningTeam = match.team2._id;
             }
-
-            DAO.getInstance().updateKnockoutMatch(targetStage, targetMatchNumber, winningTeam, isFirstTeam, function(updated) {
-
-            });
-
+            fetch('http://localhost:53167/api/matches', {
+                method: 'PUT',
+                body: {
+                    targetMatchNumber,
+                    targetStage,
+                    winningTeam,
+                    isFirstTeam
+                }
+            })
         }
     }
 

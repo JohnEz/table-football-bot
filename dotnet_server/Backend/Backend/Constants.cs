@@ -7,6 +7,13 @@ namespace Backend
 {
     static class Constants
     {
+        public static class SlackDetails
+        {
+            public const string token = "xoxp-3623867403-86532060947-352516004436-19e3c5cbd02890ee55d82876ad7847ee";
+            public const string user = "U2JFN1STV";
+            public const string channel = "D2JH4JVE2";
+        }
+
         public static class Prompts
         {
             public const string helpMessage = "Here's what I can do:\n • Add new results by saying something like: \"England 10 Germany 0\"" +

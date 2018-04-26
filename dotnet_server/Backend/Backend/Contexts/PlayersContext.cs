@@ -1,9 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Backend.Models
 {
@@ -13,12 +9,12 @@ namespace Backend.Models
 
         public PlayersContext(IOptions<Settings> settings)
         {
-            var address = new MongoUrl("mongodb://ds011462.mlab.com:11462");
-            var fromUrl = MongoDB.Driver.MongoClientSettings.FromUrl(address);
-            var credential = MongoCredential.CreateCredential(settings.Value.Database, "admin", "2604aj1010rb");
+            MongoUrl address = new MongoUrl("mongodb://ds011462.mlab.com:11462");
+            MongoClientSettings fromUrl = MongoDB.Driver.MongoClientSettings.FromUrl(address);
+            MongoCredential credential = MongoCredential.CreateCredential(settings.Value.Database, "admin", "2604aj1010rb");
             fromUrl.Credential = credential;
 
-            var client = new MongoClient(fromUrl);
+            MongoClient client = new MongoClient(fromUrl);
             if (client != null)
             {
                 _database = client.GetDatabase(settings.Value.Database);

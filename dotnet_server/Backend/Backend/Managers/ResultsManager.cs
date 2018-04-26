@@ -3,7 +3,6 @@ using Backend.Repository;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,10 +10,10 @@ namespace Backend.Managers
 {
     public class ResultsManager
     {
-        private readonly IRepository<Player> _playersRepository;
+        private readonly IPlayersRepository<Player> _playersRepository;
         private readonly IResultsRepository<Result> _resultsRepository;
 
-        public ResultsManager(IRepository<Player> playersRepository, IResultsRepository<Result> resultsRepository)
+        public ResultsManager(IPlayersRepository<Player> playersRepository, IResultsRepository<Result> resultsRepository)
         {
             _playersRepository = playersRepository;
             _resultsRepository = resultsRepository;
@@ -22,20 +21,19 @@ namespace Backend.Managers
 
         public async Task<string> GetAllResults()
         {
-            var results = await _resultsRepository.GetAll();
+            IEnumerable<Result> results = await _resultsRepository.GetAll();
             return JsonConvert.SerializeObject(results);
         }
 
         public async Task<string> GetResultById(string id)
         {
-            var result = await _resultsRepository.GetById(id) ?? new Result();
+            Result result = await _resultsRepository.GetById(id) ?? new Result();
             return JsonConvert.SerializeObject(result);
         }
 
         public async Task<string> GetResultsList(string countString)
         {
-            Int32 count = 0;
-            if (Int32.TryParse(countString, out count))
+            if (Int32.TryParse(countString, out Int32 count))
             {
                 return await ConstructResultsList(count);
             }
@@ -57,7 +55,7 @@ namespace Backend.Managers
 
         public async Task<IEnumerable<Result>> EnrichResultsFromDatabase(IEnumerable<Result> results)
         {
-            var players = await _playersRepository.GetAll();
+            IEnumerable<Player> players = await _playersRepository.GetAll();
             foreach (Result result in results)
             {
                 result.Id = result.ResultId.ToString();
@@ -76,9 +74,9 @@ namespace Backend.Managers
                 count = Constants.MaxResults.maxResults;
             }
             count = count * 10;
-            var players = await _playersRepository.GetAll();
-            var results = await _resultsRepository.GetOrderedResultsForCount(count);
-            var resultsList = new ResultsList()
+            IEnumerable<Player> players = await _playersRepository.GetAll();
+            IEnumerable<Result> results = await _resultsRepository.GetOrderedResultsForCount(count);
+            ResultsList resultsList = new ResultsList()
             {
                 AtLimit = results.Count() == _resultsRepository.GetCount(),
                 Results = new List<DailyResultsList>()
@@ -94,7 +92,7 @@ namespace Backend.Managers
                     Score1 = result.Score1,
                     Score2 = result.Score2
                 };
-                var resultDate = result.Date.ToString("yyyy-MM-dd");
+                string resultDate = result.Date.ToString("yyyy-MM-dd");
                 // if the current results date is already collected once in the list
                 if(resultsList.Results.Exists(dailyList => dailyList.Date == resultDate))
                 {

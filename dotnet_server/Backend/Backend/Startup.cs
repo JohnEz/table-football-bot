@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,12 +41,13 @@ namespace Backend
                 options.Database
                     = Configuration.GetSection("MongoConnection:Database").Value;
             });
-            services.AddTransient<IRepository<Player>, PlayerRepository>();
+            services.AddTransient<IPlayersRepository<Player>, PlayerRepository>();
             services.AddTransient<IMatchesRepository<Match>, MatchesRepository>();
             services.AddTransient<IResultsRepository<Result>, ResultsRepository>();
             services.AddTransient<MatchesManager>();
             services.AddTransient<PlayersManager>();
             services.AddTransient<ResultsManager>();
+            services.AddTransient<SlackManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
